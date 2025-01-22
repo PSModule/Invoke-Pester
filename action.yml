@@ -1,27 +1,68 @@
-name: '{{ NAME }}'
-description: '{{ DESCRIPTION }}'
+name: Invoke-Pester
+description: Runs test based on PowerShell.
 author: PSModule
 branding:
-  icon: upload-cloud
-  color: white
+  icon: check-square
+  color: gray-dark
 
 inputs:
-  working-directory:
-    description: The working directory where Terraform will be executed
+  Name:
+    description: The name of the module to test. The name of the repository is used if not specified.
     required: false
-  subject:
-    description: The subject to greet
+  Path:
+    description: The path to the code to test.
+    required: true
+  TestsPath:
+    description: The path to the tests to run.
     required: false
-    default: World
+    default: tests
+  StackTraceVerbosity:
+    description: "Verbosity level of the stack trace. Allowed values: 'None', 'FirstLine', 'Filtered', 'Full'."
+    required: false
+    default: Filtered
+  Verbosity:
+    description: "Verbosity level of the test output. Allowed values: 'None', 'Normal', 'Detailed', 'Diagnostic'."
+    required: false
+    default: 'Detailed'
+  Debug:
+    description: Enable debug output.
+    required: false
+    default: 'false'
+  Verbose:
+    description: Enable verbose output.
+    required: false
+    default: 'false'
+  Version:
+    description: Specifies the version of the GitHub module to be installed. The value must be an exact version.
+    required: false
+  Prerelease:
+    description: Allow prerelease versions if available.
+    required: false
+    default: 'false'
+
+outputs:
+  result:
+    description: If the tests passed.
+    value: ${{ fromJSON(steps.test.outputs.result).result }}
 
 runs:
   using: composite
   steps:
-    - name: '{{ NAME }}'
-      shell: pwsh
-      working-directory: ${{ inputs.working-directory }}
+    - name: Invoke-Pester
+      uses: PSModule/GitHub-Script@v1
+      id: test
       env:
-        GITHUB_ACTION_INPUT_subject: ${{ inputs.subject }}
-      run: |
-        # '{{ NAME }}'
-        . "${{ github.action_path }}\scripts\main.ps1" -Verbose
+        GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
+        GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
+        GITHUB_ACTION_INPUT_TestsPath: ${{ inputs.TestsPath }}
+        GITHUB_ACTION_INPUT_StackTraceVerbosity: ${{ inputs.StackTraceVerbosity }}
+        GITHUB_ACTION_INPUT_Verbosity: ${{ inputs.Verbosity }}
+      with:
+        Debug: ${{ inputs.Debug }}
+        Prerelease: ${{ inputs.Prerelease }}
+        Verbose: ${{ inputs.Verbose }}
+        Version: ${{ inputs.Version }}
+        ShowOutput: true
+        Script: |
+          # Invoke-Pester
+          ${{ github.action_path }}\scripts\main.ps1
