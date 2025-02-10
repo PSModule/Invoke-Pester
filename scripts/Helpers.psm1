@@ -1,6 +1,4 @@
-﻿# Run all files with the name like *.Containers.ps1 in the current directory recursively.
-
-function Get-PesterContainer {
+﻿function Get-PesterContainer {
     param(
         [string] $Path
     )
@@ -37,19 +35,3 @@ function Get-PesterConfiguration {
     }
     New-PesterConfiguration -Hashtable $config
 }
-
-
-$Path = 'C:\Repos\GitHub\PSModule\Action\Invoke-Pester\tests\Advanced'
-$containers = Get-PesterContainer -Path $Path
-
-
-$Configuration = Get-PesterConfiguration -Path $Path
-$Configuration.Run.Container = $containers
-
-$Configuration.Run.Container.Value
-
-
-$Configuration | Convertto-Json -Depth 100 | Clip
-$Configuration.Container | ConvertTo-Json -Depth 100 | Clip
-
-Invoke-Pester -Configuration $Configuration
