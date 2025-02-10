@@ -3,6 +3,8 @@ param()
 
 Import-Module "$PSScriptRoot/Helpers.psm1"
 
+Install-PSResource -Name Pester -Force -Verbose:$false
+
 LogGroup 'Get test kit versions' {
     $PSSAModule = Get-PSResource -Name PSScriptAnalyzer -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
     $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
