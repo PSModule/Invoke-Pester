@@ -234,7 +234,7 @@ $configuration = @{
 
 LogGroup 'Load configuration - Add containers' {
     $containers = Get-PesterContainer -Path $configuration.Run.Path
-    Write-Host ($containers | ConvertTo-Json -Depth 1 -WarningAction SilentlyContinue)
+    Write-Host ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
 LogGroup 'Load configuration - Result' {
