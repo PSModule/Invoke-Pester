@@ -257,7 +257,7 @@ LogGroup 'Test results' {
 
     $testResults | ConvertTo-Json -Depth 2
 
-    Set-GitHubOutput -Name 'results' -Value $($testResults | ConvertTo-Json -Depth 2)
+    Set-GitHubOutput -Name 'results' -Value $($testResults | ConvertTo-Json -Depth 1)
 }
 
 exit $failedTests
