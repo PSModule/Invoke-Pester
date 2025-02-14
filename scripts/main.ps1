@@ -119,7 +119,7 @@ LogGroup 'Load configuration - Custom settings file' {
 
         foreach ($property in $tmpCustomConfiguration[$section].Keys) {
             $value = $tmpCustomConfiguration[$section][$property]
-            if ($Value) {
+            if (-not [string]::IsNullOrEmpty($Value)) {
                 $filteredProperties[$property] = $Value
             }
         }
@@ -199,7 +199,7 @@ LogGroup 'Load configuration - Action overrides' {
 
         foreach ($property in $customConfigurationInputMap[$section].Keys) {
             $value = $customConfigurationInputMap[$section][$property]
-            if ($Value) {
+            if (-not [string]::IsNullOrEmpty($Value)) {
                 $filteredProperties[$property] = $Value
             }
         }
