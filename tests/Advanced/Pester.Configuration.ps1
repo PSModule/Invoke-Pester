@@ -1,16 +1,13 @@
 ﻿@{
-    Run          = @{
+    Run        = @{
         Path = $PSScriptRoot
     }
-    CodeCoverage = @{
-        Enabled = $false
-    }
-    TestResult   = @{
+    TestResult = @{
         Enabled       = $true
         OutputPath    = 'outputs\AnotherPath.xml'
         TestSuiteName = 'Pester'
     }
-    Output       = @{
+    Output     = @{
         CIFormat            = 'Auto'
         StackTraceVerbosity = 'Filtered'
         Verbosity           = 'Detailed'
