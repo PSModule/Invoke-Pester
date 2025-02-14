@@ -93,7 +93,7 @@ LogGroup 'Load configuration - Defaults' {
 }
 
 LogGroup 'Load configuration - Custom settings file' {
-    $customConfigurationFilePath = $otherInputs.ConfigurationFilePath
+    $customConfigurationFilePath = $inputs.ConfigurationFilePath
     Write-Host "Custom configuration file path: [$customConfigurationFilePath]"
     if ($customConfigurationFilePath) {
         $fileExists = Test-Path -Path $customConfigurationFilePath
