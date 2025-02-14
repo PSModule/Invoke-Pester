@@ -231,20 +231,20 @@ $configuration = @{
     TestDrive    = $testDrive
     TestRegistry = $testRegistry
 }
-LogGroup 'Load configuration - Result' {
-    Write-Host ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
-}
 
 LogGroup 'Load containers' {
     $containers = Get-PesterContainer -Path $configuration.Run.Path
     Write-Host ($containers | ConvertTo-Json -Depth 1 -WarningAction SilentlyContinue)
 }
 
-$configuration.Run.Container = $containers
-
-LogGroup 'Run tests' {
-    $testResults = Invoke-Pester -Configuration $configuration
+LogGroup 'Load configuration - Result' {
+    $configuration.Run.Container += $containers
+    Write-Host ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
+
+
+$testResults = Invoke-Pester -Configuration $configuration
+
 
 # LogGroup 'Test results' {
 #     $testResults | Format-List
