@@ -67,7 +67,7 @@ LogGroup 'Load inputs' {
         ConfigurationFilePath              = $env:GITHUB_ACTION_INPUT_ConfigurationFilePath
     }
 
-    [pscustomobject]$params | Format-Table
+    [pscustomobject]$params | Format-List
 }
 
 # $Path = '\tests\Advanced'
