@@ -329,17 +329,16 @@ $(if ($failedTests -gt 0) { "❌ **$failedTests test(s) failed**" } else { '✅ 
 
 foreach ($test in $testResults.Tests) {
     $statusIcon = if ($test.Result -eq 'Passed') { '✅' } else { '❌' }
-    if ($test.Result -eq 'Failed') {
-        $test.ErrorRecord
-    }
     $summaryMarkdown += @"
 - $statusIcon $($test.Name) ($($test.Duration.Seconds)s)
 
 "@
     if ($test.Result -eq 'Failed') {
-        $summaryMarkdown += @"
-  $($test.ErrorRecord.Exception.Message)
+        $test.ErrorRecord | Out-String -Stream | ForEach-Object {
+            $summaryMarkdown += @"
+    $_
 "@
+        }
     }
 }
 $summaryMarkdown += @"
