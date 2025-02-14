@@ -22,7 +22,7 @@ function Get-PesterConfiguration {
         [string] $Path
     )
 
-    $config = Get-ChildItem -Path $Path -Filter *.Configuration.ps* | ForEach-Object {
+    Get-ChildItem -Path $Path -Filter *.Configuration.ps* | ForEach-Object {
         $file = $_
         switch ($file.Extension) {
             '.ps1' {
@@ -32,8 +32,8 @@ function Get-PesterConfiguration {
                 Import-PowerShellDataFile -Path $file
             }
         }
+        $config
     }
-    $config
 }
 
 function Merge-Hashtable {
