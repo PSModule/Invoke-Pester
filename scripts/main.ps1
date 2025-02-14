@@ -238,13 +238,11 @@ LogGroup 'Load configuration - Add containers' {
 }
 
 LogGroup 'Load configuration - Result' {
-    $configuration.Run.Container += $containers
+    $configuration.Run.Container += $containers | ForEach-Object { New-PesterContainer @_ }
     Write-Host ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
-
 $testResults = Invoke-Pester -Configuration $configuration
-
 
 LogGroup 'Test results' {
     $testResults | Format-List
