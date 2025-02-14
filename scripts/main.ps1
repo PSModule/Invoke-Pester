@@ -328,6 +328,8 @@ LogGroup 'Generate step summary' {
     $passedTests = $testResults.PassedCount
     $failedTests = $testResults.FailedCount
     $skippedTests = $testResults.SkippedCount
+    $inconclusiveTests = $testResults.InconclusiveCount
+    $notRunTests = $testResults.NotRunCount
 
     # Default coverage text is 'N/A' if coverage is disabled
     $coverageStr = 'N/A'
@@ -345,9 +347,9 @@ LogGroup 'Generate step summary' {
     $summaryMarkdown = @"
 ### Pester Test Results
 
-| Total | Passed | Failed | Skipped | Coverage |
-| ----: | -----: | -----: | ------: | -------: |
-| $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $coverageStr |
+| Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
+| ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
+| $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageStr |
 
 $(if ($failedTests -gt 0) { "❌ **$failedTests test(s) failed**" } else { '✅ All tests passed!' })
 
