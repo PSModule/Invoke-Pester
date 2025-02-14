@@ -1,9 +1,12 @@
 [CmdletBinding()]
 param()
 
-Import-Module "$PSScriptRoot/Helpers.psm1"
+'Pester', 'PSScriptAnalyzer' | ForEach-Object {
+    Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue
+    Import-Module -Name $_ -Verbose:$false
+}
 
-Install-PSResource -Name Pester, PSScriptAnalyzer -Verbose:$false
+Import-Module "$PSScriptRoot/Helpers.psm1"
 
 LogGroup 'Get test kit versions' {
     $PSSAModule = Get-PSResource -Name PSScriptAnalyzer -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
@@ -16,19 +19,83 @@ LogGroup 'Get test kit versions' {
     } | Format-List
 }
 
-$Path = '\tests\Advanced'
-$containers = Get-PesterContainer -Path $Path
+LogGroup 'Load inputs' {
+    Get-ChildItem -Path env: | Where-Object { $_.Name -like 'GITHUB_ACTION_INPUT_*' } | ForEach-Object {
+        $name = $_.Name -replace '^GITHUB_ACTION_INPUT_'
+        $value = $_.Value
+        New-Variable -Name $name -Value $value -Force -Scope Script -PassThru
+    } | Format-Table -AutoSize
+}
 
-$Configuration = Get-PesterConfiguration -Path $Path
-$Configuration.Run.Container = $containers
+# $Path = '\tests\Advanced'
+# $containers = Get-PesterContainer -Path $Path
 
-$Configuration.Run.Container.Value
+# $Configuration = Get-PesterConfiguration -Path $Path
+# $Configuration.Run.Container = $containers
+
+# $Configuration.Run.Container.Value
+# @{
+#     Run_Path                           = $Path
+#     Run_ExcludePath                    = @()
+#     Run_ScriptBlock                    = @()
+#     Run_Container                      = @()
+#     Run_TestExtension                  = @(
+#         '.Tests.ps1'
+#     )
+#     Run_Exit                           = $false
+#     Run_Throw                          = $false
+#     Run_PassThru                       = $true
+#     Run_SkipRun                        = $false
+#     Run_SkipRemainingOnFailure         = 'None'
+
+#     Filter_Tag                         = @()
+#     Filter_ExcludeTag                  = @()
+#     Filter_Line                        = @()
+#     Filter_ExcludeLine                 = @()
+#     Filter_FullName                    = @()
+
+#     CodeCoverage_Enabled               = $true
+#     CodeCoverage_OutputFormat          = 'JaCoCo'
+#     CodeCoverage_OutputPath            = 'CodeCoverage-Report.xml'
+#     CodeCoverage_OutputEncoding        = 'UTF8'
+#     CodeCoverage_Path                  = @()
+#     CodeCoverage_ExcludeTests          = $true
+#     CodeCoverage_RecursePaths          = $true
+#     CodeCoverage_CoveragePercentTarget = 75.0
+#     CodeCoverage_UseBreakpoints        = $true
+#     CodeCoverage_SingleHitBreakpoints  = $true
+
+#     TestResult_Enabled                 = $true
+#     TestResult_OutputFormat            = 'NUnitXml'
+#     TestResult_OutputPath              = 'outputs\Test-Report.xml'
+#     TestResult_OutputEncoding          = 'UTF8'
+#     TestResult_TestSuiteName           = 'Unit tests'
+#     Should_ErrorAction                 = 'Stop'
+#     Debug_ShowFullErrors               = $false
+#     Debug_WriteDebugMessages           = $false
+#     Debug_WriteDebugMessagesFrom       = @(
+#         'Discovery',
+#         'Skip',
+#         'Mock',
+#         'CodeCoverage'
+#     )
+#     Debug_ShowNavigationMarkers        = $false
+#     Debug_ReturnRawResultObject        = $false
+
+#     Output_CIFormat                    = 'Auto'
+#     Output_StackTraceVerbosity         = 'Filtered'
+#     Output_Verbosity                   = 'Detailed'
+#     Output_CILogLevel                  = 'Error'
+#     Output_RenderMode                  = 'Auto'
+#     TestDrive_Enabled                  = $true
+#     TestRegistry_Enabled               = $true
+# }
 
 
-$Configuration | ConvertTo-Json -Depth 100 | Clip
-$Configuration.Container | ConvertTo-Json -Depth 100 | Clip
+# $Configuration | ConvertTo-Json -Depth 100 | Clip
+# $Configuration.Container | ConvertTo-Json -Depth 100 | Clip
 
-Invoke-Pester -Configuration $Configuration
+# Invoke-Pester -Configuration $Configuration
 
 
 
