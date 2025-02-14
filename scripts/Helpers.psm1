@@ -5,7 +5,7 @@
 
     Get-ChildItem -Path $Path -Recurse -Filter *.Container.ps* | ForEach-Object {
         $file = $_
-        $param = switch ($file.Extension) {
+        switch ($file.Extension) {
             '.ps1' {
                 . $file
             }
@@ -13,7 +13,6 @@
                 Import-PowerShellDataFile -Path $file
             }
         }
-        $param
     }
 }
 
@@ -32,7 +31,6 @@ function Get-PesterConfiguration {
                 Import-PowerShellDataFile -Path $file
             }
         }
-        $config
     }
 }
 
