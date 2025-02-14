@@ -333,8 +333,12 @@ foreach ($test in $testResults.Tests) {
         $test.ErrorRecord
     }
     $summaryMarkdown += @"
-- $statusIcon **$($test.Name)** _$($test.Duration.Seconds)s_
+- $statusIcon $($test.Name) ($($test.Duration.Seconds)s)
 
+"@
+    if ($test.Result -eq 'Failed') {
+        $summaryMarkdown += @"
+  $($test.ErrorRecord.Exception.Message)
 "@
 }
 
@@ -345,12 +349,12 @@ $summaryMarkdown += @"
 </details>
 "@
 
-# Write the summary to the special environment file
-Set-GitHubStepSummary -Summary $summaryMarkdown
+        # Write the summary to the special environment file
+        Set-GitHubStepSummary -Summary $summaryMarkdown
 
 
-# -------------------------------------------------------------------------
-# Step 13: Exit with the number of failed tests as the error code
-#          (non-zero means the step fails if tests failed).
-# -------------------------------------------------------------------------
-exit $failedTests
+        # -------------------------------------------------------------------------
+        # Step 13: Exit with the number of failed tests as the error code
+        #          (non-zero means the step fails if tests failed).
+        # -------------------------------------------------------------------------
+        exit $failedTests
