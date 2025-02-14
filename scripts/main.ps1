@@ -255,9 +255,9 @@ LogGroup 'Test results' {
         Write-GitHubNotice '✅ All tests passed.'
     }
 
-    $testResults | ConvertTo-Json -Depth 5
+    $testResults | ConvertTo-Json -Depth 2
 
-    Set-GitHubOutput -Name 'results' -Value $($testResults | ConvertTo-Json -Depth 5)
+    Set-GitHubOutput -Name 'results' -Value $($testResults | ConvertTo-Json -Depth 2)
 }
 
 exit $failedTests
