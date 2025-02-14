@@ -20,11 +20,54 @@ LogGroup 'Get test kit versions' {
 }
 
 LogGroup 'Load inputs' {
-    Get-ChildItem -Path env: | Where-Object { $_.Name -like 'GITHUB_ACTION_INPUT_*' } | ForEach-Object {
-        $name = $_.Name -replace '^GITHUB_ACTION_INPUT_'
-        $value = $_.Value
-        New-Variable -Name $name -Value $value -Force -Scope Script -PassThru
-    } | Select-Object Name,Value | Format-List
+    $params = @{
+        Run_Path                           = $env:GITHUB_ACTION_INPUT_Run_Path
+        Run_ExcludePath                    = $env:GITHUB_ACTION_INPUT_Run_ExcludePath
+        Run_ScriptBlock                    = $env:GITHUB_ACTION_INPUT_Run_ScriptBlock
+        Run_Container                      = $env:GITHUB_ACTION_INPUT_Run_Container
+        Run_TestExtension                  = $env:GITHUB_ACTION_INPUT_Run_TestExtension
+        Run_Exit                           = $env:GITHUB_ACTION_INPUT_Run_Exit
+        Run_Throw                          = $env:GITHUB_ACTION_INPUT_Run_Throw
+        Run_PassThru                       = $env:GITHUB_ACTION_INPUT_Run_PassThru
+        Run_SkipRun                        = $env:GITHUB_ACTION_INPUT_Run_SkipRun
+        Run_SkipRemainingOnFailure         = $env:GITHUB_ACTION_INPUT_Run_SkipRemainingOnFailure
+        Filter_Tag                         = $env:GITHUB_ACTION_INPUT_Filter_Tag
+        Filter_ExcludeTag                  = $env:GITHUB_ACTION_INPUT_Filter_ExcludeTag
+        Filter_Line                        = $env:GITHUB_ACTION_INPUT_Filter_Line
+        Filter_ExcludeLine                 = $env:GITHUB_ACTION_INPUT_Filter_ExcludeLine
+        Filter_FullName                    = $env:GITHUB_ACTION_INPUT_Filter_FullName
+        CodeCoverage_Enabled               = $env:GITHUB_ACTION_INPUT_CodeCoverage_Enabled
+        CodeCoverage_OutputFormat          = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputFormat
+        CodeCoverage_OutputPath            = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputPath
+        CodeCoverage_OutputEncoding        = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputEncoding
+        CodeCoverage_Path                  = $env:GITHUB_ACTION_INPUT_CodeCoverage_Path
+        CodeCoverage_ExcludeTests          = $env:GITHUB_ACTION_INPUT_CodeCoverage_ExcludeTests
+        CodeCoverage_RecursePaths          = $env:GITHUB_ACTION_INPUT_CodeCoverage_RecursePaths
+        CodeCoverage_CoveragePercentTarget = $env:GITHUB_ACTION_INPUT_CodeCoverage_CoveragePercentTarget
+        CodeCoverage_UseBreakpoints        = $env:GITHUB_ACTION_INPUT_CodeCoverage_UseBreakpoints
+        CodeCoverage_SingleHitBreakpoints  = $env:GITHUB_ACTION_INPUT_CodeCoverage_SingleHitBreakpoints
+        TestResult_Enabled                 = $env:GITHUB_ACTION_INPUT_TestResult_Enabled
+        TestResult_OutputFormat            = $env:GITHUB_ACTION_INPUT_TestResult_OutputFormat
+        TestResult_OutputPath              = $env:GITHUB_ACTION_INPUT_TestResult_OutputPath
+        TestResult_OutputEncoding          = $env:GITHUB_ACTION_INPUT_TestResult_OutputEncoding
+        TestResult_TestSuiteName           = $env:GITHUB_ACTION_INPUT_TestResult_TestSuiteName
+        Should_ErrorAction                 = $env:GITHUB_ACTION_INPUT_Should_ErrorAction
+        Debug_ShowFullErrors               = $env:GITHUB_ACTION_INPUT_Debug_ShowFullErrors
+        Debug_WriteDebugMessages           = $env:GITHUB_ACTION_INPUT_Debug_WriteDebugMessages
+        Debug_WriteDebugMessagesFrom       = $env:GITHUB_ACTION_INPUT_Debug_WriteDebugMessagesFrom
+        Debug_ShowNavigationMarkers        = $env:GITHUB_ACTION_INPUT_Debug_ShowNavigationMarkers
+        Debug_ReturnRawResultObject        = $env:GITHUB_ACTION_INPUT_Debug_ReturnRawResultObject
+        Output_Verbosity                   = $env:GITHUB_ACTION_INPUT_Output_Verbosity
+        Output_StackTraceVerbosity         = $env:GITHUB_ACTION_INPUT_Output_StackTraceVerbosity
+        Output_CIFormat                    = $env:GITHUB_ACTION_INPUT_Output_CIFormat
+        Output_CILogLevel                  = $env:GITHUB_ACTION_INPUT_Output_CILogLevel
+        Output_RenderMode                  = $env:GITHUB_ACTION_INPUT_Output_RenderMode
+        TestDrive_Enabled                  = $env:GITHUB_ACTION_INPUT_TestDrive_Enabled
+        TestRegistry_Enabled               = $env:GITHUB_ACTION_INPUT_TestRegistry_Enabled
+        ConfigurationFilePath              = $env:GITHUB_ACTION_INPUT_ConfigurationFilePath
+    }
+
+    [pscustomobject]$params | Format-Table
 }
 
 # $Path = '\tests\Advanced'
