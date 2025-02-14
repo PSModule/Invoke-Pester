@@ -311,10 +311,10 @@ if ($configuration.CodeCoverage.Enabled) {
     $coverageString = "$coverage%"
 }
 
-$summaryMarkdown = @"
-### Pester Test Results
+$statusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
 
-$(if ($failedTests -gt 0) { "❌ **$failedTests test(s) failed**" } else { '✅ All tests passed!' })
+$summaryMarkdown = @"
+### $statusIcon - Test Results
 
 | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
