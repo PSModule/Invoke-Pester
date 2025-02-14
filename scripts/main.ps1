@@ -102,7 +102,10 @@ LogGroup 'Load configuration - Defaults' {
 
 LogGroup 'Load configuration - Custom settings file' {
     $customConfigurationFilePath = $otherInputs.ConfigurationFilePath
-    if ($customConfigurationFilePath -and (Test-Path -Path $customConfigurationFilePath)) {
+    $fileExists = Test-Path -Path $customConfigurationFilePath
+    Write-Host "Custom configuration file path: $customConfigurationFilePath"
+    Write-Host "File exists: $fileExists"
+    if ($customConfigurationFilePath -and $fileExists) {
         $customConfiguration = . $customConfigurationFilePath
         [pscustomobject]$customConfiguration | Format-List
     }
