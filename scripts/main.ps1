@@ -232,7 +232,7 @@ $configuration = @{
     TestRegistry = $testRegistry
 }
 
-LogGroup 'Load containers' {
+LogGroup 'Load configuration - Add containers' {
     $containers = Get-PesterContainer -Path $configuration.Run.Path
     Write-Host ($containers | ConvertTo-Json -Depth 1 -WarningAction SilentlyContinue)
 }
@@ -246,18 +246,18 @@ LogGroup 'Load configuration - Result' {
 $testResults = Invoke-Pester -Configuration $configuration
 
 
-# LogGroup 'Test results' {
-#     $testResults | Format-List
-#     $failedTests = [int]$testResults.FailedCount
+LogGroup 'Test results' {
+    $testResults | Format-List
+    $failedTests = [int]$testResults.FailedCount
 
-#     if (($failedTests -gt 0) -or ($testResults.Result -ne 'Passed')) {
-#         Write-GitHubError "❌ Some [$failedTests] tests failed."
-#     }
-#     if ($failedTests -eq 0) {
-#         Write-GitHubNotice '✅ All tests passed.'
-#     }
+    if (($failedTests -gt 0) -or ($testResults.Result -ne 'Passed')) {
+        Write-GitHubError "❌ Some [$failedTests] tests failed."
+    }
+    if ($failedTests -eq 0) {
+        Write-GitHubNotice '✅ All tests passed.'
+    }
 
-#     Set-GitHubOutput -Name 'results' -Value $testResults
-# }
+    Set-GitHubOutput -Name 'results' -Value $testResults
+}
 
-# exit $failedTests
+exit $failedTests
