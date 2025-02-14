@@ -67,7 +67,7 @@ LogGroup 'Load inputs' {
         ConfigurationFilePath              = $env:GITHUB_ACTION_INPUT_ConfigurationFilePath
     }
 
-    [pscustomobject]$params | Format-List
+    [pscustomobject]($params.GetEnumerator() | Where-Object { $_.Value }) | Format-List
 }
 
 # $Path = '\tests\Advanced'
