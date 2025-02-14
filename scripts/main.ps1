@@ -324,11 +324,21 @@ $(if ($failedTests -gt 0) { "❌ **$failedTests test(s) failed**" } else { '✅ 
 <details><summary>Details</summary>
 <p>
 
-<- Add detailed test results here ->
+"@
 
+foreach ($test in $testResults.Tests) {
+    $statusIcon = if ($test.Result -eq 'Passed') { '✅' } else { '❌' }
+    if ($test.Result -eq 'Failed') {
+        $test.ErrorRecord
+    }
+    $summaryMarkdown += @"
+- $statusIcon **$($test.Name)** $($test.Duration.ToString())
+"@
+}
+
+$summaryMarkdown += @"
 </p>
 </details>
-
 "@
 
 # Write the summary to the special environment file
