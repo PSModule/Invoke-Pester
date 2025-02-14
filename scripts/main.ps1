@@ -188,11 +188,6 @@ LogGroup 'Run tests' {
     $testResults = Invoke-Pester -Configuration $configuration
 }
 
-# Invoke-Pester -Configuration $Configuration
-
-
-# $testResults = Invoke-Pester @pesterParams
-
 # LogGroup 'Test results' {
 #     $testResults | Format-List
 #     $failedTests = [int]$testResults.FailedCount
