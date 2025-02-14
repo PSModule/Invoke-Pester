@@ -324,7 +324,7 @@ $(if ($failedTests -gt 0) { "❌ **$failedTests test(s) failed**" } else { '✅ 
 <details><summary>Details</summary>
 <p>
 
-```
+``````
 "@
 
 foreach ($test in $testResults.Tests) {
@@ -333,13 +333,13 @@ foreach ($test in $testResults.Tests) {
         $test.ErrorRecord
     }
     $summaryMarkdown += @"
-- $statusIcon **$($test.Name)** $($test.Duration.Seconds)s
+- $statusIcon **$($test.Name)** _$($test.Duration.Seconds)s_
 
 "@
 }
 
 $summaryMarkdown += @"
-```
+``````
 
 </p>
 </details>
