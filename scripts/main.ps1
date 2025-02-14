@@ -93,26 +93,30 @@ LogGroup 'Load inputs' {
 }
 
 LogGroup 'Load configuration - Defaults' {
-    $defaultConfiguration = . (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
-    [pscustomobject]$defaultConfiguration | Format-List
+    $defaultConfigurationPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
+    if (Test-Path -Path $defaultConfigurationPath) {
+        $defaultConfiguration = . $defaultConfigurationPath
+        [pscustomobject]$defaultConfiguration | Format-List
+    }
 }
 
 LogGroup 'Load configuration - Custom settings file' {
-    $customConfiguration = . (Join-Path $PSScriptRoot -ChildPath $env:GITHUB_ACTION_INPUT_ConfigurationFilePath)
-    [pscustomobject]$customConfiguration | Format-List
+    $customConfigurationFilePath = $otherInputs.ConfigurationFilePath
+    if ($customConfigurationFilePath -and (Test-Path -Path $customConfigurationFilePath)) {
+        $customConfiguration = . $customConfigurationFilePath
+        [pscustomobject]$customConfiguration | Format-List
+    }
 }
 
 LogGroup 'Load configuration - Action overrides' {
-    [pscustomobject]$configInputs | Format-List
+    $customConfigurationInputs = ($configInputs.GetEnumerator() | Where-Object { $_.Value })
+    [pscustomobject]$customConfigurationInputs | Format-List
 }
 
 LogGroup 'Load configuration - Result' {
-    $configuration = Merge-Hashtable -Main $defaultConfiguration -Overrides $customConfiguration, $configInputs
-    [pscustomobject]$Configuration | Format-List
+    $configuration = Merge-Hashtable -Main $defaultConfiguration -Overrides $customConfiguration, $customConfigurationInputs
+    [pscustomobject]$configuration | Format-List
 }
-$defaultConfiguration = . (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
-
-
 
 # $Path = '\tests\Advanced'
 # $containers = Get-PesterContainer -Path $Path
