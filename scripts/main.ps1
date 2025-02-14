@@ -124,9 +124,7 @@ LogGroup 'Load configuration - Custom settings file' {
             }
         }
 
-        if ($filteredProperties.Count -gt 0) {
-            $customConfiguration[$section] = $filteredProperties
-        }
+        $customConfiguration[$section] = $filteredProperties
     }
     Write-Host ($customConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
@@ -206,9 +204,7 @@ LogGroup 'Load configuration - Action overrides' {
             }
         }
 
-        if ($filteredProperties.Count -gt 0) {
-            $customActionInputs[$section] = $filteredProperties
-        }
+        $customActionInputs[$section] = $filteredProperties
     }
 
     Write-Host ($customActionInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
