@@ -77,7 +77,7 @@ LogGroup 'Load configuration - Defaults' {
     $defaultConfigurationPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
     if (Test-Path -Path $defaultConfigurationPath) {
         $tmpDefault = . $defaultConfigurationPath
-        Write-Host ($defaultConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+        Write-Host ($tmpDefault | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
     }
     $defaultConfiguration = @{
         Run          = $tmpDefault.Run ?? @{}
