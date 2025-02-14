@@ -336,6 +336,7 @@ foreach ($test in $testResults.Tests) {
     if ($test.Result -eq 'Failed') {
         $summaryMarkdown += @"
   $($test.ErrorRecord.Exception.Message)
+
 "@
     }
 }
