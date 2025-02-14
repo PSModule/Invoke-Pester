@@ -85,7 +85,7 @@ function Merge-Hashtable {
             if (($Output.Keys) -notcontains $Key) {
                 $Output.$Key = $Override.$Key
             }
-            if ($Override.item($Key) | IsNotNullOrEmpty) {
+            if ($Override.item($Key)) {
                 $Output.$Key = $Override.$Key
             }
         }
