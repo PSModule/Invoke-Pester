@@ -334,11 +334,9 @@ foreach ($test in $testResults.Tests) {
 
 "@
     if ($test.Result -eq 'Failed') {
-        $test.ErrorRecord | Out-String -Stream | ForEach-Object {
-            $summaryMarkdown += @"
-    $_
+        $summaryMarkdown += @"
+    $(($test.ErrorRecord | Out-String) -Split '\n')
 "@
-        }
     }
 }
 $summaryMarkdown += @"
