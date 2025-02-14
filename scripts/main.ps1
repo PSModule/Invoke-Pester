@@ -24,7 +24,7 @@ LogGroup 'Load inputs' {
         $name = $_.Name -replace '^GITHUB_ACTION_INPUT_'
         $value = $_.Value
         New-Variable -Name $name -Value $value -Force -Scope Script -PassThru
-    } | Format-Table -AutoSize
+    } | Format-List
 }
 
 # $Path = '\tests\Advanced'
