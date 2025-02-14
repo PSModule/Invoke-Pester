@@ -290,39 +290,12 @@ LogGroup 'Test results' {
         Write-GitHubNotice '✅ All tests passed.'
     }
 
-    $testResults | ConvertTo-Json -Depth 2
+    $results = $testResults | ConvertTo-Json -Depth 2
 
     # Provide structured JSON as an output for potential downstream steps
-    Set-GitHubOutput -Name 'results' -Value ($testResults | ConvertTo-Json -Depth 1)
+    Set-GitHubOutput -Name 'results' -Value $results
 }
 
-# -------------------------------------------------------------------------
-# Step 11: Coverage summary (optional)
-#         Display coverage info if CodeCoverage.Enabled = 'true' and
-#         testResults.CodeCoverage is present.
-# -------------------------------------------------------------------------
-if ($configuration.CodeCoverage.Enabled -eq 'true') {
-    LogGroup 'Coverage summary' {
-        if ($testResults.CodeCoverage) {
-            $coveredLines = $testResults.CodeCoverage.CoveredLines
-            $totalLines = $testResults.CodeCoverage.TotalLines
-
-            if ($totalLines -gt 0) {
-                $coveragePercent = [math]::Round(($coveredLines / $totalLines) * 100, 2)
-                Write-GitHubNotice "Coverage: $coveragePercent% ($coveredLines/$totalLines lines covered)."
-            } else {
-                Write-GitHubNotice 'Coverage: 0% (0/0 lines).'
-            }
-        } else {
-            Write-GitHubNotice 'No coverage info in the test results (Pester CodeCoverage object not found).'
-        }
-    }
-}
-
-# -------------------------------------------------------------------------
-# Step 12: Generate a Step Summary (Markdown in GITHUB_STEP_SUMMARY)
-#          so results appear nicely in GitHub Actions UI.
-# -------------------------------------------------------------------------
 LogGroup 'Generate step summary' {
     $totalTests = $testResults.TotalCount
     $passedTests = $testResults.PassedCount
@@ -332,26 +305,28 @@ LogGroup 'Generate step summary' {
     $notRunTests = $testResults.NotRunCount
 
     # Default coverage text is 'N/A' if coverage is disabled
-    $coverageStr = 'N/A'
-    if (($configuration.CodeCoverage.Enabled -eq 'true') -and -not [string]::IsNullOrEmpty($testResults.CodeCoverage)) {
-        $c = $testResults.CodeCoverage
-        if ($c.TotalLines -gt 0) {
-            $pct = [math]::Round(($c.CoveredLines / $c.TotalLines) * 100, 2)
-            $coverageStr = "$pct%"
-        } else {
-            $coverageStr = '0%'
+
+    if ($configuration.CodeCoverage.Enabled -eq 'true') {
+        LogGroup 'Coverage summary' {
+            $coveragePercent = ($testResults.CodeCoverage).ToString()
+            Write-GitHubNotice "Coverage: $coveragePercent% ($coveredLines/$totalLines lines covered)."
         }
     }
 
-    # Build a concise markdown summary
+    $coverageString = 'N/A'
+    if ($configuration.CodeCoverage.Enabled) {
+        $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
+        $coverageString = "$coverage%"
+    }
+
     $summaryMarkdown = @"
 ### Pester Test Results
 
+$(if ($failedTests -gt 0) { "❌ **$failedTests test(s) failed**" } else { '✅ All tests passed!' })
+
 | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
-| $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageStr |
-
-$(if ($failedTests -gt 0) { "❌ **$failedTests test(s) failed**" } else { '✅ All tests passed!' })
+| $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 
 "@
 
