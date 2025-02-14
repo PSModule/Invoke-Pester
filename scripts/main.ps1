@@ -70,14 +70,13 @@ LogGroup 'Load inputs' {
     [pscustomobject]($inputs.GetEnumerator() | Where-Object { $_.Value }) | Format-List
 }
 
-$defaultConfiguration = @{}
 $customConfiguration = @{}
+$customActionInputs = @{}
 
 LogGroup 'Load configuration - Defaults' {
     $defaultConfigurationPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
     if (Test-Path -Path $defaultConfigurationPath) {
         $tmpDefault = . $defaultConfigurationPath
-        Write-Host ($tmpDefault | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
     }
     $defaultConfiguration = @{
         Run          = $tmpDefault.Run ?? @{}
@@ -90,6 +89,7 @@ LogGroup 'Load configuration - Defaults' {
         TestDrive    = $tmpDefault.TestDrive ?? @{}
         TestRegistry = $tmpDefault.TestRegistry ?? @{}
     }
+    Write-Host ($defaultConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
 LogGroup 'Load configuration - Custom settings file' {
@@ -100,10 +100,9 @@ LogGroup 'Load configuration - Custom settings file' {
         Write-Host "File exists: [$fileExists]"
         if ($fileExists) {
             $tmpCustom = . $customConfigurationFilePath
-            Write-Host ($tmpCustom | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
         }
     }
-    $customConfiguration = @{
+    $tmpCustomConfiguration = @{
         Run          = $tmpCustom.Run ?? @{}
         Filter       = $tmpCustom.Filter ?? @{}
         CodeCoverage = $tmpCustom.CodeCoverage ?? @{}
@@ -115,24 +114,25 @@ LogGroup 'Load configuration - Custom settings file' {
         TestRegistry = $tmpCustom.TestRegistry ?? @{}
     }
 
-    foreach ($section in $customConfiguration.Keys) {
+    foreach ($section in $tmpCustomConfiguration.Keys) {
         $filteredProperties = @{}
 
-        foreach ($property in $customConfiguration[$section].Keys) {
-            $value = $customConfiguration[$section][$property]
+        foreach ($property in $tmpCustomConfiguration[$section].Keys) {
+            $value = $tmpCustomConfiguration[$section][$property]
             if ($Value) {
                 $filteredProperties[$property] = $Value
             }
         }
 
         if ($filteredProperties.Count -gt 0) {
-            $customConfigurationInputs[$section] = $filteredProperties
+            $customConfiguration[$section] = $filteredProperties
         }
     }
+    Write-Host ($customConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
 LogGroup 'Load configuration - Action overrides' {
-    $customConfigurationInputs = @{
+    $customConfigurationInputMap = @{
         Run          = @{
             Path                   = $inputs.Run_Path
             ExcludePath            = $inputs.Run_ExcludePath
@@ -196,33 +196,33 @@ LogGroup 'Load configuration - Action overrides' {
         }
     }
 
-    foreach ($section in $customConfigurationInputs.Keys) {
+    foreach ($section in $customConfigurationInputMap.Keys) {
         $filteredProperties = @{}
 
-        foreach ($property in $customConfigurationInputs[$section].Keys) {
-            $value = $customConfigurationInputs[$section][$property]
+        foreach ($property in $customConfigurationInputMap[$section].Keys) {
+            $value = $customConfigurationInputMap[$section][$property]
             if ($Value) {
                 $filteredProperties[$property] = $Value
             }
         }
 
         if ($filteredProperties.Count -gt 0) {
-            $customConfigurationInputs[$section] = $filteredProperties
+            $customActionInputs[$section] = $filteredProperties
         }
     }
 
-    Write-Host ($customConfigurationInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Host ($customActionInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
-$run = Merge-Hashtable -Main $defaultConfiguration.Run -Overrides $customConfiguration.Run, $customConfigurationInputs.Run
-$filter = Merge-Hashtable -Main $defaultConfiguration.Filter -Overrides $customConfiguration.Filter, $customConfigurationInputs.Filter
-$codeCoverage = Merge-Hashtable -Main $defaultConfiguration.CodeCoverage -Overrides $customConfiguration.CodeCoverage, $customConfigurationInputs.CodeCoverage
-$testResult = Merge-Hashtable -Main $defaultConfiguration.TestResult -Overrides $customConfiguration.TestResult, $customConfigurationInputs.TestResult
-$should = Merge-Hashtable -Main $defaultConfiguration.Should -Overrides $customConfiguration.Should, $customConfigurationInputs.Should
-$debug = Merge-Hashtable -Main $defaultConfiguration.Debug -Overrides $customConfiguration.Debug, $customConfigurationInputs.Debug
-$output = Merge-Hashtable -Main $defaultConfiguration.Output -Overrides $customConfiguration.Output, $customConfigurationInputs.Output
-$testDrive = Merge-Hashtable -Main $defaultConfiguration.TestDrive -Overrides $customConfiguration.TestDrive, $customConfigurationInputs.TestDrive
-$testRegistry = Merge-Hashtable -Main $defaultConfiguration.TestRegistry -Overrides $customConfiguration.TestRegistry, $customConfigurationInputs.TestRegistry
+$run = Merge-Hashtable -Main $defaultConfiguration.Run -Overrides $customConfiguration.Run, $customActionInputs.Run
+$filter = Merge-Hashtable -Main $defaultConfiguration.Filter -Overrides $customConfiguration.Filter, $customActionInputs.Filter
+$codeCoverage = Merge-Hashtable -Main $defaultConfiguration.CodeCoverage -Overrides $customConfiguration.CodeCoverage, $customActionInputs.CodeCoverage
+$testResult = Merge-Hashtable -Main $defaultConfiguration.TestResult -Overrides $customConfiguration.TestResult, $customActionInputs.TestResult
+$should = Merge-Hashtable -Main $defaultConfiguration.Should -Overrides $customConfiguration.Should, $customActionInputs.Should
+$debug = Merge-Hashtable -Main $defaultConfiguration.Debug -Overrides $customConfiguration.Debug, $customActionInputs.Debug
+$output = Merge-Hashtable -Main $defaultConfiguration.Output -Overrides $customConfiguration.Output, $customActionInputs.Output
+$testDrive = Merge-Hashtable -Main $defaultConfiguration.TestDrive -Overrides $customConfiguration.TestDrive, $customActionInputs.TestDrive
+$testRegistry = Merge-Hashtable -Main $defaultConfiguration.TestRegistry -Overrides $customConfiguration.TestRegistry, $customActionInputs.TestRegistry
 
 $configuration = @{
     Run          = $run
