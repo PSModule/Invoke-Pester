@@ -324,7 +324,7 @@ $summaryMarkdown = @"
 <details><summary>Details</summary>
 <p>
 
-``````
+
 "@
 
 foreach ($test in $testResults.Tests) {
@@ -335,12 +335,11 @@ foreach ($test in $testResults.Tests) {
 "@
     if ($test.Result -eq 'Failed') {
         $summaryMarkdown += @"
-    $(($test.ErrorRecord | Out-String) -Split '\n')
+  $($test.ErrorRecord.Exception.Message)
 "@
     }
 }
 $summaryMarkdown += @"
-``````
 
 </p>
 </details>
