@@ -41,4 +41,4 @@ jobs:
       - name: Action-Test [Advanced]
         uses: ./
         with:
-          Run_Path: tests/Advanced
+          ConfigurationFilePath: tests/Advanced/Pester.Configuration.ps1
