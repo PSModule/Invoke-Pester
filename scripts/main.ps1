@@ -99,7 +99,7 @@ LogGroup 'Load configuration - Defaults' {
     $defaultConfigurationPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
     if (Test-Path -Path $defaultConfigurationPath) {
         $defaultConfiguration = . $defaultConfigurationPath
-        [pscustomobject]$defaultConfiguration | Format-List
+        Write-Host ($defaultConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
     }
 }
 
@@ -110,122 +110,33 @@ LogGroup 'Load configuration - Custom settings file' {
     Write-Host "File exists: $fileExists"
     if ($customConfigurationFilePath -and $fileExists) {
         $customConfiguration = . $customConfigurationFilePath
-        [pscustomobject]$customConfiguration | Format-List
+        Write-Host ($customConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
     }
 }
 
 LogGroup 'Load configuration - Action overrides' {
     $customConfigurationInputs = ($configInputs.GetEnumerator() | Where-Object { $_.Value })
-    [pscustomobject]$customConfigurationInputs | Format-List
+    Write-Host ($customConfigurationInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
 LogGroup 'Load configuration - Result' {
     $configuration = Merge-Hashtable -Main $defaultConfiguration -Overrides $customConfiguration, $customConfigurationInputs
-    [pscustomobject]$configuration | Format-List
+    Write-Host ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
-# $Path = '\tests\Advanced'
-# $containers = Get-PesterContainer -Path $Path
+LogGroup 'Load containers' {
+    $containers = Get-PesterContainer -Path $configuration.Run.Path
+    Write-Host ($containers | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+}
 
-# $Configuration = Get-PesterConfiguration -Path $Path
-# $Configuration.Run.Container = $containers
+$configuration.Run.Container = $containers
 
-# $Configuration.Run.Container.Value
-# @{
-#     Run_Path                           = $Path
-#     Run_ExcludePath                    = @()
-#     Run_ScriptBlock                    = @()
-#     Run_Container                      = @()
-#     Run_TestExtension                  = @(
-#         '.Tests.ps1'
-#     )
-#     Run_Exit                           = $false
-#     Run_Throw                          = $false
-#     Run_PassThru                       = $true
-#     Run_SkipRun                        = $false
-#     Run_SkipRemainingOnFailure         = 'None'
-
-#     Filter_Tag                         = @()
-#     Filter_ExcludeTag                  = @()
-#     Filter_Line                        = @()
-#     Filter_ExcludeLine                 = @()
-#     Filter_FullName                    = @()
-
-#     CodeCoverage_Enabled               = $true
-#     CodeCoverage_OutputFormat          = 'JaCoCo'
-#     CodeCoverage_OutputPath            = 'CodeCoverage-Report.xml'
-#     CodeCoverage_OutputEncoding        = 'UTF8'
-#     CodeCoverage_Path                  = @()
-#     CodeCoverage_ExcludeTests          = $true
-#     CodeCoverage_RecursePaths          = $true
-#     CodeCoverage_CoveragePercentTarget = 75.0
-#     CodeCoverage_UseBreakpoints        = $true
-#     CodeCoverage_SingleHitBreakpoints  = $true
-
-#     TestResult_Enabled                 = $true
-#     TestResult_OutputFormat            = 'NUnitXml'
-#     TestResult_OutputPath              = 'outputs\Test-Report.xml'
-#     TestResult_OutputEncoding          = 'UTF8'
-#     TestResult_TestSuiteName           = 'Unit tests'
-#     Should_ErrorAction                 = 'Stop'
-#     Debug_ShowFullErrors               = $false
-#     Debug_WriteDebugMessages           = $false
-#     Debug_WriteDebugMessagesFrom       = @(
-#         'Discovery',
-#         'Skip',
-#         'Mock',
-#         'CodeCoverage'
-#     )
-#     Debug_ShowNavigationMarkers        = $false
-#     Debug_ReturnRawResultObject        = $false
-
-#     Output_CIFormat                    = 'Auto'
-#     Output_StackTraceVerbosity         = 'Filtered'
-#     Output_Verbosity                   = 'Detailed'
-#     Output_CILogLevel                  = 'Error'
-#     Output_RenderMode                  = 'Auto'
-#     TestDrive_Enabled                  = $true
-#     TestRegistry_Enabled               = $true
-# }
-
-
-# $Configuration | ConvertTo-Json -Depth 100 | Clip
-# $Configuration.Container | ConvertTo-Json -Depth 100 | Clip
+LogGroup 'Run tests' {
+    $testResults = Invoke-Pester -Configuration $configuration
+}
 
 # Invoke-Pester -Configuration $Configuration
 
-
-
-# LogGroup 'Pester config' {
-#     $pesterParams = @{
-#         Configuration = @{
-#             Run          = @{
-#                 Path      = $Path
-#                 Container = $containers
-#                 PassThru  = $true
-#             }
-#             TestResult   = @{
-#                 Enabled       = $testModule
-#                 OutputFormat  = 'NUnitXml'
-#                 OutputPath    = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath 'outputs\Test-Report.xml'
-#                 TestSuiteName = 'Unit tests'
-#             }
-#             CodeCoverage = @{
-#                 Enabled               = $testModule
-#                 OutputPath            = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath 'outputs\CodeCoverage-Report.xml'
-#                 OutputFormat          = 'JaCoCo'
-#                 OutputEncoding        = 'UTF8'
-#                 CoveragePercentTarget = 75
-#             }
-#             Output       = @{
-#                 CIFormat            = 'Auto'
-#                 StackTraceVerbosity = $StackTraceVerbosity
-#                 Verbosity           = $Verbosity
-#             }
-#         }
-#     }
-#     Write-Host ($pesterParams | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
-# }
 
 # $testResults = Invoke-Pester @pesterParams
 
