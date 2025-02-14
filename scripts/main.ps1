@@ -296,30 +296,22 @@ LogGroup 'Test results' {
     Set-GitHubOutput -Name 'results' -Value $results
 }
 
-LogGroup 'Generate step summary' {
-    $totalTests = $testResults.TotalCount
-    $passedTests = $testResults.PassedCount
-    $failedTests = $testResults.FailedCount
-    $skippedTests = $testResults.SkippedCount
-    $inconclusiveTests = $testResults.InconclusiveCount
-    $notRunTests = $testResults.NotRunCount
+$totalTests = $testResults.TotalCount
+$passedTests = $testResults.PassedCount
+$failedTests = $testResults.FailedCount
+$skippedTests = $testResults.SkippedCount
+$inconclusiveTests = $testResults.InconclusiveCount
+$notRunTests = $testResults.NotRunCount
 
-    # Default coverage text is 'N/A' if coverage is disabled
+# Default coverage text is 'N/A' if coverage is disabled
 
-    if ($configuration.CodeCoverage.Enabled -eq 'true') {
-        LogGroup 'Coverage summary' {
-            $coveragePercent = ($testResults.CodeCoverage).ToString()
-            Write-GitHubNotice "Coverage: $coveragePercent% ($coveredLines/$totalLines lines covered)."
-        }
-    }
+$coverageString = 'N/A'
+if ($configuration.CodeCoverage.Enabled) {
+    $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
+    $coverageString = "$coverage%"
+}
 
-    $coverageString = 'N/A'
-    if ($configuration.CodeCoverage.Enabled) {
-        $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
-        $coverageString = "$coverage%"
-    }
-
-    $summaryMarkdown = @"
+$summaryMarkdown = @"
 ### Pester Test Results
 
 $(if ($failedTests -gt 0) { "❌ **$failedTests test(s) failed**" } else { '✅ All tests passed!' })
@@ -328,11 +320,20 @@ $(if ($failedTests -gt 0) { "❌ **$failedTests test(s) failed**" } else { '✅ 
 | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 
+
+<details><summary>Details</summary>
+<p>
+
+<- Add detailed test results here ->
+
+</p>
+</details>
+
 "@
 
-    # Write the summary to the special environment file
-    Set-GitHubStepSummary -Summary $summaryMarkdown
-}
+# Write the summary to the special environment file
+Set-GitHubStepSummary -Summary $summaryMarkdown
+
 
 # -------------------------------------------------------------------------
 # Step 13: Exit with the number of failed tests as the error code
