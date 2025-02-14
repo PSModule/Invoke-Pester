@@ -172,16 +172,26 @@ LogGroup 'Load configuration - Action overrides' {
     Write-Host ($customConfigurationInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
+$run = Merge-Hashtable -Main $defaultConfiguration.Run -Overrides $customConfiguration.Run, $customConfigurationInputs.Run
+$filter = Merge-Hashtable -Main $defaultConfiguration.Filter -Overrides $customConfiguration.Filter, $customConfigurationInputs.Filter
+$codeCoverage = Merge-Hashtable -Main $defaultConfiguration.CodeCoverage -Overrides $customConfiguration.CodeCoverage, $customConfigurationInputs.CodeCoverage
+$testResult = Merge-Hashtable -Main $defaultConfiguration.TestResult -Overrides $customConfiguration.TestResult, $customConfigurationInputs.TestResult
+$should = Merge-Hashtable -Main $defaultConfiguration.Should -Overrides $customConfiguration.Should, $customConfigurationInputs.Should
+$debug = Merge-Hashtable -Main $defaultConfiguration.Debug -Overrides $customConfiguration.Debug, $customConfigurationInputs.Debug
+$output = Merge-Hashtable -Main $defaultConfiguration.Output -Overrides $customConfiguration.Output, $customConfigurationInputs.Output
+$testDrive = Merge-Hashtable -Main $defaultConfiguration.TestDrive -Overrides $customConfiguration.TestDrive, $customConfigurationInputs.TestDrive
+$testRegistry = Merge-Hashtable -Main $defaultConfiguration.TestRegistry -Overrides $customConfiguration.TestRegistry, $customConfigurationInputs.TestRegistry
+
 $configuration = @{
-    Run          = Merge-Hashtable -Main $defaultConfiguration.Run -Overrides $customConfiguration.Run, $customConfigurationInputs.Run
-    Filter       = Merge-Hashtable -Main $defaultConfiguration.Filter -Overrides $customConfiguration.Filter, $customConfigurationInputs.Filter
-    CodeCoverage = Merge-Hashtable -Main $defaultConfiguration.CodeCoverage -Overrides $customConfiguration.CodeCoverage, $customConfigurationInputs.CodeCoverage
-    TestResult   = Merge-Hashtable -Main $defaultConfiguration.TestResult -Overrides $customConfiguration.TestResult, $customConfigurationInputs.TestResult
-    Should       = Merge-Hashtable -Main $defaultConfiguration.Should -Overrides $customConfiguration.Should, $customConfigurationInputs.Should
-    Debug        = Merge-Hashtable -Main $defaultConfiguration.Debug -Overrides $customConfiguration.Debug, $customConfigurationInputs.Debug
-    Output       = Merge-Hashtable -Main $defaultConfiguration.Output -Overrides $customConfiguration.Output, $customConfigurationInputs.Output
-    TestDrive    = Merge-Hashtable -Main $defaultConfiguration.TestDrive -Overrides $customConfiguration.TestDrive, $customConfigurationInputs.TestDrive
-    TestRegistry = Merge-Hashtable -Main $defaultConfiguration.TestRegistry -Overrides $customConfiguration.TestRegistry, $customConfigurationInputs.TestRegistry
+    Run          = $run
+    Filter       = $filter
+    CodeCoverage = $codeCoverage
+    TestResult   = $testResult
+    Should       = $should
+    Debug        = $debug
+    Output       = $output
+    TestDrive    = $testDrive
+    TestRegistry = $testRegistry
 }
 LogGroup 'Load configuration - Result' {
     Write-Host ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
