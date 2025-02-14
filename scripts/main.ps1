@@ -83,12 +83,14 @@ LogGroup 'Load configuration - Defaults' {
 
 LogGroup 'Load configuration - Custom settings file' {
     $customConfigurationFilePath = $otherInputs.ConfigurationFilePath
-    $fileExists = Test-Path -Path $customConfigurationFilePath
-    Write-Host "Custom configuration file path: $customConfigurationFilePath"
-    Write-Host "File exists: $fileExists"
-    if ($customConfigurationFilePath -and $fileExists) {
-        $customConfiguration = . $customConfigurationFilePath
-        Write-Host ($customConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Host "Custom configuration file path: [$customConfigurationFilePath]"
+    if ($customConfigurationFilePath) {
+        $fileExists = Test-Path -Path $customConfigurationFilePath
+        Write-Host "File exists: [$fileExists]"
+        if ($fileExists) {
+            $customConfiguration = . $customConfigurationFilePath
+            Write-Host ($customConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+        }
     }
 }
 
