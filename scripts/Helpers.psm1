@@ -13,7 +13,7 @@
                 Import-PowerShellDataFile -Path $file
             }
         }
-        New-PesterContainer @param
+        $param
     }
 }
 
@@ -33,7 +33,7 @@ function Get-PesterConfiguration {
             }
         }
     }
-    New-PesterConfiguration -Hashtable $config
+    $config
 }
 
 function Merge-Hashtable {
