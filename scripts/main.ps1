@@ -88,7 +88,18 @@ LogGroup 'Load configuration - Custom settings file' {
         $fileExists = Test-Path -Path $customConfigurationFilePath
         Write-Host "File exists: [$fileExists]"
         if ($fileExists) {
-            $customConfiguration = . $customConfigurationFilePath
+            $tmp = . $customConfigurationFilePath
+            $customConfiguration = @{
+                Run          = $tmp.Run
+                Filter       = $tmp.Filter
+                CodeCoverage = $tmp.CodeCoverage
+                TestResult   = $tmp.TestResult
+                Should       = $tmp.Should
+                Debug        = $tmp.Debug
+                Output       = $tmp.Output
+                TestDrive    = $tmp.TestDrive
+                TestRegistry = $tmp.TestRegistry
+            }
             Write-Host ($customConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
         }
     }
