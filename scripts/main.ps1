@@ -324,14 +324,14 @@ if ($configuration.CodeCoverage.Enabled -eq 'true') {
 #          so results appear nicely in GitHub Actions UI.
 # -------------------------------------------------------------------------
 LogGroup 'Generate step summary' {
-    $totalTests = $testResults.TestCount
+    $totalTests = $testResults.TotalCount
     $passedTests = $testResults.PassedCount
     $failedTests = $testResults.FailedCount
     $skippedTests = $testResults.SkippedCount
 
     # Default coverage text is 'N/A' if coverage is disabled
     $coverageStr = 'N/A'
-    if (($configuration.CodeCoverage.Enabled -eq 'true') -and $testResults.CodeCoverage) {
+    if (($configuration.CodeCoverage.Enabled -eq 'true') -and -not [string]::IsNullOrEmpty($testResults.CodeCoverage)) {
         $c = $testResults.CodeCoverage
         if ($c.TotalLines -gt 0) {
             $pct = [math]::Round(($c.CoveredLines / $c.TotalLines) * 100, 2)
