@@ -2,7 +2,7 @@
 param()
 
 'Pester', 'PSScriptAnalyzer' | ForEach-Object {
-    Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue
+    Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
     Import-Module -Name $_ -Verbose:$false
 }
 
