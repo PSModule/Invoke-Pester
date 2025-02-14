@@ -1,6 +1,9 @@
 [CmdletBinding()]
 param()
 
+# -------------------------------------------------------------------------
+# Step 1: Install/Import Pester & ScriptAnalyzer
+# -------------------------------------------------------------------------
 'Pester', 'PSScriptAnalyzer' | ForEach-Object {
     Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
     Import-Module -Name $_ -Verbose:$false
@@ -8,17 +11,23 @@ param()
 
 Import-Module "$PSScriptRoot/Helpers.psm1"
 
+# -------------------------------------------------------------------------
+# Step 2: Log tool versions
+# -------------------------------------------------------------------------
 LogGroup 'Get test kit versions' {
     $PSSAModule = Get-PSResource -Name PSScriptAnalyzer -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
     $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
 
     [PSCustomObject]@{
         PowerShell       = $PSVersionTable.PSVersion.ToString()
-        Pester           = $pesterModule.version
-        PSScriptAnalyzer = $PSSAModule.version
+        Pester           = $pesterModule.Version
+        PSScriptAnalyzer = $PSSAModule.Version
     } | Format-List
 }
 
+# -------------------------------------------------------------------------
+# Step 3: Load all action inputs (from environment vars)
+# -------------------------------------------------------------------------
 LogGroup 'Load inputs' {
     $inputs = @{
         Run_Path                           = $env:GITHUB_ACTION_INPUT_Run_Path
@@ -31,11 +40,13 @@ LogGroup 'Load inputs' {
         Run_PassThru                       = $env:GITHUB_ACTION_INPUT_Run_PassThru
         Run_SkipRun                        = $env:GITHUB_ACTION_INPUT_Run_SkipRun
         Run_SkipRemainingOnFailure         = $env:GITHUB_ACTION_INPUT_Run_SkipRemainingOnFailure
+
         Filter_Tag                         = $env:GITHUB_ACTION_INPUT_Filter_Tag
         Filter_ExcludeTag                  = $env:GITHUB_ACTION_INPUT_Filter_ExcludeTag
         Filter_Line                        = $env:GITHUB_ACTION_INPUT_Filter_Line
         Filter_ExcludeLine                 = $env:GITHUB_ACTION_INPUT_Filter_ExcludeLine
         Filter_FullName                    = $env:GITHUB_ACTION_INPUT_Filter_FullName
+
         CodeCoverage_Enabled               = $env:GITHUB_ACTION_INPUT_CodeCoverage_Enabled
         CodeCoverage_OutputFormat          = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputFormat
         CodeCoverage_OutputPath            = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputPath
@@ -46,33 +57,41 @@ LogGroup 'Load inputs' {
         CodeCoverage_CoveragePercentTarget = $env:GITHUB_ACTION_INPUT_CodeCoverage_CoveragePercentTarget
         CodeCoverage_UseBreakpoints        = $env:GITHUB_ACTION_INPUT_CodeCoverage_UseBreakpoints
         CodeCoverage_SingleHitBreakpoints  = $env:GITHUB_ACTION_INPUT_CodeCoverage_SingleHitBreakpoints
+
         TestResult_Enabled                 = $env:GITHUB_ACTION_INPUT_TestResult_Enabled
         TestResult_OutputFormat            = $env:GITHUB_ACTION_INPUT_TestResult_OutputFormat
         TestResult_OutputPath              = $env:GITHUB_ACTION_INPUT_TestResult_OutputPath
         TestResult_OutputEncoding          = $env:GITHUB_ACTION_INPUT_TestResult_OutputEncoding
         TestResult_TestSuiteName           = $env:GITHUB_ACTION_INPUT_TestResult_TestSuiteName
+
         Should_ErrorAction                 = $env:GITHUB_ACTION_INPUT_Should_ErrorAction
+
         Debug_ShowFullErrors               = $env:GITHUB_ACTION_INPUT_Debug_ShowFullErrors
         Debug_WriteDebugMessages           = $env:GITHUB_ACTION_INPUT_Debug_WriteDebugMessages
         Debug_WriteDebugMessagesFrom       = $env:GITHUB_ACTION_INPUT_Debug_WriteDebugMessagesFrom
         Debug_ShowNavigationMarkers        = $env:GITHUB_ACTION_INPUT_Debug_ShowNavigationMarkers
         Debug_ReturnRawResultObject        = $env:GITHUB_ACTION_INPUT_Debug_ReturnRawResultObject
+
         Output_Verbosity                   = $env:GITHUB_ACTION_INPUT_Output_Verbosity
         Output_StackTraceVerbosity         = $env:GITHUB_ACTION_INPUT_Output_StackTraceVerbosity
         Output_CIFormat                    = $env:GITHUB_ACTION_INPUT_Output_CIFormat
         Output_CILogLevel                  = $env:GITHUB_ACTION_INPUT_Output_CILogLevel
         Output_RenderMode                  = $env:GITHUB_ACTION_INPUT_Output_RenderMode
+
         TestDrive_Enabled                  = $env:GITHUB_ACTION_INPUT_TestDrive_Enabled
         TestRegistry_Enabled               = $env:GITHUB_ACTION_INPUT_TestRegistry_Enabled
         ConfigurationFilePath              = $env:GITHUB_ACTION_INPUT_ConfigurationFilePath
     }
 
-    [pscustomobject]($inputs.GetEnumerator() | Where-Object { $_.Value }) | Format-List
+    [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List
 }
 
 $customConfiguration = @{}
 $customActionInputs = @{}
 
+# -------------------------------------------------------------------------
+# Step 4: Load default configuration (from Pester.Configuration.ps1)
+# -------------------------------------------------------------------------
 LogGroup 'Load configuration - Defaults' {
     $defaultConfigurationPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
     if (Test-Path -Path $defaultConfigurationPath) {
@@ -89,15 +108,18 @@ LogGroup 'Load configuration - Defaults' {
         TestDrive    = $tmpDefault.TestDrive ?? @{}
         TestRegistry = $tmpDefault.TestRegistry ?? @{}
     }
-    Write-Host ($defaultConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($defaultConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
+# -------------------------------------------------------------------------
+# Step 5: Load custom config file (if provided)
+# -------------------------------------------------------------------------
 LogGroup 'Load configuration - Custom settings file' {
     $customConfigurationFilePath = $inputs.ConfigurationFilePath
-    Write-Host "Custom configuration file path: [$customConfigurationFilePath]"
+    Write-Output "Custom configuration file path: [$customConfigurationFilePath]"
     if ($customConfigurationFilePath) {
         $fileExists = Test-Path -Path $customConfigurationFilePath
-        Write-Host "File exists: [$fileExists]"
+        Write-Output "File exists: [$fileExists]"
         if ($fileExists) {
             $tmpCustom = . $customConfigurationFilePath
         }
@@ -116,19 +138,21 @@ LogGroup 'Load configuration - Custom settings file' {
 
     foreach ($section in $tmpCustomConfiguration.Keys) {
         $filteredProperties = @{}
-
         foreach ($property in $tmpCustomConfiguration[$section].Keys) {
             $value = $tmpCustomConfiguration[$section][$property]
             if (-not [string]::IsNullOrEmpty($Value)) {
                 $filteredProperties[$property] = $Value
             }
         }
-
         $customConfiguration[$section] = $filteredProperties
     }
-    Write-Host ($customConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+
+    Write-Output ($customConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
+# -------------------------------------------------------------------------
+# Step 6: Load direct Action input overrides
+# -------------------------------------------------------------------------
 LogGroup 'Load configuration - Action overrides' {
     $customConfigurationInputMap = @{
         Run          = @{
@@ -196,20 +220,21 @@ LogGroup 'Load configuration - Action overrides' {
 
     foreach ($section in $customConfigurationInputMap.Keys) {
         $filteredProperties = @{}
-
         foreach ($property in $customConfigurationInputMap[$section].Keys) {
             $value = $customConfigurationInputMap[$section][$property]
             if (-not [string]::IsNullOrEmpty($Value)) {
                 $filteredProperties[$property] = $Value
             }
         }
-
         $customActionInputs[$section] = $filteredProperties
     }
 
-    Write-Host ($customActionInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($customActionInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
+# -------------------------------------------------------------------------
+# Step 7: Merge all configuration layers
+# -------------------------------------------------------------------------
 $run = Merge-Hashtable -Main $defaultConfiguration.Run -Overrides $customConfiguration.Run, $customActionInputs.Run
 $filter = Merge-Hashtable -Main $defaultConfiguration.Filter -Overrides $customConfiguration.Filter, $customActionInputs.Filter
 $codeCoverage = Merge-Hashtable -Main $defaultConfiguration.CodeCoverage -Overrides $customConfiguration.CodeCoverage, $customActionInputs.CodeCoverage
@@ -232,20 +257,30 @@ $configuration = @{
     TestRegistry = $testRegistry
 }
 
+# -------------------------------------------------------------------------
+# Step 8: Find and add containers (if any)
+# -------------------------------------------------------------------------
 LogGroup 'Load configuration - Add containers' {
     $containers = Get-PesterContainer -Path $configuration.Run.Path
-    Write-Host ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
+    Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
 LogGroup 'Load configuration - Result' {
     $configuration.Run.Container += $containers | ForEach-Object { New-PesterContainer @_ }
-    Write-Host ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
+# -------------------------------------------------------------------------
+# Step 9: Invoke Pester tests
+# -------------------------------------------------------------------------
 $testResults = Invoke-Pester -Configuration $configuration
 
+# -------------------------------------------------------------------------
+# Step 10: Log test results (pass/fail) and return the number of failures
+# -------------------------------------------------------------------------
 LogGroup 'Test results' {
     $testResults | Format-List
+
     $failedTests = [int]$testResults.FailedCount
 
     if (($failedTests -gt 0) -or ($testResults.Result -ne 'Passed')) {
@@ -255,7 +290,75 @@ LogGroup 'Test results' {
         Write-GitHubNotice '✅ All tests passed.'
     }
 
-    Set-GitHubOutput -Name 'results' -Value $($testResults | ConvertTo-Json -Depth 3)
+    $testResults | ConvertTo-Json -Depth 2
+
+    # Provide structured JSON as an output for potential downstream steps
+    Set-GitHubOutput -Name 'results' -Value ($testResults | ConvertTo-Json -Depth 1)
 }
 
+# -------------------------------------------------------------------------
+# Step 11: Coverage summary (optional)
+#         Display coverage info if CodeCoverage.Enabled = 'true' and
+#         testResults.CodeCoverage is present.
+# -------------------------------------------------------------------------
+if ($configuration.CodeCoverage.Enabled -eq 'true') {
+    LogGroup 'Coverage summary' {
+        if ($testResults.CodeCoverage) {
+            $coveredLines = $testResults.CodeCoverage.CoveredLines
+            $totalLines = $testResults.CodeCoverage.TotalLines
+
+            if ($totalLines -gt 0) {
+                $coveragePercent = [math]::Round(($coveredLines / $totalLines) * 100, 2)
+                Write-GitHubNotice "Coverage: $coveragePercent% ($coveredLines/$totalLines lines covered)."
+            } else {
+                Write-GitHubNotice 'Coverage: 0% (0/0 lines).'
+            }
+        } else {
+            Write-GitHubNotice 'No coverage info in the test results (Pester CodeCoverage object not found).'
+        }
+    }
+}
+
+# -------------------------------------------------------------------------
+# Step 12: Generate a Step Summary (Markdown in GITHUB_STEP_SUMMARY)
+#          so results appear nicely in GitHub Actions UI.
+# -------------------------------------------------------------------------
+LogGroup 'Generate step summary' {
+    $totalTests = $testResults.TestCount
+    $passedTests = $testResults.PassedCount
+    $failedTests = $testResults.FailedCount
+    $skippedTests = $testResults.SkippedCount
+
+    # Default coverage text is 'N/A' if coverage is disabled
+    $coverageStr = 'N/A'
+    if (($configuration.CodeCoverage.Enabled -eq 'true') -and $testResults.CodeCoverage) {
+        $c = $testResults.CodeCoverage
+        if ($c.TotalLines -gt 0) {
+            $pct = [math]::Round(($c.CoveredLines / $c.TotalLines) * 100, 2)
+            $coverageStr = "$pct%"
+        } else {
+            $coverageStr = '0%'
+        }
+    }
+
+    # Build a concise markdown summary
+    $summaryMarkdown = @"
+### Pester Test Results
+
+| Total | Passed | Failed | Skipped | Coverage |
+| ----: | -----: | -----: | ------: | -------: |
+| $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $coverageStr |
+
+$(if ($failedTests -gt 0) { "❌ **$failedTests test(s) failed**" } else { '✅ All tests passed!' })
+
+"@
+
+    # Write the summary to the special environment file
+    Set-GitHubStepSummary -Summary $summaryMarkdown
+}
+
+# -------------------------------------------------------------------------
+# Step 13: Exit with the number of failed tests as the error code
+#          (non-zero means the step fails if tests failed).
+# -------------------------------------------------------------------------
 exit $failedTests
