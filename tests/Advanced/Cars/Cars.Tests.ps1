@@ -1,5 +1,12 @@
-﻿
-. "$PSScriptRoot\Cars.Settings.ps1"
+﻿[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    [string] $Path
+)
+
+BeforeAll {
+    . $Path
+}
 
 Describe 'Cars Module Tests' {
 

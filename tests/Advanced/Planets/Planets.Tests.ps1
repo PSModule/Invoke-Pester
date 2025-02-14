@@ -1,14 +1,12 @@
-﻿<#
-.SYNOPSIS
-    Pester tests for planet-related functions.
-.DESCRIPTION
-    This script loads settings from Planets.Settings.ps1 and validates functions that return planet data.
-.NOTES
-    Ensure that functions like Get-PlanetCount and Get-PlanetNames are available (e.g. from your module).
-#>
+﻿[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    [string] $Path
+)
 
-# Dot-source the settings file to import $PlanetsSettings
-. "$PSScriptRoot\Planets.Settings.ps1"
+BeforeAll {
+    . $Path
+}
 
 Describe 'Planets Module Tests' {
 
