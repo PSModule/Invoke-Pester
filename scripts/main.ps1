@@ -114,84 +114,103 @@ LogGroup 'Load configuration - Custom settings file' {
         TestDrive    = $tmpCustom.TestDrive ?? @{}
         TestRegistry = $tmpCustom.TestRegistry ?? @{}
     }
+
+    foreach ($section in $customConfiguration.Keys) {
+        $filteredProperties = @{}
+
+        foreach ($property in $customConfiguration[$section].Keys) {
+            $value = $customConfiguration[$section][$property]
+            if ($Value) {
+                $filteredProperties[$property] = $Value
+            }
+        }
+
+        if ($filteredProperties.Count -gt 0) {
+            $customConfigurationInputs[$section] = $filteredProperties
+        }
+    }
 }
 
 LogGroup 'Load configuration - Action overrides' {
     $customConfigurationInputs = @{
-        Run          = @{}
-        Filter       = @{}
-        CodeCoverage = @{}
-        TestResult   = @{}
-        Should       = @{}
-        Debug        = @{}
-        Output       = @{}
-        TestDrive    = @{}
-        TestRegistry = @{}
-    }
-
-    $customConfigurationInputs = @{
         Run          = @{
-            Path                   = $inputs.Run_Path ?? $null
-            ExcludePath            = $inputs.Run_ExcludePath ?? $null
-            ScriptBlock            = $inputs.Run_ScriptBlock ?? $null
-            Container              = $inputs.Run_Container ?? $null
-            TestExtension          = $inputs.Run_TestExtension ?? $null
-            Exit                   = $inputs.Run_Exit ?? $null
-            Throw                  = $inputs.Run_Throw ?? $null
-            PassThru               = $inputs.Run_PassThru ?? $null
-            SkipRun                = $inputs.Run_SkipRun ?? $null
-            SkipRemainingOnFailure = $inputs.Run_SkipRemainingOnFailure ?? $null
+            Path                   = $inputs.Run_Path
+            ExcludePath            = $inputs.Run_ExcludePath
+            ScriptBlock            = $inputs.Run_ScriptBlock
+            Container              = $inputs.Run_Container
+            TestExtension          = $inputs.Run_TestExtension
+            Exit                   = $inputs.Run_Exit
+            Throw                  = $inputs.Run_Throw
+            PassThru               = $inputs.Run_PassThru
+            SkipRun                = $inputs.Run_SkipRun
+            SkipRemainingOnFailure = $inputs.Run_SkipRemainingOnFailure
         }
         Filter       = @{
-            Tag         = $inputs.Filter_Tag ?? $null
-            ExcludeTag  = $inputs.Filter_ExcludeTag ?? $null
-            Line        = $inputs.Filter_Line ?? $null
-            ExcludeLine = $inputs.Filter_ExcludeLine ?? $null
-            FullName    = $inputs.Filter_FullName ?? $null
+            Tag         = $inputs.Filter_Tag
+            ExcludeTag  = $inputs.Filter_ExcludeTag
+            Line        = $inputs.Filter_Line
+            ExcludeLine = $inputs.Filter_ExcludeLine
+            FullName    = $inputs.Filter_FullName
         }
         CodeCoverage = @{
-            Enabled               = $inputs.CodeCoverage_Enabled ?? $null
-            OutputFormat          = $inputs.CodeCoverage_OutputFormat ?? $null
-            OutputPath            = $inputs.CodeCoverage_OutputPath ?? $null
-            OutputEncoding        = $inputs.CodeCoverage_OutputEncoding ?? $null
-            Path                  = $inputs.CodeCoverage_Path ?? $null
-            ExcludeTests          = $inputs.CodeCoverage_ExcludeTests ?? $null
-            RecursePaths          = $inputs.CodeCoverage_RecursePaths ?? $null
-            CoveragePercentTarget = $inputs.CodeCoverage_CoveragePercentTarget ?? $null
-            UseBreakpoints        = $inputs.CodeCoverage_UseBreakpoints ?? $null
-            SingleHitBreakpoints  = $inputs.CodeCoverage_SingleHitBreakpoints ?? $null
+            Enabled               = $inputs.CodeCoverage_Enabled
+            OutputFormat          = $inputs.CodeCoverage_OutputFormat
+            OutputPath            = $inputs.CodeCoverage_OutputPath
+            OutputEncoding        = $inputs.CodeCoverage_OutputEncoding
+            Path                  = $inputs.CodeCoverage_Path
+            ExcludeTests          = $inputs.CodeCoverage_ExcludeTests
+            RecursePaths          = $inputs.CodeCoverage_RecursePaths
+            CoveragePercentTarget = $inputs.CodeCoverage_CoveragePercentTarget
+            UseBreakpoints        = $inputs.CodeCoverage_UseBreakpoints
+            SingleHitBreakpoints  = $inputs.CodeCoverage_SingleHitBreakpoints
         }
         TestResult   = @{
-            Enabled        = $inputs.TestResult_Enabled ?? $null
-            OutputFormat   = $inputs.TestResult_OutputFormat ?? $null
-            OutputPath     = $inputs.TestResult_OutputPath ?? $null
-            OutputEncoding = $inputs.TestResult_OutputEncoding ?? $null
-            TestSuiteName  = $inputs.TestResult_TestSuiteName ?? $null
+            Enabled        = $inputs.TestResult_Enabled
+            OutputFormat   = $inputs.TestResult_OutputFormat
+            OutputPath     = $inputs.TestResult_OutputPath
+            OutputEncoding = $inputs.TestResult_OutputEncoding
+            TestSuiteName  = $inputs.TestResult_TestSuiteName
         }
         Should       = @{
-            ErrorAction = $inputs.Should_ErrorAction ?? $null
+            ErrorAction = $inputs.Should_ErrorAction
         }
         Debug        = @{
-            ShowFullErrors         = $inputs.Debug_ShowFullErrors ?? $null
-            WriteDebugMessages     = $inputs.Debug_WriteDebugMessages ?? $null
-            WriteDebugMessagesFrom = $inputs.Debug_WriteDebugMessagesFrom ?? $null
-            ShowNavigationMarkers  = $inputs.Debug_ShowNavigationMarkers ?? $null
-            ReturnRawResultObject  = $inputs.Debug_ReturnRawResultObject ?? $null
+            ShowFullErrors         = $inputs.Debug_ShowFullErrors
+            WriteDebugMessages     = $inputs.Debug_WriteDebugMessages
+            WriteDebugMessagesFrom = $inputs.Debug_WriteDebugMessagesFrom
+            ShowNavigationMarkers  = $inputs.Debug_ShowNavigationMarkers
+            ReturnRawResultObject  = $inputs.Debug_ReturnRawResultObject
         }
         Output       = @{
-            CIFormat            = $inputs.Output_CIFormat ?? $null
-            StackTraceVerbosity = $inputs.Output_StackTraceVerbosity ?? $null
-            Verbosity           = $inputs.Output_Verbosity ?? $null
-            CILogLevel          = $inputs.Output_CILogLevel ?? $null
-            RenderMode          = $inputs.Output_RenderMode ?? $null
+            CIFormat            = $inputs.Output_CIFormat
+            StackTraceVerbosity = $inputs.Output_StackTraceVerbosity
+            Verbosity           = $inputs.Output_Verbosity
+            CILogLevel          = $inputs.Output_CILogLevel
+            RenderMode          = $inputs.Output_RenderMode
         }
         TestDrive    = @{
-            Enabled = $inputs.TestDrive_Enabled ?? $null
+            Enabled = $inputs.TestDrive_Enabled
         }
         TestRegistry = @{
-            Enabled = $inputs.TestRegistry_Enabled ?? $null
+            Enabled = $inputs.TestRegistry_Enabled
         }
     }
+
+    foreach ($section in $customConfigurationInputs.Keys) {
+        $filteredProperties = @{}
+
+        foreach ($property in $customConfigurationInputs[$section].Keys) {
+            $value = $customConfigurationInputs[$section][$property]
+            if ($Value) {
+                $filteredProperties[$property] = $Value
+            }
+        }
+
+        if ($filteredProperties.Count -gt 0) {
+            $customConfigurationInputs[$section] = $filteredProperties
+        }
+    }
+
     Write-Host ($customConfigurationInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
