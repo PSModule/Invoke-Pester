@@ -20,74 +20,52 @@ LogGroup 'Get test kit versions' {
 }
 
 LogGroup 'Load inputs' {
-    $configInputs = @{
-        Run          = @{
-            Path                   = $env:GITHUB_ACTION_INPUT_Run_Path
-            ExcludePath            = $env:GITHUB_ACTION_INPUT_Run_ExcludePath
-            ScriptBlock            = $env:GITHUB_ACTION_INPUT_Run_ScriptBlock
-            Container              = $env:GITHUB_ACTION_INPUT_Run_Container
-            TestExtension          = $env:GITHUB_ACTION_INPUT_Run_TestExtension
-            Exit                   = $env:GITHUB_ACTION_INPUT_Run_Exit
-            Throw                  = $env:GITHUB_ACTION_INPUT_Run_Throw
-            PassThru               = $env:GITHUB_ACTION_INPUT_Run_PassThru
-            SkipRun                = $env:GITHUB_ACTION_INPUT_Run_SkipRun
-            SkipRemainingOnFailure = $env:GITHUB_ACTION_INPUT_Run_SkipRemainingOnFailure
-        }
-        Filter       = @{
-            Tag         = $env:GITHUB_ACTION_INPUT_Filter_Tag
-            ExcludeTag  = $env:GITHUB_ACTION_INPUT_Filter_ExcludeTag
-            Line        = $env:GITHUB_ACTION_INPUT_Filter_Line
-            ExcludeLine = $env:GITHUB_ACTION_INPUT_Filter_ExcludeLine
-            FullName    = $env:GITHUB_ACTION_INPUT_Filter_FullName
-        }
-        CodeCoverage = @{
-            Enabled               = $env:GITHUB_ACTION_INPUT_CodeCoverage_Enabled
-            OutputFormat          = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputFormat
-            OutputPath            = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputPath
-            OutputEncoding        = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputEncoding
-            Path                  = $env:GITHUB_ACTION_INPUT_CodeCoverage_Path
-            ExcludeTests          = $env:GITHUB_ACTION_INPUT_CodeCoverage_ExcludeTests
-            RecursePaths          = $env:GITHUB_ACTION_INPUT_CodeCoverage_RecursePaths
-            CoveragePercentTarget = $env:GITHUB_ACTION_INPUT_CodeCoverage_CoveragePercentTarget
-            UseBreakpoints        = $env:GITHUB_ACTION_INPUT_CodeCoverage_UseBreakpoints
-            SingleHitBreakpoints  = $env:GITHUB_ACTION_INPUT_CodeCoverage_SingleHitBreakpoints
-        }
-        TestResult   = @{
-            Enabled        = $env:GITHUB_ACTION_INPUT_TestResult_Enabled
-            OutputFormat   = $env:GITHUB_ACTION_INPUT_TestResult_OutputFormat
-            OutputPath     = $env:GITHUB_ACTION_INPUT_TestResult_OutputPath
-            OutputEncoding = $env:GITHUB_ACTION_INPUT_TestResult_OutputEncoding
-            TestSuiteName  = $env:GITHUB_ACTION_INPUT_TestResult_TestSuiteName
-        }
-        Should       = @{
-            ErrorAction = $env:GITHUB_ACTION_INPUT_Should_ErrorAction
-        }
-        Debug        = @{
-            ShowFullErrors         = $env:GITHUB_ACTION_INPUT_Debug_ShowFullErrors
-            WriteDebugMessages     = $env:GITHUB_ACTION_INPUT_Debug_WriteDebugMessages
-            WriteDebugMessagesFrom = $env:GITHUB_ACTION_INPUT_Debug_WriteDebugMessagesFrom
-            ShowNavigationMarkers  = $env:GITHUB_ACTION_INPUT_Debug_ShowNavigationMarkers
-            ReturnRawResultObject  = $env:GITHUB_ACTION_INPUT_Debug_ReturnRawResultObject
-        }
-        Output       = @{
-            Verbosity           = $env:GITHUB_ACTION_INPUT_Output_Verbosity
-            StackTraceVerbosity = $env:GITHUB_ACTION_INPUT_Output_StackTraceVerbosity
-            CIFormat            = $env:GITHUB_ACTION_INPUT_Output_CIFormat
-            CILogLevel          = $env:GITHUB_ACTION_INPUT_Output_CILogLevel
-            RenderMode          = $env:GITHUB_ACTION_INPUT_Output_RenderMode
-        }
-        TestDrive    = @{
-            Enabled = $env:GITHUB_ACTION_INPUT_TestDrive_Enabled
-        }
-        TestRegistry = @{
-            Enabled = $env:GITHUB_ACTION_INPUT_TestRegistry_Enabled
-        }
+    $inputs = @{
+        Run_Path                           = $env:GITHUB_ACTION_INPUT_Run_Path
+        Run_ExcludePath                    = $env:GITHUB_ACTION_INPUT_Run_ExcludePath
+        Run_ScriptBlock                    = $env:GITHUB_ACTION_INPUT_Run_ScriptBlock
+        Run_Container                      = $env:GITHUB_ACTION_INPUT_Run_Container
+        Run_TestExtension                  = $env:GITHUB_ACTION_INPUT_Run_TestExtension
+        Run_Exit                           = $env:GITHUB_ACTION_INPUT_Run_Exit
+        Run_Throw                          = $env:GITHUB_ACTION_INPUT_Run_Throw
+        Run_PassThru                       = $env:GITHUB_ACTION_INPUT_Run_PassThru
+        Run_SkipRun                        = $env:GITHUB_ACTION_INPUT_Run_SkipRun
+        Run_SkipRemainingOnFailure         = $env:GITHUB_ACTION_INPUT_Run_SkipRemainingOnFailure
+        Filter_Tag                         = $env:GITHUB_ACTION_INPUT_Filter_Tag
+        Filter_ExcludeTag                  = $env:GITHUB_ACTION_INPUT_Filter_ExcludeTag
+        Filter_Line                        = $env:GITHUB_ACTION_INPUT_Filter_Line
+        Filter_ExcludeLine                 = $env:GITHUB_ACTION_INPUT_Filter_ExcludeLine
+        Filter_FullName                    = $env:GITHUB_ACTION_INPUT_Filter_FullName
+        CodeCoverage_Enabled               = $env:GITHUB_ACTION_INPUT_CodeCoverage_Enabled
+        CodeCoverage_OutputFormat          = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputFormat
+        CodeCoverage_OutputPath            = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputPath
+        CodeCoverage_OutputEncoding        = $env:GITHUB_ACTION_INPUT_CodeCoverage_OutputEncoding
+        CodeCoverage_Path                  = $env:GITHUB_ACTION_INPUT_CodeCoverage_Path
+        CodeCoverage_ExcludeTests          = $env:GITHUB_ACTION_INPUT_CodeCoverage_ExcludeTests
+        CodeCoverage_RecursePaths          = $env:GITHUB_ACTION_INPUT_CodeCoverage_RecursePaths
+        CodeCoverage_CoveragePercentTarget = $env:GITHUB_ACTION_INPUT_CodeCoverage_CoveragePercentTarget
+        CodeCoverage_UseBreakpoints        = $env:GITHUB_ACTION_INPUT_CodeCoverage_UseBreakpoints
+        CodeCoverage_SingleHitBreakpoints  = $env:GITHUB_ACTION_INPUT_CodeCoverage_SingleHitBreakpoints
+        TestResult_Enabled                 = $env:GITHUB_ACTION_INPUT_TestResult_Enabled
+        TestResult_OutputFormat            = $env:GITHUB_ACTION_INPUT_TestResult_OutputFormat
+        TestResult_OutputPath              = $env:GITHUB_ACTION_INPUT_TestResult_OutputPath
+        TestResult_OutputEncoding          = $env:GITHUB_ACTION_INPUT_TestResult_OutputEncoding
+        TestResult_TestSuiteName           = $env:GITHUB_ACTION_INPUT_TestResult_TestSuiteName
+        Should_ErrorAction                 = $env:GITHUB_ACTION_INPUT_Should_ErrorAction
+        Debug_ShowFullErrors               = $env:GITHUB_ACTION_INPUT_Debug_ShowFullErrors
+        Debug_WriteDebugMessages           = $env:GITHUB_ACTION_INPUT_Debug_WriteDebugMessages
+        Debug_WriteDebugMessagesFrom       = $env:GITHUB_ACTION_INPUT_Debug_WriteDebugMessagesFrom
+        Debug_ShowNavigationMarkers        = $env:GITHUB_ACTION_INPUT_Debug_ShowNavigationMarkers
+        Debug_ReturnRawResultObject        = $env:GITHUB_ACTION_INPUT_Debug_ReturnRawResultObject
+        Output_Verbosity                   = $env:GITHUB_ACTION_INPUT_Output_Verbosity
+        Output_StackTraceVerbosity         = $env:GITHUB_ACTION_INPUT_Output_StackTraceVerbosity
+        Output_CIFormat                    = $env:GITHUB_ACTION_INPUT_Output_CIFormat
+        Output_CILogLevel                  = $env:GITHUB_ACTION_INPUT_Output_CILogLevel
+        Output_RenderMode                  = $env:GITHUB_ACTION_INPUT_Output_RenderMode
+        TestDrive_Enabled                  = $env:GITHUB_ACTION_INPUT_TestDrive_Enabled
+        TestRegistry_Enabled               = $env:GITHUB_ACTION_INPUT_TestRegistry_Enabled
+        ConfigurationFilePath              = $env:GITHUB_ACTION_INPUT_ConfigurationFilePath
     }
-    $otherInputs = @{
-        ConfigurationFilePath = $env:GITHUB_ACTION_INPUT_ConfigurationFilePath
-    }
-
-    $inputs = $configInputs + $otherInputs
 
     [pscustomobject]($inputs.GetEnumerator() | Where-Object { $_.Value }) | Format-List
 }
@@ -115,12 +93,85 @@ LogGroup 'Load configuration - Custom settings file' {
 }
 
 LogGroup 'Load configuration - Action overrides' {
-    $customConfigurationInputs = ($configInputs.GetEnumerator() | Where-Object { $_.Value })
+    $customConfigurationInputs = @{
+        Run          = @{
+            Path                   = $inputs.Run_Path
+            ExcludePath            = $inputs.Run_ExcludePath
+            ScriptBlock            = $inputs.Run_ScriptBlock
+            Container              = $inputs.Run_Container
+            TestExtension          = $inputs.Run_TestExtension
+            Exit                   = $inputs.Run_Exit
+            Throw                  = $inputs.Run_Throw
+            PassThru               = $inputs.Run_PassThru
+            SkipRun                = $inputs.Run_SkipRun
+            SkipRemainingOnFailure = $inputs.Run_SkipRemainingOnFailure
+        }
+        Filter       = @{
+            Tag         = $inputs.Filter_Tag
+            ExcludeTag  = $inputs.Filter_ExcludeTag
+            Line        = $inputs.Filter_Line
+            ExcludeLine = $inputs.Filter_ExcludeLine
+            FullName    = $inputs.Filter_FullName
+        }
+        CodeCoverage = @{
+            Enabled               = $inputs.CodeCoverage_Enabled
+            OutputFormat          = $inputs.CodeCoverage_OutputFormat
+            OutputPath            = $inputs.CodeCoverage_OutputPath
+            OutputEncoding        = $inputs.CodeCoverage_OutputEncoding
+            Path                  = $inputs.CodeCoverage_Path
+            ExcludeTests          = $inputs.CodeCoverage_ExcludeTests
+            RecursePaths          = $inputs.CodeCoverage_RecursePaths
+            CoveragePercentTarget = $inputs.CodeCoverage_CoveragePercentTarget
+            UseBreakpoints        = $inputs.CodeCoverage_UseBreakpoints
+            SingleHitBreakpoints  = $inputs.CodeCoverage_SingleHitBreakpoints
+        }
+        TestResult   = @{
+            Enabled        = $inputs.TestResult_Enabled
+            OutputFormat   = $inputs.TestResult_OutputFormat
+            OutputPath     = $inputs.TestResult_OutputPath
+            OutputEncoding = $inputs.TestResult_OutputEncoding
+            TestSuiteName  = $inputs.TestResult_TestSuiteName
+        }
+        Should       = @{
+            ErrorAction = $inputs.Should_ErrorAction
+        }
+        Debug        = @{
+            ShowFullErrors         = $inputs.Debug_ShowFullErrors
+            WriteDebugMessages     = $inputs.Debug_WriteDebugMessages
+            WriteDebugMessagesFrom = $inputs.Debug_WriteDebugMessagesFrom
+            ShowNavigationMarkers  = $inputs.Debug_ShowNavigationMarkers
+            ReturnRawResultObject  = $inputs.Debug_ReturnRawResultObject
+        }
+        Output       = @{
+            CIFormat            = $inputs.Output_CIFormat
+            StackTraceVerbosity = $inputs.Output_StackTraceVerbosity
+            Verbosity           = $inputs.Output_Verbosity
+            CILogLevel          = $inputs.Output_CILogLevel
+            RenderMode          = $inputs.Output_RenderMode
+        }
+        TestDrive    = @{
+            Enabled = $inputs.TestDrive_Enabled
+        }
+        TestRegistry = @{
+            Enabled = $inputs.TestRegistry_Enabled
+        }
+    }
     Write-Host ($customConfigurationInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
 LogGroup 'Load configuration - Result' {
-    $configuration = Merge-Hashtable -Main $defaultConfiguration -Overrides $customConfiguration, $customConfigurationInputs
+    $configuration = @{
+        Run          = Merge-Hashtable -Main $defaultConfiguration.Run -Overrides $customConfiguration.Run, $customConfigurationInputs.Run
+        Filter       = Merge-Hashtable -Main $defaultConfiguration.Filter -Overrides $customConfiguration.Filter, $customConfigurationInputs.Filter
+        CodeCoverage = Merge-Hashtable -Main $defaultConfiguration.CodeCoverage -Overrides $customConfiguration.CodeCoverage, $customConfigurationInputs.CodeCoverage
+        TestResult   = Merge-Hashtable -Main $defaultConfiguration.TestResult -Overrides $customConfiguration.TestResult, $customConfigurationInputs.TestResult
+        Should       = Merge-Hashtable -Main $defaultConfiguration.Should -Overrides $customConfiguration.Should, $customConfigurationInputs.Should
+        Debug        = Merge-Hashtable -Main $defaultConfiguration.Debug -Overrides $customConfiguration.Debug, $customConfigurationInputs.Debug
+        Output       = Merge-Hashtable -Main $defaultConfiguration.Output -Overrides $customConfiguration.Output, $customConfigurationInputs.Output
+        TestDrive    = Merge-Hashtable -Main $defaultConfiguration.TestDrive -Overrides $customConfiguration.TestDrive, $customConfigurationInputs.TestDrive
+        TestRegistry = Merge-Hashtable -Main $defaultConfiguration.TestRegistry -Overrides $customConfiguration.TestRegistry, $customConfigurationInputs.TestRegistry
+    }
+
     Write-Host ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
