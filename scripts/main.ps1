@@ -276,8 +276,8 @@ if ($configuration.CodeCoverage.Enabled) {
 }
 
 LogGroup 'Test results summary' {
-    $unicodeNbsp = [char]0x00A0  # or `\u00A0`
-    $indent = $unicodeNbsp * 3
+    $nbsp = [char]0x00A0
+    $indent = "$nbsp" * 4
 
     $testSuitName = $($configuration.TestResult.TestSuiteName)
     $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
