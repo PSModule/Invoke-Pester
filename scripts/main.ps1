@@ -322,10 +322,16 @@ $summaryMarkdown += @"
 Set-GitHubStepSummary -Summary $summaryMarkdown
 
 # Output paths for artifacts upload
-$testResults.CodeCoverage.OutputPath
-Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $testResults.CodeCoverage.OutputPath
+if ($testResults.CodeCoverage.OutputPath) {
+    Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $testResults.CodeCoverage.OutputPath
+} else {
+    Write-GitHubWarning 'No code coverage output path found.'
+}
 
-$testResults.TestResult.OutputPath
-Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.TestResult.OutputPath
+if ($testResults.TestResult.OutputPath) {
+    Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.TestResult.OutputPath
+} else {
+    Write-GitHubWarning 'No test result output path found.'
+}
 
 exit $failedTests
