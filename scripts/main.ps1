@@ -256,13 +256,8 @@ LogGroup 'Load configuration - Add containers' {
     for ($i = 0; $i -lt $configuration.Run.Container.Count; $i++) {
         $entry = $configuration.Run.Container[$i]
         if ($entry -is [hashtable]) {
-            if ($entry.ContainsKey('Path')) {
-                # Convert hashtable with Path to a ContainerInfo object
-                $configuration.Run.Container[$i] = New-PesterContainer -Path $entry.Path -Data $entry.Data
-            } elseif ($entry.ContainsKey('ScriptBlock')) {
-                # Convert hashtable with ScriptBlock to a ContainerInfo object
-                $configuration.Run.Container[$i] = New-PesterContainer -ScriptBlock $entry.ScriptBlock -Data $entry.Data
-            }
+            $cont = $configuration.Run.Container[$i]
+            $configuration.Run.Container[$i] = New-PesterContainer @cont
         }
     }
 
