@@ -368,14 +368,14 @@ runs:
 
     - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults]
       uses: actions/upload-artifact@v4
-      if: ${{ fromJSON(steps.test.outputs.result).TestResultEnabled == 'true' && (success() || failure()) }}
+      # if: ${{ fromJSON(steps.test.outputs.result).TestResultEnabled == 'true' && (success() || failure()) }}
       with:
         name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults
         path: ${{ fromJSON(steps.test.outputs.result).TestResultOutputPath }}
 
     - name: Upload code coverage report - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage]
       uses: actions/upload-artifact@v4
-      if: ${{ fromJSON(steps.test.outputs.result).CodeCoverageEnabled == 'true' && (success() || failure()) }}
+      # if: ${{ fromJSON(steps.test.outputs.result).CodeCoverageEnabled == 'true' && (success() || failure()) }}
       with:
         name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage
         path: ${{ fromJSON(steps.test.outputs.result).CodeCoverageOutputPath }}
