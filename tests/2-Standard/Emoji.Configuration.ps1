@@ -1,7 +1,8 @@
 ﻿@{
     Run          = @{
         Path      = $PSScriptRoot
-        Container = [PesterContainer](Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* | ForEach-Object { . $_ })
+        Container = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* | ForEach-Object { . $_ } |
+            ForEach-Object { New-PesterContainer @_ }
         PassThru  = $true
     }
     TestResult   = @{
