@@ -280,8 +280,7 @@ function Get-GroupedTestMarkdown {
     param(
         [Parameter(Mandatory)]
         [array]$Tests,
-        [int]$Depth,
-        [string]$BaseIndent
+        [int]$Depth
     )
     $markdown = ''
     # Group tests by the element at position $Depth (or "Ungrouped" if not present)
@@ -289,15 +288,16 @@ function Get-GroupedTestMarkdown {
     foreach ($group in $groups) {
         $groupName = $group.Name
         $groupTests = $group.Group
+        $groupIndent = $Indent * $Depth
         # Calculate aggregate status: if any test failed, mark the group as failed
         $groupStatusIcon = if ($groupTests | Where-Object { $_.Result -eq 'Failed' }) { '❌' } else { '✅' }
 
         # If any test has further parts, create a nested details block...
         if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
             $markdown += @"
-<details><summary>$BaseIndent$groupStatusIcon - $groupName</summary>
+<details><summary>$groupIndent$groupStatusIcon - $groupName</summary>
 
-$(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1) -BaseIndent ("$BaseIndent$script:indent"))
+$(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
 
 </details>
 
@@ -309,22 +309,19 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1) -BaseIndent ("$
                 $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
                 $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
                 $markdown += @"
-<details><summary>$BaseIndent$testStatusIcon - $testName ($formattedDuration)</summary>
-
+<details><summary>$groupIndent$testStatusIcon - $testName ($formattedDuration)</summary>
 "@
 
                 if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
                     $markdown += @"
 
-$BaseIndent``````
-$BaseIndent$($test.ErrorRecord.Exception.Message)
-$BaseIndent``````
-
+``````
+$($test.ErrorRecord.Exception.Message)
+``````
 "@
                 }
                 $markdown += @'
 </details>
-
 '@
             }
         }
@@ -332,5 +329,5 @@ $BaseIndent``````
     return $markdown
 }
 
-$script:nbsp = [char]0x00A0
-$script:indent = "$nbsp" * 4
+$nbsp = [char]0x00A0
+$indent = "$nbsp" * 4

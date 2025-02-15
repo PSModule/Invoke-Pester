@@ -298,14 +298,14 @@ LogGroup 'Test results summary' {
         Write-Verbose "Container name: [$containerName]" -Verbose
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
-<details><summary>$script:indent$containerStatusIcon - $testSuitName - $containerName</summary>
+<details><summary>$Indent$containerStatusIcon - $testSuitName - $containerName</summary>
 
 "@
         $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } | Sort-Object -Property Path
         Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
 
         # Build the nested details markdown grouping tests by their test path parts
-        $groupedMarkdown = Get-GroupedTestMarkdown -Tests $containerTests -Depth 0 -BaseIndent "$script:indent"
+        $groupedMarkdown = Get-GroupedTestMarkdown -Tests $containerTests -Depth 2
         $summaryMarkdown += $groupedMarkdown
 
         $summaryMarkdown += @'
