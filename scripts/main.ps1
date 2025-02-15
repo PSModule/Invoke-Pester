@@ -238,10 +238,34 @@ LogGroup 'Load configuration - Add containers' {
         TestDrive    = $testDrive
         TestRegistry = $testRegistry
     }
+    # Load configuration - Add containers
     if ($configuration.Run.Container.Count -eq 0) {
-        $containers = Get-PesterContainer -Path $configuration.Run.Path
-        $configuration.Run.Container = $containers | ForEach-Object { New-PesterContainer @_ }
+        # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
+        $configuration.Run.Container = @()  # initialize as empty array
+        foreach ($testDir in $configuration.Run.Path) {
+            if (Test-Path -LiteralPath $testDir -PathType Container) {
+                Get-ChildItem -Path $testDir -Filter '*.Container.*' -File -Recurse | ForEach-Object {
+                    # Create a Pester container object for each found file
+                    $configuration.Run.Container += New-PesterContainer -Path $_.FullName
+                }
+            }
+        }
     }
+
+    # If any containers are defined as hashtables, convert them to PesterContainer objects
+    for ($i = 0; $i -lt $configuration.Run.Container.Count; $i++) {
+        $entry = $configuration.Run.Container[$i]
+        if ($entry -is [hashtable]) {
+            if ($entry.ContainsKey('Path')) {
+                # Convert hashtable with Path to a ContainerInfo object
+                $configuration.Run.Container[$i] = New-PesterContainer -Path $entry.Path -Data $entry.Data
+            } elseif ($entry.ContainsKey('ScriptBlock')) {
+                # Convert hashtable with ScriptBlock to a ContainerInfo object
+                $configuration.Run.Container[$i] = New-PesterContainer -ScriptBlock $entry.ScriptBlock -Data $entry.Data
+            }
+        }
+    }
+
     Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
