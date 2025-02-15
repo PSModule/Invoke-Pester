@@ -116,17 +116,7 @@ LogGroup 'Load configuration - Custom settings file' {
         TestRegistry = $tmpCustom.TestRegistry ?? @{}
     }
 
-    foreach ($section in $tmpCustomConfiguration.Keys) {
-        $filteredProperties = @{}
-        foreach ($property in $tmpCustomConfiguration[$section].Keys) {
-            $value = $tmpCustomConfiguration[$section][$property]
-            if (-not [string]::IsNullOrEmpty($Value)) {
-                $filteredProperties[$property] = $Value
-            }
-        }
-        $customConfig[$section] = $filteredProperties
-    }
-
+    $customConfig = $tmpCustomConfiguration | Clear-PesterConfigurationEmptyValues
     Write-Output ($customConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
@@ -195,21 +185,11 @@ LogGroup 'Load configuration - Action overrides' {
         }
     }
 
-    foreach ($section in $customConfigInputMap.Keys) {
-        $filteredProperties = @{}
-        foreach ($property in $customConfigInputMap[$section].Keys) {
-            $value = $customConfigInputMap[$section][$property]
-            if (-not [string]::IsNullOrEmpty($Value)) {
-                $filteredProperties[$property] = $Value
-            }
-        }
-        $customInputs[$section] = $filteredProperties
-    }
-
+    $customInputs = $customConfigInputMap | Clear-PesterConfigurationEmptyValues
     Write-Output ($customInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
-LogGroup 'Load configuration - Add containers' {
+LogGroup 'Load configuration - Merge' {
     $run = Merge-Hashtable -Main $defaultConfig.Run -Overrides $customConfig.Run, $customInputs.Run
     $filter = Merge-Hashtable -Main $defaultConfig.Filter -Overrides $customConfig.Filter, $customInputs.Filter
     $codeCoverage = Merge-Hashtable -Main $defaultConfig.CodeCoverage -Overrides $customConfig.CodeCoverage, $customInputs.CodeCoverage
@@ -231,6 +211,14 @@ LogGroup 'Load configuration - Add containers' {
         TestDrive    = $testDrive
         TestRegistry = $testRegistry
     }
+
+    if (-not $configuration.Run.Path) {
+        $configuration.Run.Path = $inputs.Path
+    }
+}
+
+LogGroup 'Load configuration - Add containers' {
+
 
     Write-Output "Containers from configuration: [$($configuration.Run.Container.Count)]"
     Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)

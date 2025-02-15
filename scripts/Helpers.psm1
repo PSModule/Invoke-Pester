@@ -51,6 +51,39 @@ function Get-PesterConfiguration {
     }
 }
 
+filter Clear-PesterConfigurationEmptyValues {
+    [OutputType([Hashtable])]
+    [CmdletBinding()]
+    param (
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName
+        )]
+        [hashtable] $Hashtable
+    )
+
+    $return = @{}
+
+    foreach ($section in $Hashtable.Keys) {
+        $filteredProperties = @{}
+
+        foreach ($property in $Hashtable[$section].Keys) {
+            $value = $Hashtable[$section][$property]
+
+            # If the value isn't null or empty string, keep it.
+            if (-not [string]::IsNullOrEmpty($value)) {
+                $filteredProperties[$property] = $value
+            }
+        }
+
+        $return[$section] = $filteredProperties
+    }
+
+    return $return
+}
+
+
 function Merge-Hashtable {
     <#
         .SYNOPSIS
