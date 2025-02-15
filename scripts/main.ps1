@@ -282,12 +282,12 @@ LogGroup 'Test results summary' {
     $testSuitName = $($configuration.TestResult.TestSuiteName)
     $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
     $summaryMarkdown = @"
-### '$testSuitName' - Test Results
+### $testSuitName - Test Results
 
 | Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $testSuitStatusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
-<details><summary>$testSuitStatusIcon - $testSuitName - Details</summary>
+<details><summary>$testSuitStatusIcon - $testSuitName</summary>
 
 "@
 
@@ -301,18 +301,16 @@ LogGroup 'Test results summary' {
         $summaryMarkdown += @"
 <details><summary>$indent$containerStatusIcon - $testSuitName - $containerName</summary>
 
-Path: ``$containerPath``
-
 "@
 
-        $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath }
+        $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } | Sort-Object -Property Path
         Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
         $containerTests | ForEach-Object {
             $test = $_
             $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
             $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
             $summaryMarkdown += @"
-<details><summary>$indent$indent$testStatusIcon -  $($test.Name) - $formattedDuration</summary>
+<details><summary>$indent$indent$testStatusIcon -  $($test.Path) - $formattedDuration</summary>
 
 "@
             if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
