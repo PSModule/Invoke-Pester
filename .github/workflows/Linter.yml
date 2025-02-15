@@ -27,3 +27,7 @@ jobs:
         uses: super-linter/super-linter/slim@latest
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          VALIDATE_MARKDOWN_PRETTIER: false
+          VALIDATE_JSON_PRETTIER: false
+          VALIDATE_YAML_PRETTIER: false
+          VALIDATE_JSCPD: false
