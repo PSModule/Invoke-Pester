@@ -301,7 +301,9 @@ Path: $containerPath
 
 "@
 
-        $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item -eq $containerPath } | ForEach-Object {
+        $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath }
+        Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
+        $containerTests | ForEach-Object {
             $test = $_
             $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
             $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
@@ -318,7 +320,6 @@ Path: $containerPath
         }
 
         $summaryMarkdown += @"
-``````
 
 </p>
 </details>
