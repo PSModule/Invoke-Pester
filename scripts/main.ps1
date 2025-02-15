@@ -288,8 +288,6 @@ LogGroup 'Test results summary' {
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $testSuitStatusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 <details><summary>$testSuitStatusIcon - $testSuitName</summary>
-
-
 "@
 
     Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
@@ -300,9 +298,7 @@ LogGroup 'Test results summary' {
         Write-Verbose "Container name: [$containerName]" -Verbose
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
-<details><summary>$indent$containerStatusIcon - $testSuitName - $containerName</summary>
-
-
+<details><summary>$indent$containerStatusIcon - $containerName</summary>
 "@
 
         $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } | Sort-Object -Property Path
@@ -314,8 +310,6 @@ LogGroup 'Test results summary' {
             $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
             $summaryMarkdown += @"
 <details><summary>$indent$indent$testStatusIcon - $testPath ($formattedDuration)</summary>
-
-
 "@
             if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
                 $summaryMarkdown += @"
