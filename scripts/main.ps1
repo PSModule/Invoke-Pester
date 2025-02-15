@@ -291,7 +291,7 @@ $summaryMarkdown = @"
 
 "@
 
-foreach ($container in $testResult.Container) {
+foreach ($container in $testResult.Containers) {
     $containerPath = $container.Item.FullName
     $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
     $summaryMarkdown += @"
