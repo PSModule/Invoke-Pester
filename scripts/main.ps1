@@ -1,3 +1,4 @@
+
 [CmdletBinding()]
 param()
 
@@ -78,8 +79,8 @@ LogGroup 'Load inputs' {
     [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List
 }
 
-$customConfig = @{}
-$customInputs = @{}
+$customConfig = @{ }
+$customInputs = @{ }
 
 LogGroup 'Load configuration - Defaults' {
     $defaultConfigPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
@@ -283,7 +284,7 @@ LogGroup 'Test results summary' {
 
 | Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
-| $testSuitStatusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
+| $testSuitStatusIcon | $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 <details><summary>$testSuitStatusIcon - $testSuitName</summary>
 
 "@

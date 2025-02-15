@@ -276,7 +276,6 @@ filter Format-TimeSpan {
     return $formatted
 }
 
-# Function to recursively build markdown grouping tests by parts in their test path
 function Get-GroupedTestMarkdown {
     param(
         [Parameter(Mandatory)]
@@ -290,10 +289,13 @@ function Get-GroupedTestMarkdown {
     foreach ($group in $groups) {
         $groupName = $group.Name
         $groupTests = $group.Group
+        # Calculate aggregate status: if any test failed, mark the group as failed
+        $groupStatusIcon = if ($groupTests | Where-Object { $_.Result -eq 'Failed' }) { '❌' } else { '✅' }
+
         # If any test has further parts, create a nested details block...
         if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
             $markdown += @"
-<details><summary>$BaseIndent$groupName</summary>
+<details><summary>$BaseIndent$groupStatusIcon - $groupName</summary>
 
 $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1) -BaseIndent ("$BaseIndent$script:indent"))
 
@@ -314,9 +316,9 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1) -BaseIndent ("$
                 if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
                     $markdown += @"
 
-``````
-$($test.ErrorRecord.Exception.Message)
-``````
+$BaseIndent``````
+$BaseIndent$($test.ErrorRecord.Exception.Message)
+$BaseIndent``````
 
 "@
                 }
