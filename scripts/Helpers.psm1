@@ -288,7 +288,7 @@ function Get-GroupedTestMarkdown {
     foreach ($group in $groups) {
         $groupName = $group.Name
         $groupTests = $group.Group
-        $groupIndent = $Indent * ($Depth + 1)
+        $groupIndent = $Indent * ($Depth + 2)
         # Calculate aggregate status: if any test failed, mark the group as failed
         $groupStatusIcon = if ($groupTests | Where-Object { $_.Result -eq 'Failed' }) { '❌' } else { '✅' }
 
@@ -296,7 +296,9 @@ function Get-GroupedTestMarkdown {
         if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
             $markdown += @"
 <details><summary>$groupIndent$groupStatusIcon - $groupName</summary>
+<p>
 $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
+</p>
 </details>
 
 "@
@@ -308,6 +310,7 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
                 $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
                 $markdown += @"
 <details><summary>$groupIndent$testStatusIcon - $testName ($formattedDuration)</summary>
+<p>
 
 "@
 
@@ -321,6 +324,7 @@ $($test.ErrorRecord.Exception.Message)
 "@
                 }
                 $markdown += @'
+</p>
 </details>
 
 '@

@@ -289,7 +289,7 @@ LogGroup 'Test results summary' {
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $testSuitStatusIcon | $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 <details><summary>$testSuitStatusIcon - $testSuitName</summary>
-
+<p>
 "@
 
     Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
@@ -302,7 +302,7 @@ LogGroup 'Test results summary' {
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
 <details><summary>$Indent$containerStatusIcon - $containerName</summary>
-
+<p>
 
 "@
         $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } | Sort-Object -Property Path
@@ -314,6 +314,7 @@ LogGroup 'Test results summary' {
 
         $summaryMarkdown += @'
 
+</p>
 </details>
 
 '@
@@ -321,8 +322,8 @@ LogGroup 'Test results summary' {
 
     $summaryMarkdown += @'
 
+</p>
 </details>
-
 
 '@
     Set-GitHubStepSummary -Summary $summaryMarkdown
