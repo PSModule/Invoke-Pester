@@ -330,7 +330,7 @@ $summaryMarkdown = @"
 foreach ($test in $testResults.Tests) {
     $statusIcon = if ($test.Result -eq 'Passed') { '✅' } else { '❌' }
     $summaryMarkdown += @"
-- $statusIcon $($test.Name) ($($test.Duration | Format-TimeSpan))
+- $statusIcon $($test.Name) ($($test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding))
 
 "@
     if ($test.Result -eq 'Failed') {

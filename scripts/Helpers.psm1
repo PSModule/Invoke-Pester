@@ -94,40 +94,45 @@ function Merge-Hashtable {
 filter Format-TimeSpan {
     [CmdletBinding()]
     param(
-        [Parameter(
-            Mandatory,
+        [Parameter(Mandatory,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName
         )]
-        [TimeSpan] $TimeSpan
+        [TimeSpan] $TimeSpan,
+
+        [ValidateSet('Years', 'Months', 'Weeks', 'Days', 'Hours', 'Minutes', 'Seconds', 'Milliseconds', 'Microseconds', 'Nanoseconds')]
+        [string] $Precision = 'Nanoseconds',
+
+        # If set to $true, do a rounding pass from nanoseconds -> microseconds -> milliseconds -> seconds, etc.
+        # so that e.g. 999ms + leftover microseconds could become 1s, dropping microseconds/nanoseconds.
+        [switch] $AdaptiveRounding
     )
 
-    # If the TimeSpan is negative, handle sign and convert to a positive interval for breakdown
+    #----- 1) Handle negative TimeSpan -----
     $isNegative = $TimeSpan.Ticks -lt 0
     if ($isNegative) {
         $TimeSpan = New-TimeSpan -Ticks (-1 * $TimeSpan.Ticks)
     }
 
-    # Total ticks in the TimeSpan
-    [long]$ticks = $TimeSpan.Ticks
+    #----- 2) Define constants -----
+    [long] $ticks = $TimeSpan.Ticks
 
-    # Define approximate conversion constants
-    [long]$ticksInMillisecond = 10000              # 1 ms = 10,000 ticks
-    [long]$ticksInSecond = 10000000           # 1 second = 10 million ticks
-    [long]$ticksInMinute = $ticksInSecond * 60
-    [long]$ticksInHour = $ticksInMinute * 60
-    [long]$ticksInDay = $ticksInHour * 24
-    [long]$ticksInWeek = $ticksInDay * 7
+    # 1 tick = 100 ns
+    [long] $ticksInMillisecond = 10000       # 1 ms = 10,000 ticks
+    [long] $ticksInSecond = 10000000    # 1 s  = 10,000,000 ticks
+    [long] $ticksInMinute = $ticksInSecond * 60
+    [long] $ticksInHour = $ticksInMinute * 60
+    [long] $ticksInDay = $ticksInHour * 24
+    [long] $ticksInWeek = $ticksInDay * 7
 
-    # Approximate day-based constants for months/years:
-    # ~30.436875 days in an average month, ~365.2425 days in an average year
-    [double]$daysInMonth = 30.436875
-    [double]$daysInYear = 365.2425
+    # Approximate day-based constants for months & years
+    [double] $daysInMonth = 30.436875
+    [double] $daysInYear = 365.2425
 
-    [long]$ticksInMonth = [long]($daysInMonth * $ticksInDay)
-    [long]$ticksInYear = [long]($daysInYear * $ticksInDay)
+    [long] $ticksInMonth = [long]($daysInMonth * $ticksInDay)
+    [long] $ticksInYear = [long]($daysInYear * $ticksInDay)
 
-    # Extract each component (largest to smallest)
+    #----- 3) Extract units from largest to smallest -----
     $years = [math]::Floor($ticks / $ticksInYear)
     $ticks = $ticks % $ticksInYear
 
@@ -152,36 +157,118 @@ filter Format-TimeSpan {
     $milliseconds = [math]::Floor($ticks / $ticksInMillisecond)
     $ticks = $ticks % $ticksInMillisecond
 
-    # 1 tick = 100 nanoseconds.
-    # Microseconds = leftover ticks * (100 ns) / 1000 => leftover ticks / 10
+    # 1 tick = 100 ns, so microseconds = leftover ticks / 10
     $microseconds = [math]::Floor($ticks / 10)
     $ticks = $ticks % 10
 
-    # Remaining ticks are in increments of 100 ns
+    # leftover ticks * 100 ns = nanoseconds
     $nanoseconds = $ticks * 100
 
-    # Build a list of non-zero components
-    $parts = @()
-    if ($years -ne 0) { $parts += "$years" + 'y' }
-    if ($months -ne 0) { $parts += "$months" + 'mo' }
-    if ($weeks -ne 0) { $parts += "$weeks" + 'w' }
-    if ($days -ne 0) { $parts += "$days" + 'd' }
-    if ($hours -ne 0) { $parts += "$hours" + 'h' }
-    if ($minutes -ne 0) { $parts += "$minutes" + 'm' }
-    if ($seconds -ne 0) { $parts += "$seconds" + 's' }
-    if ($milliseconds -ne 0) { $parts += "$milliseconds" + 'ms' }
-    if ($microseconds -ne 0) { $parts += "$microseconds" + 'us' }
-    if ($nanoseconds -ne 0) { $parts += "$nanoseconds" + 'ns' }
+    #----- 4) If requested, do an adaptive "rounding up" pass -----
+    if ($AdaptiveRounding) {
+        # Round nanoseconds -> microseconds
+        # e.g. if nano >= 500, round up microseconds by 1
+        if ($nanoseconds -ge 500) {
+            $microseconds++
+        }
+        $nanoseconds = 0
 
-    # If everything was 0, just show "0s"
-    $formatted = if ($parts.Count -eq 0) {
-        '0s'
-    } else {
-        # Join with spaces (or any desired separator)
-        $parts -join ' '
+        # Carry microseconds -> milliseconds
+        if ($microseconds -ge 1000) {
+            $milliseconds += [math]::Floor($microseconds / 1000)
+            $microseconds = $microseconds % 1000
+        }
+
+        # Carry milliseconds -> seconds
+        if ($milliseconds -ge 1000) {
+            $seconds += [math]::Floor($milliseconds / 1000)
+            $milliseconds = $milliseconds % 1000
+        }
+
+        # Carry seconds -> minutes
+        if ($seconds -ge 60) {
+            $minutes += [math]::Floor($seconds / 60)
+            $seconds = $seconds % 60
+        }
+
+        # Carry minutes -> hours
+        if ($minutes -ge 60) {
+            $hours += [math]::Floor($minutes / 60)
+            $minutes = $minutes % 60
+        }
+
+        # Carry hours -> days
+        if ($hours -ge 24) {
+            $days += [math]::Floor($hours / 24)
+            $hours = $hours % 24
+        }
+
+        # Carry days -> weeks
+        if ($days -ge 7) {
+            $weeks += [math]::Floor($days / 7)
+            $days = $days % 7
+        }
+
+        # Approx: 4 weeks = 1 month
+        if ($weeks -ge 4) {
+            $months += [math]::Floor($weeks / 4)
+            $weeks = $weeks % 4
+        }
+
+        # 12 months = 1 year
+        if ($months -ge 12) {
+            $years += [math]::Floor($months / 12)
+            $months = $months % 12
+        }
     }
 
-    # Add negative sign if original TimeSpan was negative
+    #----- 5) Apply Precision Filtering -----
+    # Map each unit to a numeric rank
+    $unitRank = @{
+        'Years'        = 1
+        'Months'       = 2
+        'Weeks'        = 3
+        'Days'         = 4
+        'Hours'        = 5
+        'Minutes'      = 6
+        'Seconds'      = 7
+        'Milliseconds' = 8
+        'Microseconds' = 9
+        'Nanoseconds'  = 10
+    }
+    [int] $lowestUnitAllowed = $unitRank[$Precision]
+
+    # Gather all units in descending order
+    $components = [System.Collections.Generic.List[object]]::new()
+    $components.Add(@('Years', $years, 'y'))
+    $components.Add(@('Months', $months, 'mo'))
+    $components.Add(@('Weeks', $weeks, 'w'))
+    $components.Add(@('Days', $days, 'd'))
+    $components.Add(@('Hours', $hours, 'h'))
+    $components.Add(@('Minutes', $minutes, 'm'))
+    $components.Add(@('Seconds', $seconds, 's'))
+    $components.Add(@('Milliseconds', $milliseconds, 'ms'))
+    $components.Add(@('Microseconds', $microseconds, 'us'))
+    $components.Add(@('Nanoseconds', $nanoseconds, 'ns'))
+
+    # Filter out units that rank below the chosen precision or have zero value
+    $parts = foreach ($item in $components) {
+        $name = $item[0]
+        $value = $item[1]
+        $abbr = $item[2]
+        if ($unitRank[$name] -le $lowestUnitAllowed -and $value -ne 0) {
+            "$value$abbr"
+        }
+    }
+
+    # If no parts remain, it means everything was 0 => "0s"
+    if ($parts.Count -eq 0) {
+        $parts = @('0s')
+    }
+
+    $formatted = $parts -join ' '
+
+    #----- 6) Reapply sign if negative -----
     if ($isNegative) {
         $formatted = "-$formatted"
     }
