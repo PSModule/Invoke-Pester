@@ -321,4 +321,11 @@ $summaryMarkdown += @"
 
 Set-GitHubStepSummary -Summary $summaryMarkdown
 
+# Output paths for artifacts upload
+$testResults.CodeCoverage.OutputPath
+Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $testResults.CodeCoverage.OutputPath
+
+$testResults.TestResult.OutputPath
+Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.TestResult.OutputPath
+
 exit $failedTests
