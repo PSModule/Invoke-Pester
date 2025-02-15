@@ -366,16 +366,16 @@ runs:
         Write-Host "CodeCoverageEnabled : $env:CodeCoverageEnabled"
         Write-Host "CodeCoverageOutputPath : $env:CodeCoverageOutputPath"
 
-    - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).Configuration.TestResult.TestSuiteName.Value }}-TestResults]
+    - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults]
       uses: actions/upload-artifact@v4
-      if: ${{ fromJSON(steps.test.outputs.result).Configuration.TestResult.Enabled.Value == 'true' && (success() || failure()) }}
+      if: ${{ fromJSON(steps.test.outputs.result).TestResultEnabled == 'true' && (success() || failure()) }}
       with:
-        name: ${{ fromJSON(steps.test.outputs.result).Configuration.TestResult.TestSuiteName.Value }}-TestResults
-        path: ${{ fromJSON(steps.test.outputs.result).Configuration.TestResult.OutputPath.Value }}
+        name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults
+        path: ${{ fromJSON(steps.test.outputs.result).TestResultOutputPath }}
 
-    - name: Upload code coverage report - [${{ fromJSON(steps.test.outputs.result).Configuration.TestResult.TestSuiteName.Value }}-CodeCoverage]
+    - name: Upload code coverage report - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage]
       uses: actions/upload-artifact@v4
-      if: ${{ fromJSON(steps.test.outputs.result).Configuration.CodeCoverage.Enabled.Value == 'true' && (success() || failure()) }}
+      if: ${{ fromJSON(steps.test.outputs.result).CodeCoverageEnabled == 'true' && (success() || failure()) }}
       with:
-        name: ${{ fromJSON(steps.test.outputs.result).Configuration.TestResult.TestSuiteName.Value }}-CodeCoverage
-        path: ${{ fromJSON(steps.test.outputs.result).Configuration.CodeCoverage.OutputPath.Value }}
+        name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage
+        path: ${{ fromJSON(steps.test.outputs.result).CodeCoverageOutputPath }}
