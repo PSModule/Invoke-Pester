@@ -1,15 +1,18 @@
 ﻿@{
-    Run        = @{
+    Run          = @{
         Path      = $PSScriptRoot
         Container = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* | ForEach-Object { . $_ }
         PassThru  = $true
     }
-    TestResult = @{
+    TestResult   = @{
         Enabled       = $true
         OutputPath    = 'outputs\AnotherPath.xml'
         TestSuiteName = 'Pester'
     }
-    Output     = @{
+    CodeCoverage = @{
+        Path = 'Emoji.psm1'
+    }
+    Output       = @{
         CIFormat            = 'Auto'
         StackTraceVerbosity = 'Filtered'
         Verbosity           = 'Detailed'
