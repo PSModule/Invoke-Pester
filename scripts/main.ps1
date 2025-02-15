@@ -307,10 +307,11 @@ LogGroup 'Test results summary' {
         Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
         $containerTests | ForEach-Object {
             $test = $_
+            $testPath = $testResults.Tests[0].Path -join '/'
             $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
             $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
             $summaryMarkdown += @"
-<details><summary>$indent$indent$testStatusIcon -  $($test.Path) - $formattedDuration</summary>
+<details><summary>$indent$indent$testStatusIcon - $testPath ($formattedDuration)</summary>
 
 "@
             if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
