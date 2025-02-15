@@ -291,11 +291,13 @@ function Get-GroupedTestMarkdown {
         $groupIndent = $Indent * ($Depth + 2)
         # Calculate aggregate status: if any test failed, mark the group as failed
         $groupStatusIcon = if ($groupTests | Where-Object { $_.Result -eq 'Failed' }) { '❌' } else { '✅' }
+        # Calculate aggregate duration: sum all test durations
+        $groupDuration = ($groupTests | Measure-Object -Property Duration -Sum).Sum | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
 
         # If any test has further parts, create a nested details block...
         if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
             $markdown += @"
-<details><summary>$groupIndent$groupStatusIcon - $groupName</summary>
+<details><summary>$groupIndent$groupStatusIcon - $groupName ($groupDuration)</summary>
 <p>
 $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
 </p>
