@@ -216,29 +216,28 @@ LogGroup 'Load configuration - Action overrides' {
     Write-Output ($customInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
-$run = Merge-Hashtable -Main $defaultConfig.Run -Overrides $customConfig.Run, $customInputs.Run
-$filter = Merge-Hashtable -Main $defaultConfig.Filter -Overrides $customConfig.Filter, $customInputs.Filter
-$codeCoverage = Merge-Hashtable -Main $defaultConfig.CodeCoverage -Overrides $customConfig.CodeCoverage, $customInputs.CodeCoverage
-$testResult = Merge-Hashtable -Main $defaultConfig.TestResult -Overrides $customConfig.TestResult, $customInputs.TestResult
-$should = Merge-Hashtable -Main $defaultConfig.Should -Overrides $customConfig.Should, $customInputs.Should
-$debug = Merge-Hashtable -Main $defaultConfig.Debug -Overrides $customConfig.Debug, $customInputs.Debug
-$output = Merge-Hashtable -Main $defaultConfig.Output -Overrides $customConfig.Output, $customInputs.Output
-$testDrive = Merge-Hashtable -Main $defaultConfig.TestDrive -Overrides $customConfig.TestDrive, $customInputs.TestDrive
-$testRegistry = Merge-Hashtable -Main $defaultConfig.TestRegistry -Overrides $customConfig.TestRegistry, $customInputs.TestRegistry
-
-$configuration = @{
-    Run          = $run
-    Filter       = $filter
-    CodeCoverage = $codeCoverage
-    TestResult   = $testResult
-    Should       = $should
-    Debug        = $debug
-    Output       = $output
-    TestDrive    = $testDrive
-    TestRegistry = $testRegistry
-}
-
 LogGroup 'Load configuration - Add containers' {
+    $run = Merge-Hashtable -Main $defaultConfig.Run -Overrides $customConfig.Run, $customInputs.Run
+    $filter = Merge-Hashtable -Main $defaultConfig.Filter -Overrides $customConfig.Filter, $customInputs.Filter
+    $codeCoverage = Merge-Hashtable -Main $defaultConfig.CodeCoverage -Overrides $customConfig.CodeCoverage, $customInputs.CodeCoverage
+    $testResult = Merge-Hashtable -Main $defaultConfig.TestResult -Overrides $customConfig.TestResult, $customInputs.TestResult
+    $should = Merge-Hashtable -Main $defaultConfig.Should -Overrides $customConfig.Should, $customInputs.Should
+    $debug = Merge-Hashtable -Main $defaultConfig.Debug -Overrides $customConfig.Debug, $customInputs.Debug
+    $output = Merge-Hashtable -Main $defaultConfig.Output -Overrides $customConfig.Output, $customInputs.Output
+    $testDrive = Merge-Hashtable -Main $defaultConfig.TestDrive -Overrides $customConfig.TestDrive, $customInputs.TestDrive
+    $testRegistry = Merge-Hashtable -Main $defaultConfig.TestRegistry -Overrides $customConfig.TestRegistry, $customInputs.TestRegistry
+
+    $configuration = @{
+        Run          = $run
+        Filter       = $filter
+        CodeCoverage = $codeCoverage
+        TestResult   = $testResult
+        Should       = $should
+        Debug        = $debug
+        Output       = $output
+        TestDrive    = $testDrive
+        TestRegistry = $testRegistry
+    }
     $containers = Get-PesterContainer -Path $configuration.Run.Path
     Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
@@ -263,20 +262,24 @@ LogGroup 'Test results' {
     }
 }
 
-$totalTests = $testResults.TotalCount
-$passedTests = $testResults.PassedCount
-$failedTests = $testResults.FailedCount
-$skippedTests = $testResults.SkippedCount
-$inconclusiveTests = $testResults.InconclusiveCount
-$notRunTests = $testResults.NotRunCount
-
-$coverageString = 'N/A'
-if ($configuration.CodeCoverage.Enabled) {
-    $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
-    $coverageString = "$coverage%"
-}
-
 LogGroup 'Test results summary' {
+
+    $nbsp = [char]0x00A0
+    $indent = "$nbsp" * 4
+
+    $totalTests = $testResults.TotalCount
+    $passedTests = $testResults.PassedCount
+    $failedTests = $testResults.FailedCount
+    $skippedTests = $testResults.SkippedCount
+    $inconclusiveTests = $testResults.InconclusiveCount
+    $notRunTests = $testResults.NotRunCount
+
+    $coverageString = 'N/A'
+    if ($configuration.CodeCoverage.Enabled) {
+        $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
+        $coverageString = "$coverage%"
+    }
+
     $testSuitName = $($configuration.TestResult.TestSuiteName)
     $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
     $summaryMarkdown = @"
