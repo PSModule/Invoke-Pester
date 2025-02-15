@@ -322,11 +322,14 @@ $($test.ErrorRecord.Exception.Message)
 
 ``````
 
-
-</details>
-
 "@
             }
+
+            $summaryMarkdown += @'
+</details>
+
+'@
+
         }
 
         $summaryMarkdown += @'
