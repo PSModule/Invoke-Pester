@@ -6,7 +6,7 @@ param(
 
 Describe 'Emoji' {
     It 'Module is importable' {
-        $null = Import-Module -Name $Path -PassThru | Should -Not -Throw
+        { Import-Module -Name $Path } | Should -Not -Throw
     }
 }
 

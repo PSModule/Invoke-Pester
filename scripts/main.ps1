@@ -321,10 +321,9 @@ $summaryMarkdown += @"
 
 Set-GitHubStepSummary -Summary $summaryMarkdown
 
-# Output paths for artifacts upload
-Set-GitHubOutput -Name 'TestResultConfig' -Value ($testResults.Configuration.TestResult | ConvertTo-Json -Depth 5 )
-Set-GitHubOutput -Name 'CodeCoverageConfig' -Value ($testResults.Configuration.CodeCoverage | ConvertTo-Json -Depth 5 )
-Set-GitHubOutput -Name 'TestResults' -Value ($testResults | Select-Object -ExcludeProperty CodeCoverage | ConvertTo-Json -Depth 1 )
-Set-GitHubOutput -Name 'CodeCoverageResults' -Value ($testResults.CodeCoverage | ConvertTo-Json -Depth 1 )
+# For each property of testresults, output the value as a JSON object
+foreach ($property in $testResults.PSObject.Properties) {
+    Set-GitHubOutput -Name $property.Name -Value ($property.Value | ConvertTo-Json -Depth 5)
+}
 
 exit $failedTests
