@@ -328,3 +328,6 @@ $($test.ErrorRecord.Exception.Message)
     }
     return $markdown
 }
+
+$nbsp = [char]0x00A0
+$indent = "$nbsp" * 4
