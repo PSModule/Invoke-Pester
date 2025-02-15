@@ -241,23 +241,18 @@ LogGroup 'Load configuration - Add containers' {
     # Load configuration - Add containers
     if ($configuration.Run.Container.Count -eq 0) {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
-        $configuration.Run.Container = @()  # initialize as empty array
         foreach ($testDir in $configuration.Run.Path) {
             if (Test-Path -LiteralPath $testDir -PathType Container) {
-                Get-ChildItem -Path $testDir -Filter '*.Container.*' -File -Recurse | ForEach-Object {
-                    # Create a Pester container object for each found file
-                    $configuration.Run.Container += New-PesterContainer -Path $_.FullName
-                }
+                $configuration.Run.Container += Get-PesterContainer -Path $testDir
             }
         }
     }
 
     # If any containers are defined as hashtables, convert them to PesterContainer objects
     for ($i = 0; $i -lt $configuration.Run.Container.Count; $i++) {
-        $entry = $configuration.Run.Container[$i]
-        if ($entry -is [hashtable]) {
-            $cont = $configuration.Run.Container[$i]
-            $configuration.Run.Container[$i] = New-PesterContainer @cont
+        $cntnr = $configuration.Run.cntnrainer[$i]
+        if ($cntnr -is [hashtable]) {
+            $configuration.Run.Container[$i] = New-PesterContainer @cntnr
         }
     }
 
