@@ -239,11 +239,13 @@ LogGroup 'Load configuration - Add containers' {
         TestRegistry = $testRegistry
     }
     $containers = Get-PesterContainer -Path $configuration.Run.Path
+    if (-not $configuration.Run.Container) {
+        $configuration.Run.Container = $containers | ForEach-Object { New-PesterContainer $_ }
+    }
     Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
 LogGroup 'Load configuration - Result' {
-    $configuration.Run.Container += $containers | ForEach-Object { New-PesterContainer @_ }
     Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
