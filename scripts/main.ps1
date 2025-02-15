@@ -282,122 +282,42 @@ if ($configuration.CodeCoverage.Enabled) {
 
 $statusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
 
-#################################################################################
+$summaryMarkdown = @"
+## '$($configuration.TestResult.TestSuiteName)' - Test Results
 
-# Initialize a markdown string builder (using backtick-n for newlines in double-quoted strings)
-$summaryMarkdown = @'
-## Pester Test Results
+| Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
+| ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
+| $statusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 
-'@
 
-foreach ($container in $TestResults.Containers) {
-    Write-Verbose "Processing container: $($container.Name)-$($container.Type)-$($container.Path)" -Verbose
-    # Determine container name for display (file name or a label for scriptblock)
-    $containerPath = $null
-    $containerName = 'Test Container'
-    if ($container.Type -eq 'File') {
-        $containerPath = [string]$container.Path  # ensure it's a string
-        $containerName = [System.IO.Path]::GetFileName($containerPath)  # just the file name
-    } elseif ($container.Type -eq 'ScriptBlock') {
-        # For scriptblock containers, use a generic name or the start line
-        $containerName = 'ScriptBlock Tests'
-        if ($container.Content) {
-            $containerName = "ScriptBlock ($($container.Content.File):$($container.Content.StartPosition.StartLine))"
-        }
-    }
+<details><summary> - Details</summary>
+<p>
 
-    # Gather summary counts
-    $passed = $container.PassedCount
-    $failed = $container.FailedCount
-    $skipped = $container.SkippedCount
+``````
 
-    # Add a details section for this container
+"@
+
+$testResults.Tests | ForEach-Object {
+    $test = $_
+    $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
+    $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
     $summaryMarkdown += @"
-<details><summary>$containerName - Passed: $passed, Failed: $failed, Skipped: $skipped</summary>
+- $statusIcon $($test.Name) - $formattedDuration
 
 "@
-
-    # List each test in the container
-    Write-Verbose "Processing [$($container.Tests.Count)]tests in container: $($container.Name)" -Verbose
-    foreach ($test in $container.Tests) {
-        Write-Verbose "Processing test: $($test.Name)" -Verbose
-        # Determine status icon and test name
-        $status = '✅'  # assume passed
-        $outcome = 'Passed'
-        if (-not $test.Executed -or -not $test.Passed) {
-            # If not executed (skipped) or failed
-            if (-not $test.ShouldRun) {
-                $status = '⚠️'   # skipped test icon (could also use 🚫 or another symbol)
-                $outcome = 'Skipped'
-            } else {
-                $status = '❌'
-                $outcome = 'Failed'
-            }
-        }
-
-        # Build test name or full description.
-        # If the test object has a Name property:
-        $testName = $test.Name
-        # If needed, include context/describe info:
-        # e.g. $fullName = ($test.BlockPath -join ' > ') + " > $($test.Name)"
-
-        # Include failure message for failed tests
-        $failureDetails = ''
-        if ($outcome -eq 'Failed' -and $test.FailureMessage) {
-            $failureDetails = " – $($test.FailureMessage)"
-        }
-
-        # Append the bullet list entry
+    if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
         $summaryMarkdown += @"
-- $status **$testName** $failureDetails
+  $($test.ErrorRecord.Exception.Message)
 
 "@
     }
-
-    # Close the details tag and add an extra newline
-    $summaryMarkdown += @'
-</details>
-
-'@
 }
+$summaryMarkdown += @"
+``````
 
-
-#################################################################################
-
-# $summaryMarkdown = @"
-# | Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
-# | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
-# | $statusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
-
-
-# <details><summary>$($configuration.TestResult.TestSuiteName) - Details</summary>
-# <p>
-
-# ``````
-
-# "@
-
-# $testResults.Tests | ForEach-Object {
-#     $test = $_
-#     $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
-#     $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
-#     $summaryMarkdown += @"
-# - $statusIcon $($test.Name) - $formattedDuration
-
-# "@
-#     if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
-#         $summaryMarkdown += @"
-#   $($test.ErrorRecord.Exception.Message)
-
-# "@
-#     }
-# }
-# $summaryMarkdown += @"
-# ``````
-
-# </p>
-# </details>
-# "@
+</p>
+</details>
+"@
 
 Set-GitHubStepSummary -Summary $summaryMarkdown
 
