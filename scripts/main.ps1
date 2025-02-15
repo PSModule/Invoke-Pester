@@ -289,35 +289,43 @@ $summaryMarkdown = @"
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $statusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 
-
-<details><summary> - Details</summary>
-<p>
-
-``````
-
 "@
 
-$testResults.Tests | ForEach-Object {
-    $test = $_
-    $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
-    $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
+foreach ($container in $testResult.Container) {
+    $containerPath = $container.Item.FullName
+    $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
     $summaryMarkdown += @"
+<details><summary>$containerName - Details</summary>
+<p>
+
+Path: $containerPath
+"@
+
+    $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item -eq $containerPath } | ForEach-Object {
+        $test = $_
+        $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
+        $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
+        $summaryMarkdown += @"
 - $statusIcon $($test.Name) - $formattedDuration
 
 "@
-    if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
-        $summaryMarkdown += @"
+        if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
+            $summaryMarkdown += @"
   $($test.ErrorRecord.Exception.Message)
 
 "@
+        }
     }
-}
-$summaryMarkdown += @"
+
+    $summaryMarkdown += @"
 ``````
 
 </p>
 </details>
 "@
+
+}
+
 
 Set-GitHubStepSummary -Summary $summaryMarkdown
 
