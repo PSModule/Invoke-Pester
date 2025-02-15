@@ -238,6 +238,10 @@ LogGroup 'Load configuration - Add containers' {
         TestDrive    = $testDrive
         TestRegistry = $testRegistry
     }
+
+    Write-Output "Containers from configuration: [$($configuration.Run.Container.Count)]"
+    Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
+
     # Load configuration - Add containers
     if ($configuration.Run.Container.Count -eq 0) {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
@@ -256,6 +260,7 @@ LogGroup 'Load configuration - Add containers' {
         }
     }
 
+    Write-Output "Added containers: [$($configuration.Run.Container.Count)]"
     Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
