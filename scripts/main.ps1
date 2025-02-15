@@ -285,6 +285,9 @@ LogGroup 'Test results summary' {
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $statusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 
+<details><summary>$($configuration.TestResult.TestSuiteName) - Details</summary>
+<p>
+
 "@
 
     Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
@@ -293,11 +296,12 @@ LogGroup 'Test results summary' {
         Write-Verbose "Processing container [$containerPath]" -Verbose
         $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
         Write-Verbose "Container name: [$containerName]" -Verbose
+        $statusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
-<details><summary>$containerName - Details</summary>
+<details><summary>- $statusIcon - $containerName</summary>
 <p>
 
-Path: $containerPath
+Path: ``$containerPath``
 
 "@
 
@@ -313,21 +317,26 @@ Path: $containerPath
 "@
             if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
                 $summaryMarkdown += @"
+``````
   $($test.ErrorRecord.Exception.Message)
+``````
 
 "@
             }
         }
 
-        $summaryMarkdown += @"
+        $summaryMarkdown += @'
 
 </p>
 </details>
-"@
-
+'@
     }
 
+    $summaryMarkdown += @'
 
+</p>
+</details>
+'@
     Set-GitHubStepSummary -Summary $summaryMarkdown
 }
 
