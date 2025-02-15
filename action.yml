@@ -354,9 +354,17 @@ runs:
     - name: Check outputs
       shell: pwsh
       env:
-        RESULT: ${{ steps.test.outputs.result }}
+        TestResultEnabled: ${{ fromJSON(steps.test.outputs.result).TestResultEnabled }}
+        TestResultOutputPath: ${{ fromJSON(steps.test.outputs.result).TestResultOutputPath }}
+        TestSuiteName: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}
+        CodeCoverageEnabled: ${{ fromJSON(steps.test.outputs.result).CodeCoverageEnabled }}
+        CodeCoverageOutputPath: ${{ fromJSON(steps.test.outputs.result).CodeCoverageOutputPath }}
       run: |
-        $env:RESULT | ConvertFrom-Json -Depth 10
+        Write-Host "TestResultEnabled : $env:TestResultEnabled"
+        Write-Host "TestResultOutputPath : $env:TestResultOutputPath"
+        Write-Host "TestSuiteName : $env:TestSuiteName"
+        Write-Host "CodeCoverageEnabled : $env:CodeCoverageEnabled"
+        Write-Host "CodeCoverageOutputPath : $env:CodeCoverageOutputPath"
 
     - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).Configuration.TestResult.TestSuiteName.Value }}-TestResults]
       uses: actions/upload-artifact@v4
