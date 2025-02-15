@@ -325,7 +325,7 @@ Set-GitHubStepSummary -Summary $summaryMarkdown
 foreach ($property in $testResults.PSObject.Properties) {
     Write-Verbose "Setting output for [$($property.Name)]" -Verbose
     $name = $property.Name
-    $value = $null -ne $property.Value ? ($property.Value | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue) : ''
+    $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue) : ''
     Set-GitHubOutput -Name $name -Value $value
 }
 
