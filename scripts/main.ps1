@@ -250,7 +250,7 @@ LogGroup 'Load configuration - Add containers' {
 
     # If any containers are defined as hashtables, convert them to PesterContainer objects
     for ($i = 0; $i -lt $configuration.Run.Container.Count; $i++) {
-        $cntnr = $configuration.Run.cntnrainer[$i]
+        $cntnr = $configuration.Run.Container[$i]
         if ($cntnr -is [hashtable]) {
             $configuration.Run.Container[$i] = New-PesterContainer @cntnr
         }
