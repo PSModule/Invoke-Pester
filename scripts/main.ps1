@@ -296,7 +296,10 @@ $summaryMarkdown = @"
 ``````
 "@
 
-$testResults.Tests | ForEach-Object {
+$tests = $testResults.Tests
+Write-Output "Test count: $($tests.Count)"
+
+$tests | ForEach-Object {
     $test = $_
     $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
     $summaryMarkdown += @"
