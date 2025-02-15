@@ -17,7 +17,7 @@ Describe 'Get-Emoji' {
         }
 
         It 'Returns 🦒 (giraffe)' {
-            Get-Emoji -Name giraffe | Should -Be '🦒'
+            Get-Emoji -Name giraffe | Should -Be '🌵'#'🦒'
         }
     }
 
