@@ -31,14 +31,14 @@ jobs:
           Run_Path: tests/Simple
 
   ActionTestAdvanced:
-    name: Action-Test - [Advanced]
+    name: Action-Test - [3-Advanced]
     runs-on: ubuntu-latest
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Action-Test [Advanced]
+      - name: Action-Test [3-Advanced]
         uses: ./
         with:
-          ConfigurationFilePath: tests/Advanced/Pester.Configuration.ps1
+          ConfigurationFilePath: tests/3-Advanced/Pester.Configuration.ps1

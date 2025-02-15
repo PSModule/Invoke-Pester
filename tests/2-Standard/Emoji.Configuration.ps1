@@ -1,7 +1,7 @@
 ﻿@{
     Run        = @{
         Path      = $PSScriptRoot
-        Container = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.ps* | ForEach-Object { . $_ }
+        Container = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* | ForEach-Object { . $_ }
     }
     TestResult = @{
         Enabled       = $true
