@@ -300,13 +300,14 @@ LogGroup 'Test results summary' {
     $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
     $formattedTestDuration = $testResults.Duration | Format-TimeSpan
     $summaryMarkdown = @"
-### $testSuitName - Test Results
 
-| Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
-| ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
-| $testSuitStatusIcon | $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 <details><summary>$testSuitStatusIcon - $testSuitName ($formattedTestDuration)</summary>
 <p>
+
+| Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
+| ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
+| $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
+
 "@
 
     Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
