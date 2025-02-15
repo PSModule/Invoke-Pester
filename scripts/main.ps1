@@ -285,9 +285,13 @@ $statusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
 #################################################################################
 
 # Initialize a markdown string builder (using backtick-n for newlines in double-quoted strings)
-$summaryMarkdown = "# Pester Test Results`n`n"
+$summaryMarkdown = @'
+## Pester Test Results
+
+'@
 
 foreach ($container in $TestResults.Containers) {
+    Write-Verbose "Processing container: $($container.Name)-$($container.Type)-$($container.Path)" -Verbose
     # Determine container name for display (file name or a label for scriptblock)
     $containerPath = $null
     $containerName = 'Test Container'
@@ -308,10 +312,14 @@ foreach ($container in $TestResults.Containers) {
     $skipped = $container.SkippedCount
 
     # Add a details section for this container
-    $summaryMarkdown += "<details><summary>$containerName - Passed: $passed, Failed: $failed, Skipped: $skipped</summary>`n`n"
+    $summaryMarkdown += @"
+<details><summary>$containerName - Passed: $passed, Failed: $failed, Skipped: $skipped</summary>
+
+"@
 
     # List each test in the container
     foreach ($test in $container.Tests) {
+        Write-Verbose "Processing test: $($test.Name)" -Verbose
         # Determine status icon and test name
         $status = '✅'  # assume passed
         $outcome = 'Passed'
@@ -339,11 +347,17 @@ foreach ($container in $TestResults.Containers) {
         }
 
         # Append the bullet list entry
-        $summaryMarkdown += "- $status **$testName** $failureDetails`n"
+        $summaryMarkdown += @"
+- $status **$testName** $failureDetails
+
+"@
     }
 
     # Close the details tag and add an extra newline
-    $summaryMarkdown += "</details>`n`n"
+    $summaryMarkdown += @'
+</details>
+
+'@
 }
 
 
