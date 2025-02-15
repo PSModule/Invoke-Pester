@@ -1,19 +1,14 @@
 [CmdletBinding()]
 param()
 
-# -------------------------------------------------------------------------
-# Step 1: Install/Import Pester & ScriptAnalyzer
-# -------------------------------------------------------------------------
-'Pester', 'PSScriptAnalyzer' | ForEach-Object {
-    Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
-    Import-Module -Name $_ -Verbose:$false
+LogGroup 'Setup prerequisites' {
+    'Pester', 'PSScriptAnalyzer' | ForEach-Object {
+        Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+        Import-Module -Name $_ -Verbose:$false
+    }
+    Import-Module "$PSScriptRoot/Helpers.psm1"
 }
 
-Import-Module "$PSScriptRoot/Helpers.psm1"
-
-# -------------------------------------------------------------------------
-# Step 2: Log tool versions
-# -------------------------------------------------------------------------
 LogGroup 'Get test kit versions' {
     $PSSAModule = Get-PSResource -Name PSScriptAnalyzer -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
     $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
@@ -25,9 +20,6 @@ LogGroup 'Get test kit versions' {
     } | Format-List
 }
 
-# -------------------------------------------------------------------------
-# Step 3: Load all action inputs (from environment vars)
-# -------------------------------------------------------------------------
 LogGroup 'Load inputs' {
     $inputs = @{
         Run_Path                           = $env:GITHUB_ACTION_INPUT_Run_Path
@@ -86,18 +78,15 @@ LogGroup 'Load inputs' {
     [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List
 }
 
-$customConfiguration = @{}
-$customActionInputs = @{}
+$customConfig = @{}
+$customInputs = @{}
 
-# -------------------------------------------------------------------------
-# Step 4: Load default configuration (from Pester.Configuration.ps1)
-# -------------------------------------------------------------------------
 LogGroup 'Load configuration - Defaults' {
-    $defaultConfigurationPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
-    if (Test-Path -Path $defaultConfigurationPath) {
-        $tmpDefault = . $defaultConfigurationPath
+    $defaultConfigPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
+    if (Test-Path -Path $defaultConfigPath) {
+        $tmpDefault = . $defaultConfigPath
     }
-    $defaultConfiguration = @{
+    $defaultConfig = @{
         Run          = $tmpDefault.Run ?? @{}
         Filter       = $tmpDefault.Filter ?? @{}
         CodeCoverage = $tmpDefault.CodeCoverage ?? @{}
@@ -108,20 +97,17 @@ LogGroup 'Load configuration - Defaults' {
         TestDrive    = $tmpDefault.TestDrive ?? @{}
         TestRegistry = $tmpDefault.TestRegistry ?? @{}
     }
-    Write-Output ($defaultConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($defaultConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
-# -------------------------------------------------------------------------
-# Step 5: Load custom config file (if provided)
-# -------------------------------------------------------------------------
 LogGroup 'Load configuration - Custom settings file' {
-    $customConfigurationFilePath = $inputs.ConfigurationFilePath
-    Write-Output "Custom configuration file path: [$customConfigurationFilePath]"
-    if ($customConfigurationFilePath) {
-        $fileExists = Test-Path -Path $customConfigurationFilePath
+    $customConfigFilePath = $inputs.ConfigurationFilePath
+    Write-Output "Custom configuration file path: [$customConfigFilePath]"
+    if ($customConfigFilePath) {
+        $fileExists = Test-Path -Path $customConfigFilePath
         Write-Output "File exists: [$fileExists]"
         if ($fileExists) {
-            $tmpCustom = . $customConfigurationFilePath
+            $tmpCustom = . $customConfigFilePath
         }
     }
     $tmpCustomConfiguration = @{
@@ -144,17 +130,14 @@ LogGroup 'Load configuration - Custom settings file' {
                 $filteredProperties[$property] = $Value
             }
         }
-        $customConfiguration[$section] = $filteredProperties
+        $customConfig[$section] = $filteredProperties
     }
 
-    Write-Output ($customConfiguration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($customConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
-# -------------------------------------------------------------------------
-# Step 6: Load direct Action input overrides
-# -------------------------------------------------------------------------
 LogGroup 'Load configuration - Action overrides' {
-    $customConfigurationInputMap = @{
+    $customConfigInputMap = @{
         Run          = @{
             Path                   = $inputs.Run_Path
             ExcludePath            = $inputs.Run_ExcludePath
@@ -218,32 +201,29 @@ LogGroup 'Load configuration - Action overrides' {
         }
     }
 
-    foreach ($section in $customConfigurationInputMap.Keys) {
+    foreach ($section in $customConfigInputMap.Keys) {
         $filteredProperties = @{}
-        foreach ($property in $customConfigurationInputMap[$section].Keys) {
-            $value = $customConfigurationInputMap[$section][$property]
+        foreach ($property in $customConfigInputMap[$section].Keys) {
+            $value = $customConfigInputMap[$section][$property]
             if (-not [string]::IsNullOrEmpty($Value)) {
                 $filteredProperties[$property] = $Value
             }
         }
-        $customActionInputs[$section] = $filteredProperties
+        $customInputs[$section] = $filteredProperties
     }
 
-    Write-Output ($customActionInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($customInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
-# -------------------------------------------------------------------------
-# Step 7: Merge all configuration layers
-# -------------------------------------------------------------------------
-$run = Merge-Hashtable -Main $defaultConfiguration.Run -Overrides $customConfiguration.Run, $customActionInputs.Run
-$filter = Merge-Hashtable -Main $defaultConfiguration.Filter -Overrides $customConfiguration.Filter, $customActionInputs.Filter
-$codeCoverage = Merge-Hashtable -Main $defaultConfiguration.CodeCoverage -Overrides $customConfiguration.CodeCoverage, $customActionInputs.CodeCoverage
-$testResult = Merge-Hashtable -Main $defaultConfiguration.TestResult -Overrides $customConfiguration.TestResult, $customActionInputs.TestResult
-$should = Merge-Hashtable -Main $defaultConfiguration.Should -Overrides $customConfiguration.Should, $customActionInputs.Should
-$debug = Merge-Hashtable -Main $defaultConfiguration.Debug -Overrides $customConfiguration.Debug, $customActionInputs.Debug
-$output = Merge-Hashtable -Main $defaultConfiguration.Output -Overrides $customConfiguration.Output, $customActionInputs.Output
-$testDrive = Merge-Hashtable -Main $defaultConfiguration.TestDrive -Overrides $customConfiguration.TestDrive, $customActionInputs.TestDrive
-$testRegistry = Merge-Hashtable -Main $defaultConfiguration.TestRegistry -Overrides $customConfiguration.TestRegistry, $customActionInputs.TestRegistry
+$run = Merge-Hashtable -Main $defaultConfig.Run -Overrides $customConfig.Run, $customInputs.Run
+$filter = Merge-Hashtable -Main $defaultConfig.Filter -Overrides $customConfig.Filter, $customInputs.Filter
+$codeCoverage = Merge-Hashtable -Main $defaultConfig.CodeCoverage -Overrides $customConfig.CodeCoverage, $customInputs.CodeCoverage
+$testResult = Merge-Hashtable -Main $defaultConfig.TestResult -Overrides $customConfig.TestResult, $customInputs.TestResult
+$should = Merge-Hashtable -Main $defaultConfig.Should -Overrides $customConfig.Should, $customInputs.Should
+$debug = Merge-Hashtable -Main $defaultConfig.Debug -Overrides $customConfig.Debug, $customInputs.Debug
+$output = Merge-Hashtable -Main $defaultConfig.Output -Overrides $customConfig.Output, $customInputs.Output
+$testDrive = Merge-Hashtable -Main $defaultConfig.TestDrive -Overrides $customConfig.TestDrive, $customInputs.TestDrive
+$testRegistry = Merge-Hashtable -Main $defaultConfig.TestRegistry -Overrides $customConfig.TestRegistry, $customInputs.TestRegistry
 
 $configuration = @{
     Run          = $run
@@ -257,9 +237,6 @@ $configuration = @{
     TestRegistry = $testRegistry
 }
 
-# -------------------------------------------------------------------------
-# Step 8: Find and add containers (if any)
-# -------------------------------------------------------------------------
 LogGroup 'Load configuration - Add containers' {
     $containers = Get-PesterContainer -Path $configuration.Run.Path
     Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
@@ -270,14 +247,8 @@ LogGroup 'Load configuration - Result' {
     Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
-# -------------------------------------------------------------------------
-# Step 9: Invoke Pester tests
-# -------------------------------------------------------------------------
 $testResults = Invoke-Pester -Configuration $configuration
 
-# -------------------------------------------------------------------------
-# Step 10: Log test results (pass/fail) and return the number of failures
-# -------------------------------------------------------------------------
 LogGroup 'Test results' {
     $testResults | Format-List
 
@@ -302,8 +273,6 @@ $failedTests = $testResults.FailedCount
 $skippedTests = $testResults.SkippedCount
 $inconclusiveTests = $testResults.InconclusiveCount
 $notRunTests = $testResults.NotRunCount
-
-# Default coverage text is 'N/A' if coverage is disabled
 
 $coverageString = 'N/A'
 if ($configuration.CodeCoverage.Enabled) {
@@ -347,12 +316,6 @@ $summaryMarkdown += @"
 </details>
 "@
 
-# Write the summary to the special environment file
 Set-GitHubStepSummary -Summary $summaryMarkdown
 
-
-# -------------------------------------------------------------------------
-# Step 13: Exit with the number of failed tests as the error code
-#          (non-zero means the step fails if tests failed).
-# -------------------------------------------------------------------------
 exit $failedTests
