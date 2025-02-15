@@ -31,7 +31,8 @@ function Get-PesterConfiguration {
     if ($item.PSIsContainer) {
         $file = Get-ChildItem -Path $Path -Filter *.Configuration.*
         if ($file.Count -eq 0) {
-            throw "No configuration files found in path: [$Path]"
+            Write-Verbose "No configuration files found in path: [$Path]"
+            return @{}
         }
         if ($file.Count -gt 1) {
             throw "Multiple configuration files found in path: [$Path]"
