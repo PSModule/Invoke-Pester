@@ -297,7 +297,7 @@ LogGroup 'Test results summary' {
         Write-Verbose "Container name: [$containerName]" -Verbose
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
-<details><summary>$indent$containerStatusIcon - $testSuitName - $containerName</summary>
+<details><summary>$script:indent$containerStatusIcon - $testSuitName - $containerName</summary>
 
 "@
         $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } | Sort-Object -Property Path
