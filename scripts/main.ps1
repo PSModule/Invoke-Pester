@@ -285,7 +285,6 @@ LogGroup 'Test results summary' {
 | Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $testSuitStatusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
-
 <details><summary>$testSuitStatusIcon - $testSuitName - Details</summary>
 
 "@
@@ -316,6 +315,7 @@ Path: ``$containerPath``
 "@
             if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
                 $summaryMarkdown += @"
+
 ``````
 
 $($test.ErrorRecord.Exception.Message)
