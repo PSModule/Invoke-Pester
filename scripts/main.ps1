@@ -282,13 +282,14 @@ LogGroup 'Test results summary' {
 
     $testSuitName = $($configuration.TestResult.TestSuiteName)
     $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
+    $formattedTestDuration = $testResults.Duration | Format-TimeSpan
     $summaryMarkdown = @"
 ### $testSuitName - Test Results
 
 | Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $testSuitStatusIcon | $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
-<details><summary>$testSuitStatusIcon - $testSuitName</summary>
+<details><summary>$testSuitStatusIcon - $testSuitName ($formattedTestDuration)</summary>
 <p>
 "@
 
