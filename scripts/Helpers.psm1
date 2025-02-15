@@ -103,9 +103,8 @@ filter Format-TimeSpan {
         [ValidateSet('Years', 'Months', 'Weeks', 'Days', 'Hours', 'Minutes', 'Seconds', 'Milliseconds', 'Microseconds', 'Nanoseconds')]
         [string] $Precision = 'Nanoseconds',
 
-        # If set to $true, do a rounding pass from nanoseconds -> microseconds -> milliseconds -> seconds, etc.
-        # so that e.g. 999ms + leftover microseconds could become 1s, dropping microseconds/nanoseconds.
-        [switch] $AdaptiveRounding
+        # If set, round the entire timespan to the nearest integer in the highest allowed unit.
+        [switch] $AdaptivePrecission
     )
 
     #----- 1) Handle negative TimeSpan -----
@@ -113,6 +112,9 @@ filter Format-TimeSpan {
     if ($isNegative) {
         $TimeSpan = New-TimeSpan -Ticks (-1 * $TimeSpan.Ticks)
     }
+
+    # Save original ticks for later fractional math.
+    $originalTicks = $TimeSpan.Ticks
 
     #----- 2) Define constants -----
     [long] $ticks = $TimeSpan.Ticks
@@ -164,66 +166,20 @@ filter Format-TimeSpan {
     # leftover ticks * 100 ns = nanoseconds
     $nanoseconds = $ticks * 100
 
-    #----- 4) If requested, do an adaptive "rounding up" pass -----
-    if ($AdaptiveRounding) {
-        # Round nanoseconds -> microseconds
-        # e.g. if nano >= 500, round up microseconds by 1
-        if ($nanoseconds -ge 500) {
-            $microseconds++
-        }
-        $nanoseconds = 0
+    #----- 4) Build a list of components -----
+    $components = [System.Collections.Generic.List[object]]::new()
+    $components.Add(@('Years', $years, 'y'))
+    $components.Add(@('Months', $months, 'mo'))
+    $components.Add(@('Weeks', $weeks, 'w'))
+    $components.Add(@('Days', $days, 'd'))
+    $components.Add(@('Hours', $hours, 'h'))
+    $components.Add(@('Minutes', $minutes, 'm'))
+    $components.Add(@('Seconds', $seconds, 's'))
+    $components.Add(@('Milliseconds', $milliseconds, 'ms'))
+    $components.Add(@('Microseconds', $microseconds, 'us'))
+    $components.Add(@('Nanoseconds', $nanoseconds, 'ns'))
 
-        # Carry microseconds -> milliseconds
-        if ($microseconds -ge 1000) {
-            $milliseconds += [math]::Floor($microseconds / 1000)
-            $microseconds = $microseconds % 1000
-        }
-
-        # Carry milliseconds -> seconds
-        if ($milliseconds -ge 1000) {
-            $seconds += [math]::Floor($milliseconds / 1000)
-            $milliseconds = $milliseconds % 1000
-        }
-
-        # Carry seconds -> minutes
-        if ($seconds -ge 60) {
-            $minutes += [math]::Floor($seconds / 60)
-            $seconds = $seconds % 60
-        }
-
-        # Carry minutes -> hours
-        if ($minutes -ge 60) {
-            $hours += [math]::Floor($minutes / 60)
-            $minutes = $minutes % 60
-        }
-
-        # Carry hours -> days
-        if ($hours -ge 24) {
-            $days += [math]::Floor($hours / 24)
-            $hours = $hours % 24
-        }
-
-        # Carry days -> weeks
-        if ($days -ge 7) {
-            $weeks += [math]::Floor($days / 7)
-            $days = $days % 7
-        }
-
-        # Approx: 4 weeks = 1 month
-        if ($weeks -ge 4) {
-            $months += [math]::Floor($weeks / 4)
-            $weeks = $weeks % 4
-        }
-
-        # 12 months = 1 year
-        if ($months -ge 12) {
-            $years += [math]::Floor($months / 12)
-            $months = $months % 12
-        }
-    }
-
-    #----- 5) Apply Precision Filtering -----
-    # Map each unit to a numeric rank
+    # Map each unit to a numeric rank (lower = more significant)
     $unitRank = @{
         'Years'        = 1
         'Months'       = 2
@@ -238,42 +194,69 @@ filter Format-TimeSpan {
     }
     [int] $lowestUnitAllowed = $unitRank[$Precision]
 
-    # Gather all units in descending order
-    $components = [System.Collections.Generic.List[object]]::new()
-    $components.Add(@('Years', $years, 'y'))
-    $components.Add(@('Months', $months, 'mo'))
-    $components.Add(@('Weeks', $weeks, 'w'))
-    $components.Add(@('Days', $days, 'd'))
-    $components.Add(@('Hours', $hours, 'h'))
-    $components.Add(@('Minutes', $minutes, 'm'))
-    $components.Add(@('Seconds', $seconds, 's'))
-    $components.Add(@('Milliseconds', $milliseconds, 'ms'))
-    $components.Add(@('Microseconds', $microseconds, 'us'))
-    $components.Add(@('Nanoseconds', $nanoseconds, 'ns'))
+    #----- 5) Adaptive rounding (if switch set) -----
+    if ($AdaptivePrecission) {
 
-    # Filter out units that rank below the chosen precision or have zero value
-    $parts = foreach ($item in $components) {
-        $name = $item[0]
-        $value = $item[1]
-        $abbr = $item[2]
-        if ($unitRank[$name] -le $lowestUnitAllowed -and $value -ne 0) {
-            "$value$abbr"
+        # Find the first (highest) allowed unit that is nonzero.
+        $highestUnitComponent = $null
+        foreach ($comp in $components) {
+            $unitName = $comp[0]
+            $value = $comp[1]
+            if ($unitRank[$unitName] -le $lowestUnitAllowed -and $value -ne 0) {
+                $highestUnitComponent = $comp
+                break
+            }
         }
+        if (-not $highestUnitComponent) {
+            # If none of the allowed components are nonzero, use the one matching $Precision.
+            $highestUnitComponent = $components | Where-Object { $_[0] -eq $Precision } | Select-Object -First 1
+        }
+        $unitName = $highestUnitComponent[0]
+        $unitAbbr = $highestUnitComponent[2]
+
+        # Compute the full timespan in the chosen unit.
+        switch ($unitName) {
+            'Years' { $fractionalValue = $originalTicks / $ticksInYear }
+            'Months' { $fractionalValue = $originalTicks / $ticksInMonth }
+            'Weeks' { $fractionalValue = $originalTicks / $ticksInWeek }
+            'Days' { $fractionalValue = $originalTicks / $ticksInDay }
+            'Hours' { $fractionalValue = $originalTicks / $ticksInHour }
+            'Minutes' { $fractionalValue = $originalTicks / $ticksInMinute }
+            'Seconds' { $fractionalValue = $originalTicks / $ticksInSecond }
+            'Milliseconds' { $fractionalValue = $originalTicks / $ticksInMillisecond }
+            'Microseconds' { $fractionalValue = $originalTicks / 10 }
+            'Nanoseconds' { $fractionalValue = $originalTicks * 100 }
+        }
+
+        # Round to the nearest integer (i.e. if at least half the next unit, round up)
+        $roundedValue = [math]::Round($fractionalValue, 0, [System.MidpointRounding]::AwayFromZero)
+        $formatted = "$roundedValue$unitAbbr"
+
+        if ($isNegative) {
+            $formatted = "-$formatted"
+        }
+        return $formatted
+    } else {
+        #----- 6) Normal behavior: filter and output multiple components -----
+        $parts = foreach ($item in $components) {
+            $name = $item[0]
+            $value = $item[1]
+            $abbr = $item[2]
+            if ($unitRank[$name] -le $lowestUnitAllowed -and $value -ne 0) {
+                "$value$abbr"
+            }
+        }
+
+        if ($parts.Count -eq 0) {
+            $parts = @('0s')
+        }
+        $formatted = $parts -join ' '
+
+        if ($isNegative) {
+            $formatted = "-$formatted"
+        }
+        return $formatted
     }
-
-    # If no parts remain, it means everything was 0 => "0s"
-    if ($parts.Count -eq 0) {
-        $parts = @('0s')
-    }
-
-    $formatted = $parts -join ' '
-
-    #----- 6) Reapply sign if negative -----
-    if ($isNegative) {
-        $formatted = "-$formatted"
-    }
-
-    return $formatted
 }
 
 function Get-GroupedTestMarkdown {
@@ -294,7 +277,7 @@ function Get-GroupedTestMarkdown {
         # Calculate aggregate duration: sum all test durations
         $groupDuration = [System.TimeSpan]::Zero
         $groupTests.Duration | ForEach-Object { $groupDuration += $_ }
-        $formattedGroupDuration = $groupDuration | Format-TimeSpan -AdaptiveRounding
+        $formattedGroupDuration = $groupDuration | Format-TimeSpan -AdaptivePrecission
 
         # If any test has further parts, create a nested details block...
         if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
@@ -311,7 +294,7 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
             foreach ($test in $groupTests) {
                 $testName = $test.Path[$Depth]
                 $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
-                $formattedDuration = $test.Duration | Format-TimeSpan -AdaptiveRounding
+                $formattedDuration = $test.Duration | Format-TimeSpan -AdaptivePrecission
                 $markdown += @"
 <details><summary>$groupIndent$testStatusIcon - $testName ($formattedDuration)</summary>
 <p>

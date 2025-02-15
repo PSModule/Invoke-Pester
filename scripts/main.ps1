@@ -300,7 +300,7 @@ LogGroup 'Test results summary' {
         $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
         Write-Verbose "Container name: [$containerName]" -Verbose
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
-        $formattedContainerDuration = $container.Duration | Format-TimeSpan -AdaptiveRounding
+        $formattedContainerDuration = $container.Duration | Format-TimeSpan -AdaptivePrecission
         $summaryMarkdown += @"
 <details><summary>$Indent$containerStatusIcon - $containerName ()</summary>
 <p>
