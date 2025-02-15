@@ -353,13 +353,9 @@ LogGroup 'Test results summary' {
     Set-GitHubStepSummary -Summary $summaryMarkdown
 }
 
-$results = $testResults | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue
-# Provide structured JSON as an output for potential downstream steps
-Set-GitHubOutput -Name 'results' -Value $results
-
 # For each property of testresults, output the value as a JSON object
 foreach ($property in $testResults.PSObject.Properties) {
-    Write-Verbose "Setting output for [$($property.Name)]" -Verbose
+    Write-Verbose "Setting output for [$($property.Name)]"
     $name = $property.Name
     $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
     Set-GitHubOutput -Name $name -Value $value
