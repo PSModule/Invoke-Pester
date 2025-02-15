@@ -287,7 +287,6 @@ LogGroup 'Test results summary' {
 | $testSuitStatusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 
 <details><summary>$testSuitStatusIcon - $testSuitName - Details</summary>
-<p>
 
 "@
 
@@ -300,7 +299,6 @@ LogGroup 'Test results summary' {
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
 <details><summary>$containerStatusIcon - $testSuitName - $containerName</summary>
-<p>
 
 Path: ``$containerPath``
 
@@ -309,24 +307,22 @@ Path: ``$containerPath``
         $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath }
         Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
         $containerTests | ForEach-Object {
-
-
-
             $test = $_
             $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
             $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
             $summaryMarkdown += @"
 <details><summary>$testStatusIcon -  $($test.Name) - $formattedDuration</summary>
-<p>
 
 "@
             if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
                 $summaryMarkdown += @"
 ``````
+
 $($test.ErrorRecord.Exception.Message)
+
 ``````
 
-</p>
+
 </details>
 
 "@
@@ -335,15 +331,15 @@ $($test.ErrorRecord.Exception.Message)
 
         $summaryMarkdown += @'
 
-</p>
 </details>
+
 '@
     }
 
     $summaryMarkdown += @'
 
-</p>
 </details>
+
 '@
     Set-GitHubStepSummary -Summary $summaryMarkdown
 }
