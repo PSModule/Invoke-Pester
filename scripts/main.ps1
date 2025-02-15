@@ -283,14 +283,12 @@ if ($configuration.CodeCoverage.Enabled) {
 $statusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
 
 $summaryMarkdown = @"
-### $statusIcon - Test Results for '$($configuration.TestResult.TestSuiteName)'
-
-| Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
-| ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
-| $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
+| Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
+| ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
+| $statusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 
 
-<details><summary>Details</summary>
+<details><summary>$($configuration.TestResult.TestSuiteName) - Details</summary>
 <p>
 
 ``````
