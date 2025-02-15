@@ -23,7 +23,7 @@
     CodeCoverage = @{
         Enabled               = $true
         OutputFormat          = 'JaCoCo'
-        OutputPath            = 'CodeCoverage-Report.xml'
+        OutputPath            = 'test_reports/CodeCoverage-Report.xml'
         OutputEncoding        = 'UTF8'
         Path                  = @()
         ExcludeTests          = $true
@@ -35,7 +35,7 @@
     TestResult   = @{
         Enabled        = $true
         OutputFormat   = 'NUnitXml'
-        OutputPath     = 'outputs\Test-Report.xml'
+        OutputPath     = 'test_reports/TestResult-Report.xml'
         OutputEncoding = 'UTF8'
         TestSuiteName  = 'Unit tests'
     }
