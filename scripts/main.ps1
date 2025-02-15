@@ -79,8 +79,8 @@ LogGroup 'Load inputs' {
     [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List
 }
 
-$customConfig = @{ }
-$customInputs = @{ }
+$customConfig = @{}
+$customInputs = @{}
 
 LogGroup 'Load configuration - Defaults' {
     $defaultConfigPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
