@@ -276,9 +276,6 @@ if ($configuration.CodeCoverage.Enabled) {
 }
 
 LogGroup 'Test results summary' {
-    $nbsp = [char]0x00A0
-    $indent = "$nbsp" * 4
-
     $testSuitName = $($configuration.TestResult.TestSuiteName)
     $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
     $summaryMarkdown = @"
@@ -307,7 +304,7 @@ LogGroup 'Test results summary' {
         Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
 
         # Build the nested details markdown grouping tests by their test path parts
-        $groupedMarkdown = Get-GroupedTestMarkdown -Tests $containerTests -Depth 0 -BaseIndent "$indent    "
+        $groupedMarkdown = Get-GroupedTestMarkdown -Tests $containerTests -Depth 0 -BaseIndent "$script:indent"
         $summaryMarkdown += $groupedMarkdown
 
         $summaryMarkdown += @'

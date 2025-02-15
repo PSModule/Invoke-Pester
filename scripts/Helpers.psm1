@@ -293,7 +293,7 @@ function Get-GroupedTestMarkdown {
         # If any test has further parts, create a nested details block...
         if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
             $markdown += "$BaseIndent<details><summary>$groupName</summary>`n"
-            $markdown += Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1) -BaseIndent ("$BaseIndent    ")
+            $markdown += Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1) -BaseIndent ("$BaseIndent$script:indent")
             $markdown += "$BaseIndent</details>`n"
         } else {
             # Otherwise, list each test at this level
@@ -311,3 +311,6 @@ function Get-GroupedTestMarkdown {
     }
     return $markdown
 }
+
+$script:nbsp = [char]0x00A0
+$script:indent = "$nbsp" * 4
