@@ -277,15 +277,16 @@ if ($configuration.CodeCoverage.Enabled) {
 
 LogGroup 'Test results summary' {
 
-    $statusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
+    $testSuitName = $($configuration.TestResult.TestSuiteName)
+    $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
     $summaryMarkdown = @"
-### '$($configuration.TestResult.TestSuiteName)' - Test Results
+### '$testSuitName' - Test Results
 
 | Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
-| $statusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
+| $testSuitStatusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 
-<details><summary>$($configuration.TestResult.TestSuiteName) - Details</summary>
+<details><summary>$testSuitStatusIcon - $testSuitName - Details</summary>
 <p>
 
 "@
@@ -296,9 +297,9 @@ LogGroup 'Test results summary' {
         Write-Verbose "Processing container [$containerPath]" -Verbose
         $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
         Write-Verbose "Container name: [$containerName]" -Verbose
-        $statusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
+        $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
-<details><summary>- $statusIcon - $containerName</summary>
+<details><summary>$containerStatusIcon - $testSuitName - $containerName</summary>
 <p>
 
 Path: ``$containerPath``
@@ -308,18 +309,25 @@ Path: ``$containerPath``
         $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath }
         Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
         $containerTests | ForEach-Object {
+
+
+
             $test = $_
-            $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
+            $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
             $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
             $summaryMarkdown += @"
-- $statusIcon $($test.Name) - $formattedDuration
+<details><summary>$testStatusIcon -  $($test.Name) - $formattedDuration</summary>
+<p>
 
 "@
             if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
                 $summaryMarkdown += @"
 ``````
-  $($test.ErrorRecord.Exception.Message)
+$($test.ErrorRecord.Exception.Message)
 ``````
+
+</p>
+</details>
 
 "@
             }
