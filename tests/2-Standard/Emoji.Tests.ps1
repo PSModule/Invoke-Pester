@@ -1,4 +1,16 @@
-﻿Describe 'Get-Emoji' {
+﻿[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    [string] $Path
+)
+
+Describe 'Emoji' {
+    It 'Module is importable' {
+        $null = Import-Module -Name $Path -PassThru
+    }
+}
+
+Describe 'Get-Emoji' {
     Context 'Lookup by whole name' {
         It 'Returns 🌵 (cactus)' {
             Get-Emoji -Name cactus | Should -Be '🌵'
