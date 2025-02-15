@@ -309,7 +309,7 @@ LogGroup 'Test results summary' {
         Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
 
         # Build the nested details markdown grouping tests by their test path parts
-        $groupedMarkdown = Get-GroupedTestMarkdown -Tests $containerTests -Depth 2
+        $groupedMarkdown = Get-GroupedTestMarkdown -Tests $containerTests -Depth 0
         $summaryMarkdown += $groupedMarkdown
 
         $summaryMarkdown += @'

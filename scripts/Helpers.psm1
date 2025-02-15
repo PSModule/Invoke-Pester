@@ -288,7 +288,7 @@ function Get-GroupedTestMarkdown {
     foreach ($group in $groups) {
         $groupName = $group.Name
         $groupTests = $group.Group
-        $groupIndent = $Indent * $Depth
+        $groupIndent = $Indent * ($Depth + 1)
         # Calculate aggregate status: if any test failed, mark the group as failed
         $groupStatusIcon = if ($groupTests | Where-Object { $_.Result -eq 'Failed' }) { '❌' } else { '✅' }
 
