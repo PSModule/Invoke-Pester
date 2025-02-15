@@ -240,7 +240,7 @@ LogGroup 'Load configuration - Add containers' {
     }
     if ($configuration.Run.Container.Count -eq 0) {
         $containers = Get-PesterContainer -Path $configuration.Run.Path
-        $configuration.Run.Container = $containers | ForEach-Object { New-PesterContainer $_ }
+        $configuration.Run.Container = $containers | ForEach-Object { New-PesterContainer @_ }
     }
     Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
