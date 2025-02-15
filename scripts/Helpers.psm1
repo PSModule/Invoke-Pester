@@ -310,6 +310,7 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
                 $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
                 $markdown += @"
 <details><summary>$groupIndent$testStatusIcon - $testName ($formattedDuration)</summary>
+
 "@
 
                 if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
@@ -318,10 +319,12 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
 ``````
 $($test.ErrorRecord.Exception.Message)
 ``````
+
 "@
                 }
                 $markdown += @'
 </details>
+
 '@
             }
         }
