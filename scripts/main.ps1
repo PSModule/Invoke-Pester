@@ -297,11 +297,7 @@ $summaryMarkdown = @"
 
 "@
 
-$tests = $testResults.Tests
-Write-Output "Test count: $($tests.Count)"
-
-$tests | ForEach-Object {
-    Write-Output "Processing test: $($_.Name)"
+$testResults.Tests | ForEach-Object {
     $test = $_
     $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
     $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
@@ -321,12 +317,6 @@ $summaryMarkdown += @"
 
 </p>
 </details>
-"@
-
-# Add a link to the run summary in the GitHub Actions log
-$summaryMarkdown += @"
-[View the full test run details in the GitHub Actions log]($env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID)
-
 "@
 
 Set-GitHubStepSummary -Summary $summaryMarkdown
