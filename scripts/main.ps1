@@ -283,7 +283,7 @@ if ($configuration.CodeCoverage.Enabled) {
 $statusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
 
 $summaryMarkdown = @"
-## '$($configuration.TestResult.TestSuiteName)' - Test Results
+### '$($configuration.TestResult.TestSuiteName)' - Test Results
 
 | Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
@@ -291,14 +291,18 @@ $summaryMarkdown = @"
 
 "@
 
+Write-Verbose "Processing containers [$($testResult.Containers.Count)]" -Verbose
 foreach ($container in $testResult.Containers) {
     $containerPath = $container.Item.FullName
+    Write-Verbose "Processing container [$containerPath]" -Verbose
     $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
+    Write-Verbose "Container name: [$containerName]" -Verbose
     $summaryMarkdown += @"
 <details><summary>$containerName - Details</summary>
 <p>
 
 Path: $containerPath
+
 "@
 
     $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item -eq $containerPath } | ForEach-Object {
