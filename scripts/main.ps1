@@ -318,6 +318,7 @@ foreach ($container in $TestResults.Containers) {
 "@
 
     # List each test in the container
+    Write-Verbose "Processing [$($container.Tests.Count)]tests in container: $($container.Name)" -Verbose
     foreach ($test in $container.Tests) {
         Write-Verbose "Processing test: $($test.Name)" -Verbose
         # Determine status icon and test name
