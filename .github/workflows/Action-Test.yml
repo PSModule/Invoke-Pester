@@ -17,18 +17,31 @@ permissions:
   pull-requests: read
 
 jobs:
-  ActionTestSimple:
-    name: Action-Test - [Simple]
+  ActionTest1Simple:
+    name: Action-Test - [1-Simple]
     runs-on: ubuntu-latest
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Action-Test [Simple]
+      - name: Action-Test [1-Simple]
         uses: ./
         with:
-          Run_Path: tests/Simple
+          Run_Path: tests/1-Simple
+
+  ActionTest2Standard:
+    name: Action-Test - [2-Standard]
+    runs-on: ubuntu-latest
+    steps:
+      # Need to check out as part of the test, as its a local action
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Action-Test [2-Standard]
+        uses: ./
+        with:
+          Run_Path: tests/2-Standard
 
   ActionTestAdvanced:
     name: Action-Test - [3-Advanced]
