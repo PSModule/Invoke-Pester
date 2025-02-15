@@ -260,11 +260,6 @@ LogGroup 'Test results' {
     if ($failedTests -eq 0) {
         Write-GitHubNotice '✅ All tests passed.'
     }
-
-    $results = $testResults | ConvertTo-Json -Depth 2
-
-    # Provide structured JSON as an output for potential downstream steps
-    Set-GitHubOutput -Name 'results' -Value $results
 }
 
 $totalTests = $testResults.TotalCount
@@ -280,9 +275,10 @@ if ($configuration.CodeCoverage.Enabled) {
     $coverageString = "$coverage%"
 }
 
-$statusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
+LogGroup 'Test results summary' {
 
-$summaryMarkdown = @"
+    $statusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
+    $summaryMarkdown = @"
 ### '$($configuration.TestResult.TestSuiteName)' - Test Results
 
 | Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
@@ -291,13 +287,13 @@ $summaryMarkdown = @"
 
 "@
 
-Write-Verbose "Processing containers [$($testResult.Containers.Count)]" -Verbose
-foreach ($container in $testResult.Containers) {
-    $containerPath = $container.Item.FullName
-    Write-Verbose "Processing container [$containerPath]" -Verbose
-    $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
-    Write-Verbose "Container name: [$containerName]" -Verbose
-    $summaryMarkdown += @"
+    Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
+    foreach ($container in $testResults.Containers) {
+        $containerPath = $container.Item.FullName
+        Write-Verbose "Processing container [$containerPath]" -Verbose
+        $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
+        Write-Verbose "Container name: [$containerName]" -Verbose
+        $summaryMarkdown += @"
 <details><summary>$containerName - Details</summary>
 <p>
 
@@ -305,33 +301,38 @@ Path: $containerPath
 
 "@
 
-    $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item -eq $containerPath } | ForEach-Object {
-        $test = $_
-        $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
-        $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
-        $summaryMarkdown += @"
+        $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item -eq $containerPath } | ForEach-Object {
+            $test = $_
+            $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
+            $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
+            $summaryMarkdown += @"
 - $statusIcon $($test.Name) - $formattedDuration
 
 "@
-        if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
-            $summaryMarkdown += @"
+            if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
+                $summaryMarkdown += @"
   $($test.ErrorRecord.Exception.Message)
 
 "@
+            }
         }
-    }
 
-    $summaryMarkdown += @"
+        $summaryMarkdown += @"
 ``````
 
 </p>
 </details>
 "@
 
+    }
+
+
+    Set-GitHubStepSummary -Summary $summaryMarkdown
 }
 
-
-Set-GitHubStepSummary -Summary $summaryMarkdown
+$results = $testResults | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue
+# Provide structured JSON as an output for potential downstream steps
+Set-GitHubOutput -Name 'results' -Value $results
 
 # For each property of testresults, output the value as a JSON object
 foreach ($property in $testResults.PSObject.Properties) {
