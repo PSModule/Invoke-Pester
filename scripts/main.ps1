@@ -317,9 +317,7 @@ Path: ``$containerPath``
                 $summaryMarkdown += @"
 
 ``````
-
 $($test.ErrorRecord.Exception.Message)
-
 ``````
 
 "@
