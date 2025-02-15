@@ -265,6 +265,10 @@ LogGroup 'Load configuration - Add containers' {
 }
 
 LogGroup 'Load configuration - Result' {
+    $artifactName = $configuration.TestResult.TestSuiteName
+    $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
+    $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
+
     Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 

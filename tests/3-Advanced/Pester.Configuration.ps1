@@ -7,8 +7,7 @@
     }
     TestResult = @{
         Enabled       = $true
-        OutputPath    = 'outputs\AnotherPath.xml'
-        TestSuiteName = 'Pester'
+        TestSuiteName = 'Advanced'
     }
     Output     = @{
         CIFormat            = 'Auto'

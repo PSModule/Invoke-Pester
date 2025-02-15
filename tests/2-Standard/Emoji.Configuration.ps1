@@ -1,17 +1,13 @@
 ﻿@{
-    Run          = @{
+    Run        = @{
         Path     = $PSScriptRoot
         PassThru = $true
     }
-    TestResult   = @{
+    TestResult = @{
         Enabled       = $true
-        OutputPath    = 'outputs\AnotherPath.xml'
-        TestSuiteName = 'Pester'
+        TestSuiteName = 'Standard'
     }
-    CodeCoverage = @{
-        Path = 'Emoji.psm1'
-    }
-    Output       = @{
+    Output     = @{
         CIFormat            = 'Auto'
         StackTraceVerbosity = 'Filtered'
         Verbosity           = 'Detailed'
