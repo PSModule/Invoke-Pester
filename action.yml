@@ -187,7 +187,11 @@ inputs:
       Path to the configuration file.
     required: false
     default: '${{ github.workspace }}/.github/pester.settings.ps1'
-
+  Debug:
+    description: |
+      Enable debug mode.
+    required: false
+    default: 'false'
 outputs:
   result:
     description: If the tests passed.
@@ -196,6 +200,9 @@ outputs:
 runs:
   using: composite
   steps:
+    - uses: PSModule/Debug@v0
+      if: ${{ inputs.Debug == 'true' }}
+
     - name: Invoke-Pester
       uses: PSModule/GitHub-Script@v1
       id: test

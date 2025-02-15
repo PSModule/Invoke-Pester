@@ -323,7 +323,10 @@ Set-GitHubStepSummary -Summary $summaryMarkdown
 
 # For each property of testresults, output the value as a JSON object
 foreach ($property in $testResults.PSObject.Properties) {
-    Set-GitHubOutput -Name $property.Name -Value ($property.Value | ConvertTo-Json -Depth 5)
+    Write-Verbose "Setting output for [$($property.Name)]" -Verbose
+    $name = $property.Name
+    $value = $null -ne $property.Value ? ($property.Value | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue) : ''
+    Set-GitHubOutput -Name $name -Value $value
 }
 
 exit $failedTests
