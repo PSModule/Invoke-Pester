@@ -276,6 +276,8 @@ if ($configuration.CodeCoverage.Enabled) {
 }
 
 LogGroup 'Test results summary' {
+    $unicodeNbsp = [char]0x00A0  # or `\u00A0`
+    $indent = $unicodeNbsp * 3
 
     $testSuitName = $($configuration.TestResult.TestSuiteName)
     $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
@@ -297,7 +299,7 @@ LogGroup 'Test results summary' {
         Write-Verbose "Container name: [$containerName]" -Verbose
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
-<details><summary>|   $containerStatusIcon - $testSuitName - $containerName</summary>
+<details><summary>$indent$containerStatusIcon - $testSuitName - $containerName</summary>
 
 Path: ``$containerPath``
 
@@ -310,7 +312,7 @@ Path: ``$containerPath``
             $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
             $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
             $summaryMarkdown += @"
-<details><summary>|   |   $testStatusIcon -  $($test.Name) - $formattedDuration</summary>
+<details><summary>$indent$indent$testStatusIcon -  $($test.Name) - $formattedDuration</summary>
 
 "@
             if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
