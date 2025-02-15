@@ -294,7 +294,7 @@ function Get-GroupedTestMarkdown {
         # Calculate aggregate duration: sum all test durations
         $groupDuration = [System.TimeSpan]::Zero
         $groupTests.Duration | ForEach-Object { $groupDuration += $_ }
-        $formattedGroupDuration = $groupDuration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
+        $formattedGroupDuration = $groupDuration | Format-TimeSpan -AdaptiveRounding
 
         # If any test has further parts, create a nested details block...
         if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
@@ -311,7 +311,7 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
             foreach ($test in $groupTests) {
                 $testName = $test.Path[$Depth]
                 $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
-                $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
+                $formattedDuration = $test.Duration | Format-TimeSpan -AdaptiveRounding
                 $markdown += @"
 <details><summary>$groupIndent$testStatusIcon - $testName ($formattedDuration)</summary>
 <p>
