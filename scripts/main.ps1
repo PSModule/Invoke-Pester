@@ -294,6 +294,7 @@ $summaryMarkdown = @"
 <p>
 
 ``````
+
 "@
 
 $tests = $testResults.Tests
@@ -303,8 +304,9 @@ $tests | ForEach-Object {
     Write-Output "Processing test: $($_.Name)"
     $test = $_
     $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
+    $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
     $summaryMarkdown += @"
-- $statusIcon $($test.Name) ($($test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding))
+- $statusIcon $($test.Name) - $formattedDuration
 
 "@
     if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
