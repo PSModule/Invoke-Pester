@@ -297,7 +297,7 @@ LogGroup 'Test results summary' {
         Write-Verbose "Container name: [$containerName]" -Verbose
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
-<details><summary>$containerStatusIcon - $testSuitName - $containerName</summary>
+<details>   <summary>   $containerStatusIcon - $testSuitName - $containerName</summary>
 
 Path: ``$containerPath``
 
