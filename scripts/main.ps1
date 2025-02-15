@@ -323,6 +323,12 @@ $summaryMarkdown += @"
 </details>
 "@
 
+# Add a link to the run summary in the GitHub Actions log
+$summaryMarkdown += @"
+[View the full test run details in the GitHub Actions log]($env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID)
+
+"@
+
 Set-GitHubStepSummary -Summary $summaryMarkdown
 
 exit $failedTests

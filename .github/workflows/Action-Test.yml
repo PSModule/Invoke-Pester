@@ -25,6 +25,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - uses: PSModule/Debug@v0
+
       - name: Action-Test [1-Simple]
         uses: ./
         with:
@@ -38,6 +40,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - uses: PSModule/Debug@v0
+
       - name: Action-Test [2-Standard]
         uses: ./
         with:
@@ -50,6 +54,8 @@ jobs:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - uses: PSModule/Debug@v0
 
       - name: Action-Test [3-Advanced]
         uses: ./
