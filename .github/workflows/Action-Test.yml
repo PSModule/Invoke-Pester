@@ -28,7 +28,7 @@ jobs:
       - name: Action-Test [1-Simple]
         uses: ./
         with:
-          Run_Path: tests/1-Simple
+          Path: tests/1-Simple
 
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
@@ -41,7 +41,7 @@ jobs:
       - name: Action-Test [2-Standard]
         uses: ./
         with:
-          Run_Path: tests/2-Standard
+          Path: tests/2-Standard
 
   ActionTestAdvanced:
     name: Action-Test - [3-Advanced]
@@ -54,4 +54,4 @@ jobs:
       - name: Action-Test [3-Advanced]
         uses: ./
         with:
-          ConfigurationFilePath: tests/3-Advanced/Pester.Configuration.ps1
+          Path: tests/3-Advanced/Pester.Configuration.ps1

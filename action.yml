@@ -6,6 +6,11 @@ branding:
   color: gray-dark
 
 inputs:
+  Path:
+    description: |
+      Path to where tests are located or a configuration file.
+    required: false
+    default: ${{ github.workspace }}/tests
   Run_Path:
     description: |
       Directories to be searched for tests, paths directly to test files, or combination of both.
@@ -182,11 +187,6 @@ inputs:
     description: |
       Enable TestRegistry.
     required: false
-  ConfigurationFilePath:
-    description: |
-      Path to the configuration file.
-    required: false
-    default: '${{ github.workspace }}/.github/pester.settings.ps1'
   Debug:
     description: |
       Enable debug mode.
@@ -301,6 +301,7 @@ runs:
       id: test
       continue-on-error: true
       env:
+        GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
         GITHUB_ACTION_INPUT_Run_Path: ${{ inputs.Run_Path }}
         GITHUB_ACTION_INPUT_Run_ExcludePath: ${{ inputs.Run_ExcludePath }}
         GITHUB_ACTION_INPUT_Run_ScriptBlock: ${{ inputs.Run_ScriptBlock }}
@@ -344,7 +345,6 @@ runs:
         GITHUB_ACTION_INPUT_Output_RenderMode: ${{ inputs.Output_RenderMode }}
         GITHUB_ACTION_INPUT_TestDrive_Enabled: ${{ inputs.TestDrive_Enabled }}
         GITHUB_ACTION_INPUT_TestRegistry_Enabled: ${{ inputs.TestRegistry_Enabled }}
-        GITHUB_ACTION_INPUT_ConfigurationFilePath: ${{ inputs.ConfigurationFilePath }}
       with:
         ShowOutput: true
         Script: |

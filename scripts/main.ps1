@@ -23,6 +23,8 @@ LogGroup 'Get test kit versions' {
 
 LogGroup 'Load inputs' {
     $inputs = @{
+        Path                               = $env:GITHUB_ACTION_INPUT_Path
+
         Run_Path                           = $env:GITHUB_ACTION_INPUT_Run_Path
         Run_ExcludePath                    = $env:GITHUB_ACTION_INPUT_Run_ExcludePath
         Run_ScriptBlock                    = $env:GITHUB_ACTION_INPUT_Run_ScriptBlock
@@ -73,7 +75,6 @@ LogGroup 'Load inputs' {
 
         TestDrive_Enabled                  = $env:GITHUB_ACTION_INPUT_TestDrive_Enabled
         TestRegistry_Enabled               = $env:GITHUB_ACTION_INPUT_TestRegistry_Enabled
-        ConfigurationFilePath              = $env:GITHUB_ACTION_INPUT_ConfigurationFilePath
     }
 
     [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List
@@ -102,15 +103,7 @@ LogGroup 'Load configuration - Defaults' {
 }
 
 LogGroup 'Load configuration - Custom settings file' {
-    $customConfigFilePath = $inputs.ConfigurationFilePath
-    Write-Output "Custom configuration file path: [$customConfigFilePath]"
-    if ($customConfigFilePath) {
-        $fileExists = Test-Path -Path $customConfigFilePath
-        Write-Output "File exists: [$fileExists]"
-        if ($fileExists) {
-            $tmpCustom = . $customConfigFilePath
-        }
-    }
+    $tmpCustom = Get-PesterConfiguration -Path $inputs.Path
     $tmpCustomConfiguration = @{
         Run          = $tmpCustom.Run ?? @{}
         Filter       = $tmpCustom.Filter ?? @{}

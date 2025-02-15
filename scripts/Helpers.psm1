@@ -21,15 +21,31 @@ function Get-PesterConfiguration {
         [string] $Path
     )
 
-    Get-ChildItem -Path $Path -Filter *.Configuration.ps* | ForEach-Object {
-        $file = $_
-        switch ($file.Extension) {
-            '.ps1' {
-                . $file
-            }
-            '.psd1' {
-                Import-PowerShellDataFile -Path $file
-            }
+    Write-Output "Path: [$Path]"
+    $pathExists = Test-Path -Path $Path
+    if (-not $pathExists) {
+        throw "Test path does not exist: [$Path]"
+    }
+    $item = $Path | Get-Item
+
+    if ($item.PSIsContainer) {
+        $file = Get-ChildItem -Path $Path -Filter *.Configuration.*
+        if ($file.Count -eq 0) {
+            throw "No configuration files found in path: [$Path]"
+        }
+        if ($file.Count -gt 1) {
+            throw "Multiple configuration files found in path: [$Path]"
+        }
+    } else {
+        $file = $item
+    }
+
+    switch ($file.Extension) {
+        '.ps1' {
+            . $file
+        }
+        '.psd1' {
+            Import-PowerShellDataFile -Path $file
         }
     }
 }
