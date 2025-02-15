@@ -289,6 +289,7 @@ LogGroup 'Test results summary' {
 | $testSuitStatusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 <details><summary>$testSuitStatusIcon - $testSuitName</summary>
 
+
 "@
 
     Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
@@ -300,6 +301,7 @@ LogGroup 'Test results summary' {
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
 <details><summary>$indent$containerStatusIcon - $testSuitName - $containerName</summary>
+
 
 "@
 
@@ -313,6 +315,7 @@ LogGroup 'Test results summary' {
             $summaryMarkdown += @"
 <details><summary>$indent$indent$testStatusIcon - $testPath ($formattedDuration)</summary>
 
+
 "@
             if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
                 $summaryMarkdown += @"
@@ -321,11 +324,13 @@ LogGroup 'Test results summary' {
 $($test.ErrorRecord.Exception.Message)
 ``````
 
+
 "@
             }
 
             $summaryMarkdown += @'
 </details>
+
 
 '@
 
@@ -335,12 +340,14 @@ $($test.ErrorRecord.Exception.Message)
 
 </details>
 
+
 '@
     }
 
     $summaryMarkdown += @'
 
 </details>
+
 
 '@
     Set-GitHubStepSummary -Summary $summaryMarkdown
