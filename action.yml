@@ -354,9 +354,9 @@ runs:
     - name: Check outputs
       shell: pwsh
       env:
-        RESULT: ${{ fromJSON(steps.test.outputs.result) }}
+        RESULT: ${{ steps.test.outputs.result }}
       run: |
-        $env:RESULT | ConvertTo-Json -Depth 10
+        $env:RESULT | ConvertFrom-Json -Depth 10
 
     - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).Configuration.TestResult.TestSuiteName.Value }}-TestResults]
       uses: actions/upload-artifact@v4
