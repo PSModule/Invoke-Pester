@@ -285,7 +285,8 @@ LogGroup 'Test results summary' {
 | Status | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $testSuitStatusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
-<details><summary>$testSuitStatusIcon - $testSuitName - Details</summary>
+<details>
+    <summary>$testSuitStatusIcon - $testSuitName - Details</summary>
 
 "@
 
@@ -297,7 +298,8 @@ LogGroup 'Test results summary' {
         Write-Verbose "Container name: [$containerName]" -Verbose
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
-<details>   <summary>   $containerStatusIcon - $testSuitName - $containerName</summary>
+    <details>
+        <summary>   $containerStatusIcon - $testSuitName - $containerName</summary>
 
 Path: ``$containerPath``
 
@@ -310,7 +312,9 @@ Path: ``$containerPath``
             $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
             $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
             $summaryMarkdown += @"
-<details>   <summary>   $testStatusIcon -  $($test.Name) - $formattedDuration</summary>
+        <div style="margin-left: 20px;">
+            <details>
+                <summary>$testStatusIcon -  $($test.Name) - $formattedDuration</summary>
 
 "@
             if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
@@ -324,7 +328,8 @@ $($test.ErrorRecord.Exception.Message)
             }
 
             $summaryMarkdown += @'
-</details>
+            </details>
+        </div>
 
 '@
 
@@ -332,7 +337,7 @@ $($test.ErrorRecord.Exception.Message)
 
         $summaryMarkdown += @'
 
-</details>
+    </details>
 
 '@
     }
