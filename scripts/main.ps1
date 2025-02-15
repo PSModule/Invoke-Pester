@@ -288,9 +288,11 @@ LogGroup 'Test results summary' {
 | ----- | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $testSuitStatusIcon |$($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
 <details><summary>$testSuitStatusIcon - $testSuitName</summary>
+
 "@
 
     Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
+    # For each container, group tests by their test path parts
     foreach ($container in $testResults.Containers) {
         $containerPath = $container.Item.FullName
         Write-Verbose "Processing container [$containerPath]" -Verbose
@@ -298,42 +300,18 @@ LogGroup 'Test results summary' {
         Write-Verbose "Container name: [$containerName]" -Verbose
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
-<details><summary>$indent$containerStatusIcon - $containerName</summary>
-"@
+<details><summary>$indent$containerStatusIcon - $testSuitName - $containerName</summary>
 
+"@
         $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } | Sort-Object -Property Path
         Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
-        $containerTests | ForEach-Object {
-            $test = $_
-            $testPath = $test.Path -join '/'
-            $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
-            $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
-            $summaryMarkdown += @"
-<details><summary>$indent$indent$testStatusIcon - $testPath ($formattedDuration)</summary>
-"@
-            if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
-                $summaryMarkdown += @"
 
-``````
-$($test.ErrorRecord.Exception.Message)
-``````
-
-
-"@
-            }
-
-            $summaryMarkdown += @'
-</details>
-
-
-'@
-
-        }
+        # Build the nested details markdown grouping tests by their test path parts
+        $groupedMarkdown = Get-GroupedTestMarkdown -Tests $containerTests -Depth 0 -BaseIndent "$indent    "
+        $summaryMarkdown += $groupedMarkdown
 
         $summaryMarkdown += @'
-
 </details>
-
 
 '@
     }

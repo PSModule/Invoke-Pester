@@ -275,3 +275,39 @@ filter Format-TimeSpan {
 
     return $formatted
 }
+
+# Function to recursively build markdown grouping tests by parts in their test path
+function Get-GroupedTestMarkdown {
+    param(
+        [Parameter(Mandatory)]
+        [array]$Tests,
+        [int]$Depth,
+        [string]$BaseIndent
+    )
+    $markdown = ''
+    # Group tests by the element at position $Depth (or "Ungrouped" if not present)
+    $groups = $Tests | Group-Object { if ($_.Path.Count -gt $Depth) { $_.Path[$Depth] } else { 'Ungrouped' } } | Sort-Object Name
+    foreach ($group in $groups) {
+        $groupName = $group.Name
+        $groupTests = $group.Group
+        # If any test has further parts, create a nested details block...
+        if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
+            $markdown += "$BaseIndent<details><summary>$groupName</summary>`n"
+            $markdown += Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1) -BaseIndent ("$BaseIndent    ")
+            $markdown += "$BaseIndent</details>`n"
+        } else {
+            # Otherwise, list each test at this level
+            foreach ($test in $groupTests) {
+                $testName = $test.Path[$Depth]
+                $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
+                $formattedDuration = $test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding
+                $markdown += "$BaseIndent<details><summary>$testStatusIcon - $testName ($formattedDuration)</summary>`n"
+                if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
+                    $markdown += "`n$BaseIndent    $($test.ErrorRecord.Exception.Message)`n"
+                }
+                $markdown += "$BaseIndent</details>`n"
+            }
+        }
+    }
+    return $markdown
+}
