@@ -302,7 +302,7 @@ LogGroup 'Test results summary' {
         $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
         $summaryMarkdown += @"
 <details><summary>$Indent$containerStatusIcon - $containerName</summary>
-------------------------------------------------------
+----
 
 "@
         $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } | Sort-Object -Property Path
@@ -313,6 +313,7 @@ LogGroup 'Test results summary' {
         $summaryMarkdown += $groupedMarkdown
 
         $summaryMarkdown += @'
+----
 </details>
 
 '@
