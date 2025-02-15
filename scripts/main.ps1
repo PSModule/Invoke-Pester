@@ -322,7 +322,7 @@ $summaryMarkdown += @"
 Set-GitHubStepSummary -Summary $summaryMarkdown
 
 # Output paths for artifacts upload
-Set-GitHubOutput -Name 'CodeCoverageConfig' -Value $testResults.Configuration.CodeCoverage
-Set-GitHubOutput -Name 'TestResultConfig' -Value $testResults.Configuration.TestResult
+Set-GitHubOutput -Name 'CodeCoverageConfig' -Value ($testResults.Configuration.CodeCoverage | ConvertTo-Json -Depth 5 )
+Set-GitHubOutput -Name 'TestResultConfig' -Value ($testResults.Configuration.TestResult | ConvertTo-Json -Depth 5 )
 
 exit $failedTests
