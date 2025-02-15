@@ -1,6 +1,7 @@
 ﻿@{
     Run        = @{
-        Path = $PSScriptRoot
+        Path     = $PSScriptRoot
+        PassThru = $true
     }
     TestResult = @{
         Enabled       = $true

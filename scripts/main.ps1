@@ -296,8 +296,9 @@ $summaryMarkdown = @"
 ``````
 "@
 
-foreach ($test in $testResults.Tests) {
-    $statusIcon = if ($test.Result -eq 'Passed') { '✅' } else { '❌' }
+$testResults.Tests | ForEach-Object {
+    $test = $_
+    $statusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
     $summaryMarkdown += @"
 - $statusIcon $($test.Name) ($($test.Duration | Format-TimeSpan -Precision Milliseconds -AdaptiveRounding))
 
