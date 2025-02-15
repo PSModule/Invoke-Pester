@@ -296,9 +296,7 @@ function Get-GroupedTestMarkdown {
         if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
             $markdown += @"
 <details><summary>$groupIndent$groupStatusIcon - $groupName</summary>
-
 $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
-
 </details>
 
 "@
