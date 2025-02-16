@@ -152,7 +152,9 @@ jobs:
 
 ### Inputs
 
-All are **optional** unless otherwise noted. For more info on the configuration options, see the [Pester documentation](https://pester.dev/docs/usage/configuration).
+All are **optional** unless otherwise noted. For more info on the configuration options, see the
+[Pester Configuration documentation](https://pester.dev/docs/usage/configuration).
+`Run.PassThru` is forced to `$true` to ensure the action can capture test results.
 
 | **Input**                            | **Description**                                                                                        | **Default**                     |
 |--------------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------------|
@@ -164,7 +166,6 @@ All are **optional** unless otherwise noted. For more info on the configuration 
 | `Run_TestExtension`                  | Filter used to identify test files (e.g. `.Tests.ps1`).                                                | *(none)*                        |
 | `Run_Exit`                           | Whether to exit with a non-zero exit code on failure.                                                  | *(none)*                        |
 | `Run_Throw`                          | Whether to throw an exception on test failure.                                                         | *(none)*                        |
-| `Run_PassThru`                       | Return result object to pipeline after finishing the test run.                                         | *(none)*                        |
 | `Run_SkipRun`                        | Discovery only, skip actual test run.                                                                  | *(none)*                        |
 | `Run_SkipRemainingOnFailure`         | Skips remaining tests after the first failure. Options: `None`, `Run`, `Container`, `Block`.           | *(none)*                        |
 | `Filter_Tag`                         | Tags of Describe/Context/It blocks to run.                                                             | *(none)*                        |

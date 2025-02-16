@@ -40,10 +40,6 @@ inputs:
     description: |
       Throw an exception when test run fails. When used together with Exit, throwing an exception is preferred.
     required: false
-  Run_PassThru:
-    description: |
-      Return result object to the pipeline after finishing the test run.
-    required: false
   Run_SkipRun:
     description: |
       Runs the discovery phase but skips run. Use it with PassThru to get object populated with all tests.
@@ -309,7 +305,6 @@ runs:
         GITHUB_ACTION_INPUT_Run_TestExtension: ${{ inputs.Run_TestExtension }}
         GITHUB_ACTION_INPUT_Run_Exit: ${{ inputs.Run_Exit }}
         GITHUB_ACTION_INPUT_Run_Throw: ${{ inputs.Run_Throw }}
-        GITHUB_ACTION_INPUT_Run_PassThru: ${{ inputs.Run_PassThru }}
         GITHUB_ACTION_INPUT_Run_SkipRun: ${{ inputs.Run_SkipRun }}
         GITHUB_ACTION_INPUT_Run_SkipRemainingOnFailure: ${{ inputs.Run_SkipRemainingOnFailure }}
         GITHUB_ACTION_INPUT_Filter_Tag: ${{ inputs.Filter_Tag }}

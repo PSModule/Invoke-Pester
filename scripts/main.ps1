@@ -32,7 +32,6 @@ LogGroup 'Load inputs' {
         Run_TestExtension                  = $env:GITHUB_ACTION_INPUT_Run_TestExtension
         Run_Exit                           = $env:GITHUB_ACTION_INPUT_Run_Exit
         Run_Throw                          = $env:GITHUB_ACTION_INPUT_Run_Throw
-        Run_PassThru                       = $env:GITHUB_ACTION_INPUT_Run_PassThru
         Run_SkipRun                        = $env:GITHUB_ACTION_INPUT_Run_SkipRun
         Run_SkipRemainingOnFailure         = $env:GITHUB_ACTION_INPUT_Run_SkipRemainingOnFailure
 
@@ -130,7 +129,6 @@ LogGroup 'Load configuration - Action overrides' {
             TestExtension          = $inputs.Run_TestExtension
             Exit                   = $inputs.Run_Exit
             Throw                  = $inputs.Run_Throw
-            PassThru               = $inputs.Run_PassThru
             SkipRun                = $inputs.Run_SkipRun
             SkipRemainingOnFailure = $inputs.Run_SkipRemainingOnFailure
         }
@@ -247,6 +245,9 @@ LogGroup 'Load configuration - Result' {
     $artifactName = $configuration.TestResult.TestSuiteName
     $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
     $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
+    $configuration.Run.PassThru = $true
+
+    $configuration = New-PesterConfiguration -Hashtable $configuration
 
     Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
