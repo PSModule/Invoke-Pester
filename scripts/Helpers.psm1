@@ -73,6 +73,7 @@ function Get-PesterConfiguration {
         The function returns a hashtable containing the Pester configuration if found.
         If no configuration file is found, an empty hashtable is returned.
     #>
+    [OutputType([hashtable])]
     [CmdletBinding()]
     param(
         # Specifies the path where the Pester configuration file is located.
@@ -299,6 +300,7 @@ filter Format-TimeSpan {
         .NOTES
         Returns a string representing the formatted TimeSpan using the most significant unit.
     #>
+    [OutputType([string])]
     [CmdletBinding()]
     param(
         # The TimeSpan object to be formatted into a human-readable string.
@@ -459,6 +461,8 @@ function Get-GroupedTestMarkdown {
         .NOTES
         A formatted Markdown string summarizing test results.
     #>
+    [OutputType([string])]
+    [CmdletBinding()]
     param(
         # The collection of test results to be grouped and formatted.
         [Parameter(Mandatory)]
