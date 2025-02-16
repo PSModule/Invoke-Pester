@@ -3,7 +3,7 @@
 This GitHub Action runs [Pester](https://pester.dev) tests in PowerShell, producing code coverage and test result artifacts. It automates many tasks to streamline continuous integration for PowerShell projects:
 
 - Installation and import of required modules (Pester, PSScriptAnalyzer).
-- Automatic merging of default, repo-level, and direct inputs into a final Pester configuration.
+- Automatic merging of default configuration, test suite configuration, and direct inputs into a final Pester configuration.
 - Optional uploading of test results and coverage reports.
 - Clear step summary in GitHub’s job logs.
 
@@ -25,12 +25,12 @@ The action’s behavior is controlled by **layered configuration**:
 1. **Default Config**
    Packaged with the action (in `Pester.Configuration.ps1` if provided). Sets base paths, coverage toggles, artifact names, etc.
 
-2. **Repo-Level Config**
-   If your repository contains a Pester config file (e.g., `MyTests.Configuration.psd1` or `Pester.Configuration.ps1`), the action loads and merges those settings on top of the defaults.
+2. **Test Suite Config**
+   If your test suite contains a Pester config file (e.g., `MyTests.Configuration.psd1` or `Pester.Configuration.ps1`), the action loads and merges those settings on top of the defaults.
 
 3. **Direct Inputs**
-   Finally, any inputs specified under the `with:` clause in your GitHub Action workflow override both the default and repo-level config.
-   > *Example:* If you specify `CodeCoverage_Enabled: true` here, it will enable coverage even if the repo config says otherwise.
+   Finally, any inputs specified under the `with:` clause in your GitHub Action workflow override both the default and test suite config.
+   > *Example:* If you specify `CodeCoverage_Enabled: true` here, it will enable coverage even if the test suite config says otherwise.
 
 This **“last-write-wins”** strategy means you can set global defaults while retaining the flexibility to override them at the action level.
 
@@ -191,7 +191,7 @@ All are **optional** unless otherwise noted.
 | `Debug_ShowFullErrors`               | Show Pester internal stack on errors. (Deprecated – overrides `Output.StackTraceVerbosity` to `Full`).                                   | *(none)*                        |
 | `Debug_WriteDebugMessages`           | Write debug messages to screen.                                                                                                          | *(none)*                        |
 | `Debug_WriteDebugMessagesFrom`       | Filter debug messages by source. Wildcards allowed.                                                                                      | *(none)*                        |
-| `Debug_ShowNavigationMarkers`        | Write paths after every block/test for easy navigation in VSCode.                                                                        | *(none)*                        |
+| `Debug_ShowNavigationMarkers`        | Write paths after every block/test for easy navigation in Visual Studio Code.                                                                        | *(none)*                        |
 | `Debug_ReturnRawResultObject`        | Returns an unfiltered result object, for development only.                                                                               | *(none)*                        |
 | `Output_Verbosity`                   | Verbosity: `None`, `Normal`, `Detailed`, `Diagnostic`.                                                                                   | *(none)*                        |
 | `Output_StackTraceVerbosity`         | Stacktrace detail: `None`, `FirstLine`, `Filtered`, `Full`.                                                                              | *(none)*                        |
@@ -254,11 +254,11 @@ After the test run completes, these outputs become available. They are all JSON-
 - To **skip coverage** or **test result uploads**, set `CodeCoverage_Enabled: false` or `TestResult_Enabled: false`.
 - If you do **not** want a failing test to cause the step to fail, set `Run_Exit: false` and `Run_Throw: false`.
 - For deeper debug info, set `Debug: 'true'` (which uses the [PSModule/Debug@v0](https://github.com/PSModule/Debug) action).
-- If your tests require a **custom Pester config**, place it in your repo and point `Path` or `Run_Path` to it. The action merges that file with defaults.
+- If your tests require a **custom Pester config**, place it in your repository and point `Path` or `Run_Path` to it. The action merges that file with defaults.
 
 ## Contributing
 
-1. Open a pull request with your proposed changes (bug fixes, improvements, new features).
+1. Open a pull request with your proposed changes (bugfixes, improvements, new features).
 2. Test your branch in a real or mock workflow if possible to confirm it behaves as intended.
 3. We welcome any ideas for streamlining test runs, coverage generation, or other enhancements.
 
