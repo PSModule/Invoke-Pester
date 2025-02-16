@@ -1,27 +1,366 @@
-name: '{{ NAME }}'
-description: '{{ DESCRIPTION }}'
+name: Invoke-Pester (by PSModule)
+description: Runs test, using Pester and PowerShell.
 author: PSModule
 branding:
-  icon: upload-cloud
-  color: white
+  icon: check-square
+  color: gray-dark
 
 inputs:
-  working-directory:
-    description: The working directory where Terraform will be executed
+  Path:
+    description: |
+      Path to where tests are located or a configuration file.
     required: false
-  subject:
-    description: The subject to greet
+    default: ${{ github.workspace }}/tests
+  Run_Path:
+    description: |
+      Directories to be searched for tests, paths directly to test files, or combination of both.
     required: false
-    default: World
+  Run_ExcludePath:
+    description: |
+      Directories or files to be excluded from the run.
+    required: false
+  Run_ScriptBlock:
+    description: |
+      ScriptBlocks containing tests to be executed.
+    required: false
+  Run_Container:
+    description: |
+      ContainerInfo objects containing tests to be executed.
+    required: false
+  Run_TestExtension:
+    description: |
+      Filter used to identify test files.
+    required: false
+  Run_Exit:
+    description: |
+      Exit with non-zero exit code when the test run fails. Exit code is always set to `$LASTEXITCODE` even when this option is `$false`.
+      When used together with Throw, throwing an exception is preferred.
+    required: false
+  Run_Throw:
+    description: |
+      Throw an exception when test run fails. When used together with Exit, throwing an exception is preferred.
+    required: false
+  Run_PassThru:
+    description: |
+      Return result object to the pipeline after finishing the test run.
+    required: false
+  Run_SkipRun:
+    description: |
+      Runs the discovery phase but skips run. Use it with PassThru to get object populated with all tests.
+    required: false
+  Run_SkipRemainingOnFailure:
+    description: |
+      Skips remaining tests after failure for selected scope, options are None, Run, Container and Block.
+    required: false
+  Filter_Tag:
+    description: |
+      Tags of Describe, Context or It to be run.
+    required: false
+  Filter_ExcludeTag:
+    description: |
+      Tags of Describe, Context or It to be excluded from the run.
+    required: false
+  Filter_Line:
+    description: |
+      Filter by file and scriptblock start line, useful to run parsed tests programmatically to avoid problems with expanded names.
+      Example: 'C:\tests\file1.Tests.ps1:37'
+    required: false
+  Filter_ExcludeLine:
+    description: |
+      Exclude by file and scriptblock start line, takes precedence over Line.
+    required: false
+  Filter_FullName:
+    description: |
+      Full name of test with -like wildcards, joined by dot. Example: '*.describe Get-Item.test1'
+    required: false
+  CodeCoverage_Enabled:
+    description: |
+      Enable CodeCoverage.
+    required: false
+  CodeCoverage_OutputFormat:
+    description: |
+      Format to use for code coverage report. Possible values: JaCoCo, CoverageGutters, Cobertura
+    required: false
+  CodeCoverage_OutputPath:
+    description: |
+      Path relative to the current directory where code coverage report is saved.
+    required: false
+  CodeCoverage_OutputEncoding:
+    description: |
+      Encoding of the output file.
+    required: false
+  CodeCoverage_Path:
+    description: |
+      Directories or files to be used for code coverage, by default the Path(s) from general settings are used, unless overridden here.
+    required: false
+  CodeCoverage_ExcludeTests:
+    description: |
+      Exclude tests from code coverage. This uses the TestFilter from general configuration.
+    required: false
+  CodeCoverage_RecursePaths:
+    description: |
+      Will recurse through directories in the Path option.
+    required: false
+  CodeCoverage_CoveragePercentTarget:
+    description: |
+      Target percent of code coverage that you want to achieve.
+    required: false
+  CodeCoverage_UseBreakpoints:
+    description: |
+      EXPERIMENTAL: When false, use Profiler based tracer to do CodeCoverage instead of using breakpoints.
+    required: false
+  CodeCoverage_SingleHitBreakpoints:
+    description: |
+      Remove breakpoint when it is hit.
+    required: false
+  TestResult_Enabled:
+    description: |
+      Enable TestResult.
+    required: false
+  TestResult_OutputFormat:
+    description: |
+      Format to use for test result report. Possible values: NUnitXml, NUnit2.5, NUnit3 or JUnitXml
+    required: false
+  TestResult_OutputPath:
+    description: |
+      Path relative to the current directory where test result report is saved.
+    required: false
+  TestResult_OutputEncoding:
+    description: |
+      Encoding of the output file.
+    required: false
+  TestResult_TestSuiteName:
+    description: |
+      Set the name assigned to the root 'test-suite' element.
+    required: false
+  Should_ErrorAction:
+    description: |
+      Controls if Should throws on error. Use 'Stop' to throw on error, or 'Continue' to fail at the end of the test.
+    required: false
+  Debug_ShowFullErrors:
+    description: |
+      Show full errors including Pester internal stack. This property is deprecated, and if set to true it will override Output.StackTraceVerbosity to 'Full'.
+    required: false
+  Debug_WriteDebugMessages:
+    description: |
+      Write Debug messages to screen.
+    required: false
+  Debug_WriteDebugMessagesFrom:
+    description: |
+      Write Debug messages from a given source, WriteDebugMessages must be set to true for this to work.
+      You can use like wildcards to get messages from multiple sources, as well as * to get everything.
+    required: false
+  Debug_ShowNavigationMarkers:
+    description: |
+      Write paths after every block and test, for easy navigation in VSCode.
+    required: false
+  Debug_ReturnRawResultObject:
+    description: |
+      Returns unfiltered result object, this is for development only. Do not rely on this object for additional properties,
+      non-public properties will be renamed without previous notice.
+    required: false
+  Output_Verbosity:
+    description: |
+      The verbosity of output, options are None, Normal, Detailed and Diagnostic.
+    required: false
+  Output_StackTraceVerbosity:
+    description: |
+      The verbosity of stacktrace output, options are None, FirstLine, Filtered and Full.
+    required: false
+  Output_CIFormat:
+    description: |
+      The CI format of error output in build logs, options are None, Auto, AzureDevops and GithubActions.
+    required: false
+  Output_CILogLevel:
+    description: |
+      The CI log level in build logs, options are Error and Warning.
+    required: false
+  Output_RenderMode:
+    description: |
+      The mode used to render console output, options are Auto, Ansi, ConsoleColor and Plaintext.
+    required: false
+  TestDrive_Enabled:
+    description: |
+      Enable TestDrive.
+    required: false
+  TestRegistry_Enabled:
+    description: |
+      Enable TestRegistry.
+    required: false
+  Debug:
+    description: |
+      Enable debug mode.
+    required: false
+    default: 'false'
+outputs:
+  Containers:
+    description: Containers object used during the test.
+    value: ${{ fromJSON(steps.test.outputs.result).Containers }}
+  Result:
+    description: If the tests passed.
+    value: ${{ fromJSON(steps.test.outputs.result).Result }}
+  FailedCount:
+    description: Number of failed tests.
+    value: ${{ fromJSON(steps.test.outputs.result).FailedCount }}
+  FailedBlocksCount:
+    description: Number of failed blocks.
+    value: ${{ fromJSON(steps.test.outputs.result).FailedBlocksCount }}
+  FailedContainersCount:
+    description: Number of failed containers.
+    value: ${{ fromJSON(steps.test.outputs.result).FailedContainersCount }}
+  PassedCount:
+    description: Number of passed tests.
+    value: ${{ fromJSON(steps.test.outputs.result).PassedCount }}
+  SkippedCount:
+    description: Number of skipped tests.
+    value: ${{ fromJSON(steps.test.outputs.result).SkippedCount }}
+  InconclusiveCount:
+    description: Number of inconclusive tests.
+    value: ${{ fromJSON(steps.test.outputs.result).InconclusiveCount }}
+  NotRunCount:
+    description: Number of tests that were not run.
+    value: ${{ fromJSON(steps.test.outputs.result).NotRunCount }}
+  TotalCount:
+    description: Total number of tests.
+    value: ${{ fromJSON(steps.test.outputs.result).TotalCount }}
+  Duration:
+    description: Duration of the test run.
+    value: ${{ fromJSON(steps.test.outputs.result).Duration }}
+  Executed:
+    description: Number of tests executed.
+    value: ${{ fromJSON(steps.test.outputs.result).Executed }}
+  ExecutedAt:
+    description: Time when the tests were executed.
+    value: ${{ fromJSON(steps.test.outputs.result).ExecutedAt }}
+  Version:
+    description: Version of Pester used.
+    value: ${{ fromJSON(steps.test.outputs.result).Version }}
+  PSVersion:
+    description: Version of PowerShell used.
+    value: ${{ fromJSON(steps.test.outputs.result).PSVersion }}
+  PSBoundParameters:
+    description: Parameters used to run the tests.
+    value: ${{ fromJSON(steps.test.outputs.result).PSBoundParameters }}
+  Plugins:
+    description: Plugins used during the test run.
+    value: ${{ fromJSON(steps.test.outputs.result).Plugins }}
+  PluginConfiguration:
+    description: Configuration of the plugins.
+    value: ${{ fromJSON(steps.test.outputs.result).PluginConfiguration }}
+  PluginData:
+    description: Data of the plugins.
+    value: ${{ fromJSON(steps.test.outputs.result).PluginData }}
+  Configuration:
+    description: Configuration used during the test run.
+    value: ${{ fromJSON(steps.test.outputs.result).Configuration }}
+  DiscoveryDuration:
+    description: Duration of the discovery phase.
+    value: ${{ fromJSON(steps.test.outputs.result).DiscoveryDuration }}
+  UserDuration:
+    description: Duration of the user code execution.
+    value: ${{ fromJSON(steps.test.outputs.result).UserDuration }}
+  FrameworkDuration:
+    description: Duration of the framework code execution.
+    value: ${{ fromJSON(steps.test.outputs.result).FrameworkDuration }}
+  Failed:
+    description: Failed tests.
+    value: ${{ fromJSON(steps.test.outputs.result).Failed }}
+  FailedBlocks:
+    description: Failed blocks.
+    value: ${{ fromJSON(steps.test.outputs.result).FailedBlocks }}
+  FailedContainers:
+    description: Failed containers.
+    value: ${{ fromJSON(steps.test.outputs.result).FailedContainers }}
+  Passed:
+    description: Passed tests.
+    value: ${{ fromJSON(steps.test.outputs.result).Passed }}
+  Skipped:
+    description: Skipped tests.
+    value: ${{ fromJSON(steps.test.outputs.result).Skipped }}
+  Inconclusive:
+    description: Inconclusive tests.
+    value: ${{ fromJSON(steps.test.outputs.result).Inconclusive }}
+  NotRun:
+    description: Tests that were not run.
+    value: ${{ fromJSON(steps.test.outputs.result).NotRun }}
+  Tests:
+    description: All tests.
+    value: ${{ fromJSON(steps.test.outputs.result).Tests }}
+  CodeCoverage:
+    description: Code coverage report.
+    value: ${{ fromJSON(steps.test.outputs.result).CodeCoverage }}
 
 runs:
   using: composite
   steps:
-    - name: '{{ NAME }}'
-      shell: pwsh
-      working-directory: ${{ inputs.working-directory }}
+    - uses: PSModule/Debug@v0
+      if: ${{ inputs.Debug == 'true' }}
+
+    - name: Invoke-Pester
+      uses: PSModule/GitHub-Script@v1
+      id: test
+      continue-on-error: true
       env:
-        GITHUB_ACTION_INPUT_subject: ${{ inputs.subject }}
-      run: |
-        # '{{ NAME }}'
-        . "${{ github.action_path }}\scripts\main.ps1" -Verbose
+        GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
+        GITHUB_ACTION_INPUT_Run_Path: ${{ inputs.Run_Path }}
+        GITHUB_ACTION_INPUT_Run_ExcludePath: ${{ inputs.Run_ExcludePath }}
+        GITHUB_ACTION_INPUT_Run_ScriptBlock: ${{ inputs.Run_ScriptBlock }}
+        GITHUB_ACTION_INPUT_Run_Container: ${{ inputs.Run_Container }}
+        GITHUB_ACTION_INPUT_Run_TestExtension: ${{ inputs.Run_TestExtension }}
+        GITHUB_ACTION_INPUT_Run_Exit: ${{ inputs.Run_Exit }}
+        GITHUB_ACTION_INPUT_Run_Throw: ${{ inputs.Run_Throw }}
+        GITHUB_ACTION_INPUT_Run_PassThru: ${{ inputs.Run_PassThru }}
+        GITHUB_ACTION_INPUT_Run_SkipRun: ${{ inputs.Run_SkipRun }}
+        GITHUB_ACTION_INPUT_Run_SkipRemainingOnFailure: ${{ inputs.Run_SkipRemainingOnFailure }}
+        GITHUB_ACTION_INPUT_Filter_Tag: ${{ inputs.Filter_Tag }}
+        GITHUB_ACTION_INPUT_Filter_ExcludeTag: ${{ inputs.Filter_ExcludeTag }}
+        GITHUB_ACTION_INPUT_Filter_Line: ${{ inputs.Filter_Line }}
+        GITHUB_ACTION_INPUT_Filter_ExcludeLine: ${{ inputs.Filter_ExcludeLine }}
+        GITHUB_ACTION_INPUT_Filter_FullName: ${{ inputs.Filter_FullName }}
+        GITHUB_ACTION_INPUT_CodeCoverage_Enabled: ${{ inputs.CodeCoverage_Enabled }}
+        GITHUB_ACTION_INPUT_CodeCoverage_OutputFormat: ${{ inputs.CodeCoverage_OutputFormat }}
+        GITHUB_ACTION_INPUT_CodeCoverage_OutputPath: ${{ inputs.CodeCoverage_OutputPath }}
+        GITHUB_ACTION_INPUT_CodeCoverage_OutputEncoding: ${{ inputs.CodeCoverage_OutputEncoding }}
+        GITHUB_ACTION_INPUT_CodeCoverage_Path: ${{ inputs.CodeCoverage_Path }}
+        GITHUB_ACTION_INPUT_CodeCoverage_ExcludeTests: ${{ inputs.CodeCoverage_ExcludeTests }}
+        GITHUB_ACTION_INPUT_CodeCoverage_RecursePaths: ${{ inputs.CodeCoverage_RecursePaths }}
+        GITHUB_ACTION_INPUT_CodeCoverage_CoveragePercentTarget: ${{ inputs.CodeCoverage_CoveragePercentTarget }}
+        GITHUB_ACTION_INPUT_CodeCoverage_UseBreakpoints: ${{ inputs.CodeCoverage_UseBreakpoints }}
+        GITHUB_ACTION_INPUT_CodeCoverage_SingleHitBreakpoints: ${{ inputs.CodeCoverage_SingleHitBreakpoints }}
+        GITHUB_ACTION_INPUT_TestResult_Enabled: ${{ inputs.TestResult_Enabled }}
+        GITHUB_ACTION_INPUT_TestResult_OutputFormat: ${{ inputs.TestResult_OutputFormat }}
+        GITHUB_ACTION_INPUT_TestResult_OutputPath: ${{ inputs.TestResult_OutputPath }}
+        GITHUB_ACTION_INPUT_TestResult_OutputEncoding: ${{ inputs.TestResult_OutputEncoding }}
+        GITHUB_ACTION_INPUT_TestResult_TestSuiteName: ${{ inputs.TestResult_TestSuiteName }}
+        GITHUB_ACTION_INPUT_Should_ErrorAction: ${{ inputs.Should_ErrorAction }}
+        GITHUB_ACTION_INPUT_Debug_ShowFullErrors: ${{ inputs.Debug_ShowFullErrors }}
+        GITHUB_ACTION_INPUT_Debug_WriteDebugMessages: ${{ inputs.Debug_WriteDebugMessages }}
+        GITHUB_ACTION_INPUT_Debug_WriteDebugMessagesFrom: ${{ inputs.Debug_WriteDebugMessagesFrom }}
+        GITHUB_ACTION_INPUT_Debug_ShowNavigationMarkers: ${{ inputs.Debug_ShowNavigationMarkers }}
+        GITHUB_ACTION_INPUT_Debug_ReturnRawResultObject: ${{ inputs.Debug_ReturnRawResultObject }}
+        GITHUB_ACTION_INPUT_Output_Verbosity: ${{ inputs.Output_Verbosity }}
+        GITHUB_ACTION_INPUT_Output_StackTraceVerbosity: ${{ inputs.Output_StackTraceVerbosity }}
+        GITHUB_ACTION_INPUT_Output_CIFormat: ${{ inputs.Output_CIFormat }}
+        GITHUB_ACTION_INPUT_Output_CILogLevel: ${{ inputs.Output_CILogLevel }}
+        GITHUB_ACTION_INPUT_Output_RenderMode: ${{ inputs.Output_RenderMode }}
+        GITHUB_ACTION_INPUT_TestDrive_Enabled: ${{ inputs.TestDrive_Enabled }}
+        GITHUB_ACTION_INPUT_TestRegistry_Enabled: ${{ inputs.TestRegistry_Enabled }}
+      with:
+        ShowOutput: true
+        Script: |
+          # Invoke-Pester
+          ${{ github.action_path }}\scripts\main.ps1
+
+    - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults]
+      uses: actions/upload-artifact@v4
+      if: ${{ fromJSON(steps.test.outputs.result).TestResultEnabled && (success() || failure()) }}
+      with:
+        name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults
+        path: ${{ fromJSON(steps.test.outputs.result).TestResultOutputPath }}
+
+    - name: Upload code coverage report - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage]
+      uses: actions/upload-artifact@v4
+      if: ${{ fromJSON(steps.test.outputs.result).CodeCoverageEnabled && (success() || failure()) }}
+      with:
+        name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage
+        path: ${{ fromJSON(steps.test.outputs.result).CodeCoverageOutputPath }}
