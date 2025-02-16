@@ -116,7 +116,7 @@ LogGroup 'Load configuration - Custom settings file' {
         TestRegistry = $tmpCustom.TestRegistry ?? @{}
     }
 
-    $customConfig = $tmpCustomConfiguration | Clear-PesterConfigurationEmptyValues
+    $customConfig = $tmpCustomConfiguration | Clear-PesterConfigurationEmptyValue
     Write-Output ($customConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
@@ -185,7 +185,7 @@ LogGroup 'Load configuration - Action overrides' {
         }
     }
 
-    $customInputs = $customConfigInputMap | Clear-PesterConfigurationEmptyValues
+    $customInputs = $customConfigInputMap | Clear-PesterConfigurationEmptyValue
     Write-Output ($customInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
