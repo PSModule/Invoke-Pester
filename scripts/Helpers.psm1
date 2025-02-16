@@ -83,7 +83,6 @@ filter Clear-PesterConfigurationEmptyValues {
     return $return
 }
 
-
 function Merge-Hashtable {
     <#
         .SYNOPSIS

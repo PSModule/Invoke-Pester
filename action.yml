@@ -1,4 +1,4 @@
-name: Invoke-Pester
+name: Invoke-Pester (by PSModule)
 description: Runs test, using Pester and PowerShell.
 author: PSModule
 branding:

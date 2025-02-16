@@ -218,8 +218,6 @@ LogGroup 'Load configuration - Merge' {
 }
 
 LogGroup 'Load configuration - Add containers' {
-
-
     Write-Output "Containers from configuration: [$($configuration.Run.Container.Count)]"
     Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 
