@@ -1,5 +1,5 @@
 ﻿# Cars.Settings.ps1
-$CarsSettings = @{
+$script:CarsSettings = @{
     # Expected number of car models for testing
     CarCount  = 3
 

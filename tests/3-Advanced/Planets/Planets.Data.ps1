@@ -1,5 +1,5 @@
 ﻿# Planets.Settings.ps1
-$PlanetsSettings = @{
+$script:PlanetsSettings = @{
     # Expected number of planets (classical count excluding dwarf planets)
     PlanetCount = 8
 
