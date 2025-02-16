@@ -10,6 +10,14 @@
     @{ Name = 'smiling face with smiling eyes'; Symbol = '😊'; Kind = 'Face' }
 ) | ForEach-Object { [PSCustomObject]$_ }
 
-function Get-Emoji ([string]$Name = '*') {
+function Get-Emoji {
+    <#
+            .SYNOPSIS
+            Get emoji by name.
+        #>
+    [CmdletBinding()]
+    param(
+        [string]$Name = '*'
+    )
     $script:emojis | Where-Object Name -Like $Name | ForEach-Object Symbol
 }
