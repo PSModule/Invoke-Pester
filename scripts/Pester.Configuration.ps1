@@ -1,4 +1,4 @@
-@{
+﻿@{
     Run          = @{
         Path                   = $Path
         ExcludePath            = @()
