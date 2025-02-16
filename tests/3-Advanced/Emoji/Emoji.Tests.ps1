@@ -1,4 +1,12 @@
-﻿[CmdletBinding()]
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSReviewUnusedParameter', '',
+    Justification = 'Required for Pester tests'
+)]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseDeclaredVarsMoreThanAssignments', '',
+    Justification = 'Required for Pester tests'
+)]
+[CmdletBinding()]
 param(
     [Parameter(Mandatory)]
     [string] $Path
@@ -24,37 +32,37 @@ Describe 'Get-Emoji' {
     Context 'Lookup by wildcard' {
         Context 'by prefix' {
             BeforeAll {
-                $emojis = Get-Emoji -Name pen*
+                $script:emojis = Get-Emoji -Name pen*
             }
 
             It 'Returns ✏️ (pencil)' {
-                $emojis | Should -Contain '✏️'
+                $script:emojis | Should -Contain '✏️'
             }
 
             It 'Returns 🐧 (penguin)' {
-                $emojis | Should -Contain '🐧'
+                $script:emojis | Should -Contain '🐧'
             }
 
             It 'Returns 😔 (pensive)' {
-                $emojis | Should -Contain '😔'
+                $script:emojis | Should -Contain '😔'
             }
         }
 
         Context 'by contains' {
             BeforeAll {
-                $emojis = Get-Emoji -Name *smiling*
+                $script:emojis = Get-Emoji -Name *smiling*
             }
 
             It 'Returns 🙂 (slightly smiling face)' {
-                $emojis | Should -Contain '🙂'
+                $script:emojis | Should -Contain '🙂'
             }
 
             It 'Returns 😁 (beaming face with smiling eyes)' {
-                $emojis | Should -Contain '😁'
+                $script:emojis | Should -Contain '😁'
             }
 
             It 'Returns 😊 (smiling face with smiling eyes)' {
-                $emojis | Should -Contain '😊'
+                $script:emojis | Should -Contain '😊'
             }
         }
     }

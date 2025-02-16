@@ -1,5 +1,16 @@
-﻿BeforeAll {
-    $emojis = @(
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSReviewUnusedParameter', '',
+    Justification = 'Required for Pester tests'
+)]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseDeclaredVarsMoreThanAssignments', '',
+    Justification = 'Required for Pester tests'
+)]
+[CmdletBinding()]
+param()
+
+BeforeAll {
+    $script:emojis = @(
         @{ Name = 'apple'; Symbol = '🍎'; Kind = 'Fruit' }
         @{ Name = 'beaming face with smiling eyes'; Symbol = '😁'; Kind = 'Face' }
         @{ Name = 'cactus'; Symbol = '🌵'; Kind = 'Plant' }
@@ -11,8 +22,16 @@
         @{ Name = 'smiling face with smiling eyes'; Symbol = '😊'; Kind = 'Face' }
     ) | ForEach-Object { [PSCustomObject]$_ }
 
-    function Get-Emoji ([string]$Name = '*') {
-        $emojis | Where-Object Name -Like $Name | ForEach-Object Symbol
+    function Get-Emoji {
+        <#
+            .SYNOPSIS
+            Get emoji by name.
+        #>
+        [CmdletBinding()]
+        param(
+            [string]$Name = '*'
+        )
+        $script:emojis | Where-Object Name -Like $Name | ForEach-Object Symbol
     }
 }
 
@@ -30,37 +49,37 @@ Describe 'Get-Emoji' {
     Context 'Lookup by wildcard' {
         Context 'by prefix' {
             BeforeAll {
-                $emojis = Get-Emoji -Name pen*
+                $script:emojis = Get-Emoji -Name pen*
             }
 
             It 'Returns ✏️ (pencil)' {
-                $emojis | Should -Contain '✏️'
+                $script:emojis | Should -Contain '✏️'
             }
 
             It 'Returns 🐧 (penguin)' {
-                $emojis | Should -Contain '🐧'
+                $script:emojis | Should -Contain '🐧'
             }
 
             It 'Returns 😔 (pensive)' {
-                $emojis | Should -Contain '😔'
+                $script:emojis | Should -Contain '😔'
             }
         }
 
         Context 'by contains' {
             BeforeAll {
-                $emojis = Get-Emoji -Name *smiling*
+                $script:emojis = Get-Emoji -Name *smiling*
             }
 
             It 'Returns 🙂 (slightly smiling face)' {
-                $emojis | Should -Contain '🙂'
+                $script:emojis | Should -Contain '🙂'
             }
 
             It 'Returns 😁 (beaming face with smiling eyes)' {
-                $emojis | Should -Contain '😁'
+                $script:emojis | Should -Contain '😁'
             }
 
             It 'Returns 😊 (smiling face with smiling eyes)' {
-                $emojis | Should -Contain '😊'
+                $script:emojis | Should -Contain '😊'
             }
         }
     }

@@ -1,5 +1,5 @@
 ﻿# Animals.Settings.ps1
-$AnimalsSettings = @{
+$script:AnimalsSettings = @{
     # Expected number of animal types for testing
     AnimalCount = 5
 
