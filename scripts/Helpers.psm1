@@ -81,7 +81,7 @@ function Get-PesterConfiguration {
         [string] $Path
     )
 
-    Write-Output "Path: [$Path]"
+    Write-Host "Path: [$Path]"
     $pathExists = Test-Path -Path $Path
     if (-not $pathExists) {
         throw "Test path does not exist: [$Path]"
@@ -91,7 +91,7 @@ function Get-PesterConfiguration {
     if ($item.PSIsContainer) {
         $file = Get-ChildItem -Path $Path -Filter *.Configuration.*
         if ($file.Count -eq 0) {
-            Write-Verbose "No configuration files found in path: [$Path]"
+            Write-Host "No configuration files found in path: [$Path]"
             return @{}
         }
         if ($file.Count -gt 1) {
