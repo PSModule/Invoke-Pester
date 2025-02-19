@@ -97,6 +97,7 @@ function Get-PesterConfiguration {
 
     Write-Host "Importing configuration data file: $($file.FullName)"
     $hashtable = Import-PowerShellDataFile -Path $($file.FullName)
+    Write-Verbose ($hashtable | ConvertTo-Json -Depth 5) -Verbose
     New-PesterConfiguration -Hashtable $hashtable
 }
 
