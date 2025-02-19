@@ -89,7 +89,9 @@ function Get-PesterConfiguration {
     $item = $Path | Get-Item
 
     if ($item.PSIsContainer) {
+        Write-Host "Path is a directory. Searching for configuration files..."
         $file = Get-ChildItem -Path $Path -Filter *.Configuration.*
+        Write-Host "Found $($file.Count) configuration files."
         if ($file.Count -eq 0) {
             Write-Host "No configuration files found in path: [$Path]"
             return @{}
@@ -103,9 +105,11 @@ function Get-PesterConfiguration {
 
     switch ($file.Extension) {
         '.ps1' {
+            Write-Host "Executing configuration script: $($file.FullName)"
             . $file
         }
         '.psd1' {
+            Write-Host "Importing configuration data file: $($file.FullName)"
             Import-PowerShellDataFile -Path $file
         }
     }
