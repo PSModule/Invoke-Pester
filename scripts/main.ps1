@@ -103,9 +103,6 @@ LogGroup 'Load configuration - Defaults' {
 
 LogGroup 'Load configuration - Custom settings file' {
     $tmpCustom = Get-PesterConfiguration -Path $inputs.Path
-    Write-Verbose "Custom configuration: [$($tmpCustom.Count)]" -Verbose
-    Write-Output ($tmpCustom | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
-
     $customConfig = $tmpCustom | Clear-PesterConfigurationEmptyValue
     Write-Output ($customConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
@@ -179,29 +176,9 @@ LogGroup 'Load configuration - Action overrides' {
 }
 
 LogGroup 'Load configuration - Merge' {
-    $run = Merge-Hashtable -Main $defaultConfig.Run -Overrides $customConfig.Run, $customInputs.Run
-    $filter = Merge-Hashtable -Main $defaultConfig.Filter -Overrides $customConfig.Filter, $customInputs.Filter
-    $codeCoverage = Merge-Hashtable -Main $defaultConfig.CodeCoverage -Overrides $customConfig.CodeCoverage, $customInputs.CodeCoverage
-    $testResult = Merge-Hashtable -Main $defaultConfig.TestResult -Overrides $customConfig.TestResult, $customInputs.TestResult
-    $should = Merge-Hashtable -Main $defaultConfig.Should -Overrides $customConfig.Should, $customInputs.Should
-    $debug = Merge-Hashtable -Main $defaultConfig.Debug -Overrides $customConfig.Debug, $customInputs.Debug
-    $output = Merge-Hashtable -Main $defaultConfig.Output -Overrides $customConfig.Output, $customInputs.Output
-    $testDrive = Merge-Hashtable -Main $defaultConfig.TestDrive -Overrides $customConfig.TestDrive, $customInputs.TestDrive
-    $testRegistry = Merge-Hashtable -Main $defaultConfig.TestRegistry -Overrides $customConfig.TestRegistry, $customInputs.TestRegistry
+    $configuration = Merge-PesterConfiguration -BaseConfiguration $defaultConfig -AdditionalConfiguration $customConfig, $customInputs
 
-    $configuration = @{
-        Run          = $run
-        Filter       = $filter
-        CodeCoverage = $codeCoverage
-        TestResult   = $testResult
-        Should       = $should
-        Debug        = $debug
-        Output       = $output
-        TestDrive    = $testDrive
-        TestRegistry = $testRegistry
-    }
-
-    if (-not $configuration.Run.Path) {
+    if ([string]::IsNullOrEmpty($configuration.Run.Path.Value)) {
         $configuration.Run.Path = $inputs.Path
     }
 }

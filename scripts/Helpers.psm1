@@ -89,7 +89,7 @@ function Get-PesterConfiguration {
     $item = $Path | Get-Item
 
     if ($item.PSIsContainer) {
-        Write-Host "Path is a directory. Searching for configuration files..."
+        Write-Host 'Path is a directory. Searching for configuration files...'
         $file = Get-ChildItem -Path $Path -Filter *.Configuration.*
         Write-Host "Found $($file.Count) configuration files."
         if ($file.Count -eq 0) {
@@ -103,15 +103,83 @@ function Get-PesterConfiguration {
         $file = $item
     }
 
-    switch ($file.Extension) {
-        '.ps1' {
-            Write-Host "Executing configuration script: $($file.FullName)"
-            . $file
+    Write-Host "Importing configuration data file: $($file.FullName)"
+    $hashtable = Import-PowerShellDataFile -Path $($file.FullName)
+
+    $configuration = @{
+        Run          = $hashtable.Run
+        Filter       = $hashtable.Filter
+        CodeCoverage = $hashtable.CodeCoverage
+        TestResult   = $hashtable.TestResult
+        Should       = $hashtable.Should
+        Debug        = $hashtable.Debug
+        Output       = $hashtable.Output
+        TestDrive    = $hashtable.TestDrive
+        TestRegistry = $hashtable.TestRegistry
+    }
+}
+
+function Merge-PesterConfiguration {
+    <#
+    .SYNOPSIS
+    Merges a base Pester configuration with additional settings.
+
+    .DESCRIPTION
+    The `Merge-PesterConfiguration` function takes a base Pester configuration hashtable and merges it with
+    additional configuration settings. The function processes each additional configuration hashtable and
+    merges it into the base configuration. If multiple additional configurations are provided, the function
+    merges them sequentially, with each subsequent configuration overwriting the previous one.
+
+    .EXAMPLE
+    $baseConfig = @{
+        Run = @{
+            PassThru = $false
         }
-        '.psd1' {
-            Write-Host "Importing configuration data file: $($file.FullName)"
-            Import-PowerShellDataFile -Path $file
+    }
+    $additionalConfig1 = @{
+        Run = @{
+            PassThru = $true
         }
+    }
+    $additionalConfig2 = @{
+        Run = @{
+            PassThru    = $false
+            ExcludePath = "Test-Exclude"
+        }
+    }
+    Merge-PesterConfiguration -BaseConfiguration $baseConfig -AdditionalConfiguration $additionalConfig1, $additionalConfig2
+
+    .NOTES
+    General notes
+    #>
+    [CmdletBinding()]
+    param (
+        # The base configuration hashtable to merge into.
+        [Parameter(Mandatory)]
+        [hashtable] $BaseConfiguration,
+
+        # The additional configuration hashtable to merge into the base.
+        [Parameter(Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName
+        )]
+        [hashtable[]] $AdditionalConfiguration
+    )
+
+    begin {
+        $mergedConfiguration = New-PesterConfiguration -Hashtable $BaseConfiguration
+    }
+
+    process {
+        foreach ($config in $AdditionalConfiguration) {
+            $correct = [PesterConfigurationDeserializer]::new().CanConvertFrom($config, [PesterConfiguration])
+            Write-Host "Correct: $correct"
+            $mergedConfiguration = [PesterConfiguration]::Merge($mergedConfiguration, $config)
+        }
+    }
+
+    end {
+        return $mergedConfiguration
     }
 }
 
