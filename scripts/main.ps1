@@ -103,6 +103,8 @@ LogGroup 'Load configuration - Defaults' {
 
 LogGroup 'Load configuration - Custom settings file' {
     $tmpCustom = Get-PesterConfiguration -Path $inputs.Path
+    Write-Verbose "Custom configuration: [$($tmpCustom.Count)]" -Verbose
+    Write-Output ($tmpCustom | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
     $tmpCustomConfiguration = @{
         Run          = $tmpCustom.Run ?? @{}
         Filter       = $tmpCustom.Filter ?? @{}
