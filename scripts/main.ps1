@@ -102,8 +102,7 @@ LogGroup 'Load configuration - Defaults' {
 }
 
 LogGroup 'Load configuration - Custom settings file' {
-    $tmpCustom = Get-PesterConfiguration -Path $inputs.Path
-    $customConfig = $tmpCustom | Clear-PesterConfigurationEmptyValue
+    $customConfig = Get-PesterConfiguration -Path $inputs.Path
     Write-Output ($customConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
