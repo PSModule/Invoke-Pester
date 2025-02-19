@@ -165,6 +165,83 @@ function Merge-PesterConfiguration {
     }
 }
 
+function New-PesterConfigurationHashtable {
+    <#
+
+    #>
+    [CmdletBinding()]
+    param()
+
+    # Prepare the output hashtable
+    $result = @{}
+
+    $schema = [PesterConfiguration]::new()
+
+    # Iterate over each top-level category (Run, Filter, etc.)
+    foreach ($category in $schema.PSObject.Properties.Name) {
+        $categoryObj = $schema.$category
+        $subHash = @{}
+
+        # Iterate over each setting within the category
+        foreach ($settingName in $categoryObj.PSObject.Properties.Name) {
+            $subHash[$settingName] = $null
+        }
+
+        $result[$category] = $subHash
+    }
+    $result
+}
+
+filter Convert-PesterConfigurationToHashtable {
+    [OutputType([hashtable])]
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline
+        )]
+        [PesterConfiguration] $PesterConfiguration
+    )
+
+    # Prepare the output hashtable
+    $result = @{}
+
+    # Iterate over each top-level category (Run, Filter, etc.)
+    foreach ($category in $PesterConfiguration.PSObject.Properties.Name) {
+        $categoryObj = $PesterConfiguration.$category
+        $subHash = @{}
+
+        # Iterate over each setting within the category
+        foreach ($settingName in $categoryObj.PSObject.Properties.Name) {
+            $setting = $categoryObj.$settingName
+
+            # Only consider settings that have IsModified true
+            if ($setting -and $setting.PSObject.Properties.Match('IsModified') -and $setting.IsModified) {
+
+                # Ensure both Default and Value properties exist.
+                if ($setting.PSObject.Properties.Match('Default') -and $setting.PSObject.Properties.Match('Value')) {
+
+                    # Compare types (unless handling of nulls is desired differently).
+                    if (($null -ne $setting.Value) -and ($null -ne $setting.Default)) {
+                        if ($setting.Value.GetType().FullName -eq $setting.Default.GetType().FullName) {
+                            $subHash[$settingName] = $setting.Value
+                        }
+                    } else {
+                        # If both are null, include the key (adjust as needed).
+                        if (($null -eq $setting.Value) -and ($null -eq $setting.Default)) {
+                            $subHash[$settingName] = $null
+                        }
+                    }
+                }
+            }
+        }
+
+        $result[$category] = $subHash
+    }
+
+    return $result
+}
+
 filter Clear-PesterConfigurationEmptyValue {
     <#
         .SYNOPSIS
@@ -226,177 +303,6 @@ filter Clear-PesterConfigurationEmptyValue {
     }
 
     return $return
-}
-
-filter Format-TimeSpan {
-    <#
-        .SYNOPSIS
-        Formats a TimeSpan object into a human-readable string with the most appropriate unit.
-
-        .DESCRIPTION
-        The Format-TimeSpan function takes a TimeSpan object and returns a string representation of the duration
-        using the most significant unit (e.g., years, months, weeks, days, hours, minutes, etc.).
-
-        The function adapts dynamically to the scale of the input and ensures an appropriate level of rounding.
-        Negative TimeSpan values are handled properly by converting to absolute values for formatting
-        and appending a negative sign to the output.
-
-        .EXAMPLE
-        [TimeSpan]::FromDays(45) | Format-TimeSpan
-
-        Output:
-        ```powershell
-        1mo
-        ```
-
-        Formats a TimeSpan of 45 days into the closest unit, which is 1 month.
-
-        .EXAMPLE
-        [TimeSpan]::FromSeconds(90) | Format-TimeSpan
-
-        Output:
-        ```powershell
-        1m
-        ```
-
-        Converts 90 seconds into the most significant unit, which is 1 minute.
-
-        .EXAMPLE
-        [TimeSpan]::FromMilliseconds(500) | Format-TimeSpan
-
-        Output:
-        ```powershell
-        500ms
-        ```
-
-        Converts 500 milliseconds directly into milliseconds as it's the most appropriate unit.
-
-        .OUTPUTS
-        System.String
-
-        .NOTES
-        Returns a string representing the formatted TimeSpan using the most significant unit.
-    #>
-    [OutputType([string])]
-    [CmdletBinding()]
-    param(
-        # The TimeSpan object to be formatted into a human-readable string.
-        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
-        [TimeSpan] $TimeSpan
-    )
-
-    #----- 1) Handle negative TimeSpan -----
-    $isNegative = $TimeSpan.Ticks -lt 0
-    if ($isNegative) {
-        $TimeSpan = New-TimeSpan -Ticks (-1 * $TimeSpan.Ticks)
-    }
-
-    # Save original ticks for fractional math.
-    $originalTicks = $TimeSpan.Ticks
-
-    #----- 2) Define constants -----
-    [long] $ticks = $TimeSpan.Ticks
-    [long] $ticksInMillisecond = 10000       # 1 ms = 10,000 ticks
-    [long] $ticksInSecond = 10000000          # 1 s  = 10,000,000 ticks
-    [long] $ticksInMinute = $ticksInSecond * 60
-    [long] $ticksInHour = $ticksInMinute * 60
-    [long] $ticksInDay = $ticksInHour * 24
-    [long] $ticksInWeek = $ticksInDay * 7
-
-    # Approximate day-based constants for months & years
-    [double] $daysInMonth = 30.436875
-    [double] $daysInYear = 365.2425
-    [long] $ticksInMonth = [long]($daysInMonth * $ticksInDay)
-    [long] $ticksInYear = [long]($daysInYear * $ticksInDay)
-
-    #----- 3) Extract units from largest to smallest -----
-    $years = [math]::Floor($ticks / $ticksInYear)
-    $ticks %= $ticksInYear
-    $months = [math]::Floor($ticks / $ticksInMonth)
-    $ticks %= $ticksInMonth
-    $weeks = [math]::Floor($ticks / $ticksInWeek)
-    $ticks %= $ticksInWeek
-    $days = [math]::Floor($ticks / $ticksInDay)
-    $ticks %= $ticksInDay
-    $hours = [math]::Floor($ticks / $ticksInHour)
-    $ticks %= $ticksInHour
-    $minutes = [math]::Floor($ticks / $ticksInMinute)
-    $ticks %= $ticksInMinute
-    $seconds = [math]::Floor($ticks / $ticksInSecond)
-    $ticks %= $ticksInSecond
-    $milliseconds = [math]::Floor($ticks / $ticksInMillisecond)
-    $ticks %= $ticksInMillisecond
-    $microseconds = [math]::Floor($ticks / 10)
-    $ticks %= 10
-    $nanoseconds = $ticks * 100
-
-    #----- 4) Build a list of components -----
-    $components = [System.Collections.Generic.List[object]]::new()
-    $components.Add(@('Years', $years, 'y'))
-    $components.Add(@('Months', $months, 'mo'))
-    $components.Add(@('Weeks', $weeks, 'w'))
-    $components.Add(@('Days', $days, 'd'))
-    $components.Add(@('Hours', $hours, 'h'))
-    $components.Add(@('Minutes', $minutes, 'm'))
-    $components.Add(@('Seconds', $seconds, 's'))
-    $components.Add(@('Milliseconds', $milliseconds, 'ms'))
-    $components.Add(@('Microseconds', $microseconds, 'us'))
-    $components.Add(@('Nanoseconds', $nanoseconds, 'ns'))
-
-    # Map each unit to a numeric rank (lower = more significant)
-    $unitRank = @{
-        'Years'        = 1
-        'Months'       = 2
-        'Weeks'        = 3
-        'Days'         = 4
-        'Hours'        = 5
-        'Minutes'      = 6
-        'Seconds'      = 7
-        'Milliseconds' = 8
-        'Microseconds' = 9
-        'Nanoseconds'  = 10
-    }
-    # With no Precision parameter, allow all units (Nanoseconds rank is 10)
-    [int] $lowestUnitAllowed = 10
-
-    #----- 5) Adaptive rounding: Pick the first (highest) nonzero unit -----
-    $highestUnitComponent = $null
-    foreach ($comp in $components) {
-        $unitName = $comp[0]
-        $value = $comp[1]
-        if ($unitRank[$unitName] -le $lowestUnitAllowed -and $value -ne 0) {
-            $highestUnitComponent = $comp
-            break
-        }
-    }
-    if (-not $highestUnitComponent) {
-        # If all components are zero, fall back to Nanoseconds.
-        $highestUnitComponent = $components[-1]
-    }
-    $unitName = $highestUnitComponent[0]
-    $unitAbbr = $highestUnitComponent[2]
-
-    # Compute the full timespan in the chosen unit.
-    switch ($unitName) {
-        'Years' { $fractionalValue = $originalTicks / $ticksInYear }
-        'Months' { $fractionalValue = $originalTicks / $ticksInMonth }
-        'Weeks' { $fractionalValue = $originalTicks / $ticksInWeek }
-        'Days' { $fractionalValue = $originalTicks / $ticksInDay }
-        'Hours' { $fractionalValue = $originalTicks / $ticksInHour }
-        'Minutes' { $fractionalValue = $originalTicks / $ticksInMinute }
-        'Seconds' { $fractionalValue = $originalTicks / $ticksInSecond }
-        'Milliseconds' { $fractionalValue = $originalTicks / $ticksInMillisecond }
-        'Microseconds' { $fractionalValue = $originalTicks / 10 }
-        'Nanoseconds' { $fractionalValue = $originalTicks * 100 }
-    }
-
-    # Round to the nearest integer.
-    $roundedValue = [math]::Round($fractionalValue, 0, [System.MidpointRounding]::AwayFromZero)
-    $formatted = "$roundedValue$unitAbbr"
-    if ($isNegative) {
-        $formatted = "-$formatted"
-    }
-    return $formatted
 }
 
 function Get-GroupedTestMarkdown {

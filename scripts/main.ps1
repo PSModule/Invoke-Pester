@@ -3,7 +3,7 @@
 param()
 
 LogGroup 'Setup prerequisites' {
-    'Pester', 'PSScriptAnalyzer', 'Hashtable' | ForEach-Object {
+    'Pester', 'PSScriptAnalyzer', 'Hashtable', 'TimeSpan' | ForEach-Object {
         Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
         Import-Module -Name $_ -Verbose:$false
     }
@@ -83,7 +83,7 @@ $customConfig = @{}
 $customInputs = @{}
 
 LogGroup 'Load configuration - Defaults' {
-    $defaultConfig = New-PesterConfiguration
+    $defaultConfig = New-PesterConfiguration | Convert-PesterConfigurationToHashtable
     Write-Output ($defaultConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
