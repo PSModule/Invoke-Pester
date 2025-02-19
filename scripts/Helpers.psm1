@@ -32,15 +32,7 @@
     )
 
     Get-ChildItem -Path $Path -Recurse -Filter *.Container.ps* | ForEach-Object {
-        $file = $_
-        switch ($file.Extension) {
-            '.ps1' {
-                . $file
-            }
-            '.psd1' {
-                Import-PowerShellDataFile -Path $file
-            }
-        }
+        Import-PowerShellDataFile -Path $_
     }
 }
 
@@ -73,7 +65,7 @@ function Get-PesterConfiguration {
         The function returns a hashtable containing the Pester configuration if found.
         If no configuration file is found, an empty hashtable is returned.
     #>
-    [OutputType([hashtable])]
+    [OutputType([PesterConfiguration])]
     [CmdletBinding()]
     param(
         # Specifies the path where the Pester configuration file is located.
@@ -94,7 +86,7 @@ function Get-PesterConfiguration {
         Write-Host "Found $($file.Count) configuration files."
         if ($file.Count -eq 0) {
             Write-Host "No configuration files found in path: [$Path]"
-            return @{}
+            return New-PesterConfiguration -Hashtable @{}
         }
         if ($file.Count -gt 1) {
             throw "Multiple configuration files found in path: [$Path]"
@@ -105,18 +97,7 @@ function Get-PesterConfiguration {
 
     Write-Host "Importing configuration data file: $($file.FullName)"
     $hashtable = Import-PowerShellDataFile -Path $($file.FullName)
-
-    $configuration = @{
-        Run          = $hashtable.Run
-        Filter       = $hashtable.Filter
-        CodeCoverage = $hashtable.CodeCoverage
-        TestResult   = $hashtable.TestResult
-        Should       = $hashtable.Should
-        Debug        = $hashtable.Debug
-        Output       = $hashtable.Output
-        TestDrive    = $hashtable.TestDrive
-        TestRegistry = $hashtable.TestRegistry
-    }
+    New-PesterConfiguration -Hashtable $hashtable
 }
 
 function Merge-PesterConfiguration {

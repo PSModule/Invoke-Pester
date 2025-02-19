@@ -83,21 +83,7 @@ $customConfig = @{}
 $customInputs = @{}
 
 LogGroup 'Load configuration - Defaults' {
-    $defaultConfigPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
-    if (Test-Path -Path $defaultConfigPath) {
-        $tmpDefault = . $defaultConfigPath
-    }
-    $defaultConfig = @{
-        Run          = $tmpDefault.Run ?? @{}
-        Filter       = $tmpDefault.Filter ?? @{}
-        CodeCoverage = $tmpDefault.CodeCoverage ?? @{}
-        TestResult   = $tmpDefault.TestResult ?? @{}
-        Should       = $tmpDefault.Should ?? @{}
-        Debug        = $tmpDefault.Debug ?? @{}
-        Output       = $tmpDefault.Output ?? @{}
-        TestDrive    = $tmpDefault.TestDrive ?? @{}
-        TestRegistry = $tmpDefault.TestRegistry ?? @{}
-    }
+    $defaultConfig = New-PesterConfiguration
     Write-Output ($defaultConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
