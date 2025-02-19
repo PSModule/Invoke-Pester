@@ -105,19 +105,8 @@ LogGroup 'Load configuration - Custom settings file' {
     $tmpCustom = Get-PesterConfiguration -Path $inputs.Path
     Write-Verbose "Custom configuration: [$($tmpCustom.Count)]" -Verbose
     Write-Output ($tmpCustom | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
-    $tmpCustomConfiguration = @{
-        Run          = $tmpCustom.Run ?? @{}
-        Filter       = $tmpCustom.Filter ?? @{}
-        CodeCoverage = $tmpCustom.CodeCoverage ?? @{}
-        TestResult   = $tmpCustom.TestResult ?? @{}
-        Should       = $tmpCustom.Should ?? @{}
-        Debug        = $tmpCustom.Debug ?? @{}
-        Output       = $tmpCustom.Output ?? @{}
-        TestDrive    = $tmpCustom.TestDrive ?? @{}
-        TestRegistry = $tmpCustom.TestRegistry ?? @{}
-    }
 
-    $customConfig = $tmpCustomConfiguration | Clear-PesterConfigurationEmptyValue
+    $customConfig = $tmpCustom | Clear-PesterConfigurationEmptyValue
     Write-Output ($customConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
