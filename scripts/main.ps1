@@ -222,7 +222,7 @@ LogGroup 'Load configuration - Add containers' {
     # Load configuration - Add containers
     if ($configuration.Run.Container.Count -eq 0) {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
-        Write-Ouptut "No containers specified. Searching for containers in Run.Path directories."
+        Write-Output "No containers specified. Searching for containers in Run.Path directories."
         foreach ($testDir in $configuration.Run.Path) {
             Write-Output "Processing directory [$testDir]"
             if (Test-Path -LiteralPath $testDir -PathType Container) {
