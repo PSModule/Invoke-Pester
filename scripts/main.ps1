@@ -3,7 +3,7 @@
 param()
 
 LogGroup 'Setup prerequisites' {
-    'Pester', 'PSScriptAnalyzer' | ForEach-Object {
+    'Pester', 'PSScriptAnalyzer', 'Hashtable' | ForEach-Object {
         Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
         Import-Module -Name $_ -Verbose:$false
     }
