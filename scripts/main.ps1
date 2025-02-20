@@ -191,7 +191,7 @@ LogGroup 'Find containers' {
             Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
             foreach ($containerFile in $containerFiles) {
                 Write-Output "Processing container file [$containerFile]"
-                $containers += (. $_)
+                $containers += Import-Hashtable $containerFile
             }
         }
     }
