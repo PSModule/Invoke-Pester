@@ -181,7 +181,7 @@ LogGroup 'Find containers' {
         Write-Output 'Searching for containers in Run.Path directories.'
         foreach ($testDir in $configuration.Run.Path) {
             Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse | ForEach-Object {
-                $containers += . $_
+                $containers += (. $_)
             }
         }
     }
