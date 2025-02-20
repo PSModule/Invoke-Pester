@@ -154,7 +154,8 @@ function Merge-PesterConfiguration {
     process {
         foreach ($config in $AdditionalConfiguration) {
             foreach ($category in $config.Keys) {
-                Merge-Hashtable -Main $mergedConfiguration[$category] -Overrides $config[$category]
+                Write-Host "Merging category: [$category]"
+                $mergedConfiguration[$category] = Merge-Hashtable -Main $mergedConfiguration[$category] -Overrides $config[$category]
             }
         }
     }
