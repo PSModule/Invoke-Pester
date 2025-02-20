@@ -79,9 +79,6 @@ LogGroup 'Load inputs' {
     [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List
 }
 
-$customConfig = @{}
-$customInputs = @{}
-
 LogGroup 'Load configuration - Defaults' {
     $defaultConfig = New-PesterConfiguration | Convert-PesterConfigurationToHashtable
     Write-Output ($defaultConfig | Format-Hashtable | Out-String)
@@ -189,29 +186,23 @@ LogGroup 'Find containers' {
     Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
-# LogGroup 'Set Configuration - Result' {
-Write-Verbose 'Setting configuration values' -Verbose
-$artifactName = $configuration.TestResult.TestSuiteName
-Write-Verbose "Artifact name: [$artifactName]" -Verbose
-$configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
-Write-Verbose "Test result output path: [$($configuration.TestResult.OutputPath)]" -Verbose
-$configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
-Write-Verbose "Code coverage output path: [$($configuration.CodeCoverage.OutputPath)]" -Verbose
-$configuration.Run.PassThru = $true
-Write-Verbose "PassThru: [$($configuration.Run.PassThru)]" -Verbose
+LogGroup 'Set Configuration - Result' {
+    $artifactName = $configuration.TestResult.TestSuiteName
+    $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
+    $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
+    $configuration.Run.PassThru = $true
 
-# If any containers are defined as hashtables, convert them to PesterContainer objects
-$pesterContainers = @()
-$configuration.Run.Container = @()
-foreach ($container in $containers) {
-    Write-Verbose "Processing container [$container]" -Verbose
-    Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
-    $configuration.Run.Container += New-PesterContainer @container
+    # If any containers are defined as hashtables, convert them to PesterContainer objects
+    $configuration.Run.Container = @()
+    foreach ($container in $containers) {
+        Write-Verbose "Processing container [$container]" -Verbose
+        Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
+        $configuration.Run.Container += New-PesterContainer @container
+    }
+
+    $configuration = New-PesterConfiguration -Hashtable $configuration
+    Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
-
-$configuration = New-PesterConfiguration -Hashtable $configuration
-Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
-# }
 
 $testResults = Invoke-Pester -Configuration $configuration
 
