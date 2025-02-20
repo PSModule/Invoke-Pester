@@ -32,12 +32,12 @@
     )
 
     $containerFiles = Get-ChildItem -Path $Path -Recurse -Filter *.Container.*
-    Write-Host "Found $($containerFiles.Count) container files."
+    Write-Verbose "Found $($containerFiles.Count) container files."
 
     foreach ($file in $containerFiles) {
-        Write-Host "Loading container file: [$file]"
+        Write-Verbose "Loading container file: [$file]"
         $container = . $file
-        Write-Host ($container | Format-Hashtable | Out-String)
+        Write-Verbose ($container | Format-Hashtable | Out-String)
         $container
     }
 }
@@ -173,8 +173,42 @@ function Merge-PesterConfiguration {
 
 function New-PesterConfigurationHashtable {
     <#
+        .SYNOPSIS
+        Generates a hashtable representing the structure of a Pester configuration.
 
+        .DESCRIPTION
+        This function creates a hashtable that mirrors the structure of a Pester configuration object.
+        Each top-level category (e.g., Run, Filter) is represented as a key in the hashtable, with subkeys
+        corresponding to individual settings. The values for these settings are initialized as `$null`.
+
+        This function is useful for creating configuration templates or inspecting the available settings
+        in a structured manner.
+
+        .EXAMPLE
+        New-PesterConfigurationHashtable
+
+        Output:
+        ```powershell
+        Name                           Value
+        ----                           -----
+        Run                            @{Container = $null; Exit = $null; PassThru = $null;...}
+        Filter                         @{Tag = $null; ExcludeTag = $null;...}
+        ...
+        ```
+
+        Generates a hashtable representing the Pester configuration structure.
+
+        .OUTPUTS
+        hashtable
+
+        .NOTES
+        Returns a hashtable containing the structure of a Pester configuration with `$null` values.
     #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Creates an in-memory resource'
+    )]
+    [OutputType([hashtable])]
     [CmdletBinding()]
     param()
 
@@ -199,9 +233,37 @@ function New-PesterConfigurationHashtable {
 }
 
 filter Convert-PesterConfigurationToHashtable {
+    <#
+        .SYNOPSIS
+        Converts a PesterConfiguration object into a hashtable containing only modified settings.
+
+        .DESCRIPTION
+        This function iterates over a given PesterConfiguration object and extracts only the settings that have been modified.
+        It ensures that only properties with an `IsModified` flag set to `$true` are included in the output hashtable.
+        The function maintains the category structure of the configuration and retains type consistency when assigning values.
+
+        .EXAMPLE
+        $config = New-PesterConfiguration
+        $config.Run.PassThru = $true
+        Convert-PesterConfigurationToHashtable -PesterConfiguration $config
+
+        Output:
+        ```powershell
+        @{Run = @{PassThru = $true}}
+        ```
+
+        Converts the provided PesterConfiguration object into a hashtable containing only modified values.
+
+        .OUTPUTS
+        hashtable
+
+        .NOTES
+        A hashtable containing only modified settings from the provided PesterConfiguration object.
+    #>
     [OutputType([hashtable])]
     [CmdletBinding()]
     param(
+        # The PesterConfiguration object to convert into a hashtable.
         [Parameter(
             Mandatory,
             ValueFromPipeline
@@ -279,7 +341,7 @@ filter Clear-PesterConfigurationEmptyValue {
         .NOTES
         A cleaned hashtable with empty or null values removed.
     #>
-    [OutputType([Hashtable])]
+    [OutputType([hashtable])]
     [CmdletBinding()]
     param (
         # The hashtable containing Pester configuration settings to filter.
