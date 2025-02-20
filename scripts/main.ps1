@@ -243,18 +243,18 @@ LogGroup 'Test results summary' {
     $summaryMarkdown = @"
 
 <details><summary>$testSuitStatusIcon - $testSuitName ($formattedTestDuration)</summary>
+<p>
 
 <details><summary>Configuration</summary>
 <p>
 
-``````json
-$($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+``````pwsh
+$($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String)
 ``````
 
 </p>
 </details>
 
-<p>
 
 | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
