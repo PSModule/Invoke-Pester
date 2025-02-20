@@ -1,13 +1,16 @@
 ﻿@{
-    Run        = @{
+    Run          = @{
         Path     = $PSScriptRoot
         PassThru = $true
     }
-    TestResult = @{
+    TestResult   = @{
         Enabled       = $true
         TestSuiteName = 'Advanced'
     }
-    Output     = @{
+    CodeCoderage = @{
+        Enabled = $true
+    }
+    Output       = @{
         CIFormat            = 'Auto'
         StackTraceVerbosity = 'Filtered'
         Verbosity           = 'Detailed'
