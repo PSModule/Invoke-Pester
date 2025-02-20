@@ -455,7 +455,9 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
                 $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
                 $formattedDuration = $test.Duration | Format-TimeSpan
                 $markdown += @"
+<p>
 $groupIndent$testStatusIcon - $testName ($formattedDuration)
+
 
 "@
                 if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
@@ -464,7 +466,7 @@ $groupIndent$testStatusIcon - $testName ($formattedDuration)
 ``````
 $($test.ErrorRecord.Exception.Message)
 ``````
-
+</p>
 "@
                 }
             }
