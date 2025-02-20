@@ -187,7 +187,10 @@ LogGroup 'Find containers' {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
         Write-Output 'Searching for containers in same location as config.'
         foreach ($testDir in $inputs.Path) {
-            Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse | Where-Object { -not [string]::IsNullOrEmpty($_) } | ForEach-Object {
+            $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
+            Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
+            foreach ($containerFile in $containerFiles) {
+                Write-Output "Processing container file [$containerFile]"
                 $containers += (. $_)
             }
         }
