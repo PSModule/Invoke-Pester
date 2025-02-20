@@ -161,11 +161,12 @@ LogGroup 'Load configuration - Action overrides' {
 }
 
 LogGroup 'Merge configuration' {
-    $configuration = Merge-PesterConfiguration -BaseConfiguration $defaultConfig -AdditionalConfiguration $customConfig, $customInputs
+    $configuration = Merge-Hashtable -Main $defaultConfig -Overrides $customConfig, $customInputs
 
-    if ([string]::IsNullOrEmpty($configuration.Run.Path.Value)) {
+    if ([string]::IsNullOrEmpty($configuration.Run.Path)) {
         $configuration.Run.Path = $inputs.Path
     }
+    Write-Output ($configuration | Format-Hashtable | Out-String)
 }
 
 LogGroup 'Add configuration - Containers' {
