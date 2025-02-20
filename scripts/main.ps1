@@ -178,9 +178,13 @@ LogGroup 'Merge configuration' {
 
 LogGroup 'Find containers' {
     $containers = @()
-    $configuration.Run.Container | Where-Object { $null -ne $_ } | ForEach-Object {
-        Write-Verbose "Processing container [$_]"
-        $containers += $_ | Convert-PesterConfigurationToHashtable
+    $existingContainers = $configuration.Run.Container
+    if ($existingContainers.Count -gt 0) {
+        Write-Output "Containers from configuration: [$($existingContainers.Count)]"
+        foreach ($existingContainer in $existingContainers) {
+            Write-Output "Processing container [$existingContainer]"
+            $containers += $existingContainer | Convert-PesterConfigurationToHashtable
+        }
     }
     Write-Output "Containers from configuration: [$($containers.Count)]"
     if ($containers.Count -eq 0) {
