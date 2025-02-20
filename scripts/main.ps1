@@ -22,7 +22,7 @@ LogGroup 'Get test kit versions' {
 }
 
 LogGroup 'Load inputs' {
-    $providedItem = Resolve-Path -Path $env:GITHUB_WORKSPACE/$env:GITHUB_ACTION_INPUT_Path | Select-Object -ExpandProperty Path | Get-Item
+    $providedItem = Resolve-Path -Path $env:GITHUB_ACTION_INPUT_Path | Select-Object -ExpandProperty Path | Get-Item
     if ($providedItem -is [System.IO.DirectoryInfo]) {
         $providedPath = $providedItem.FullName
     } elseif ($providedItem -is [System.IO.FileInfo]) {
