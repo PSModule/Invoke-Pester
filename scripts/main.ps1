@@ -328,6 +328,9 @@ $configurationHashtable
 # For each property of testresults, output the value as a JSON object
 foreach ($property in $testResults.PSObject.Properties) {
     Write-Verbose "Setting output for [$($property.Name)]"
+    if ($property.Name -ne 'Containers') {
+        continue
+    }
     $name = $property.Name
     $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
     $summaryMarkdown += @"
@@ -345,13 +348,13 @@ $value
 
 }
 
-$summaryMarkdown += @"
+$summaryMarkdown += @'
 
 
 </p>
 </details>
 
-"@
+'@
 
 $summaryMarkdown += @'
 
