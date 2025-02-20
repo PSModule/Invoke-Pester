@@ -269,17 +269,6 @@ LogGroup 'Test results summary' {
 <details><summary>$testSuitStatusIcon - $testSuitName ($formattedTestDuration)</summary>
 <p>
 
-<details><summary>Configuration</summary>
-<p>
-
-``````pwsh
-$configurationHashtable
-``````
-
-</p>
-</details>
-
-
 | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
@@ -317,6 +306,20 @@ $configurationHashtable
 }
 
 $summaryMarkdown += @"
+
+-----------------------------------------
+
+<details><summary>Configuration</summary>
+<p>
+
+``````pwsh
+$configurationHashtable
+``````
+
+</p>
+</details>
+
+
 <details><summary>Test results</summary>
 <p>
 
