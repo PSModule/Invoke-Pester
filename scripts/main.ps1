@@ -184,7 +184,7 @@ LogGroup 'Find containers' {
         }
     }
     Write-Output "Containers found: [$($containers.Count)]"
-    $containers
+    Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
 LogGroup 'Set Configuration - Result' {
