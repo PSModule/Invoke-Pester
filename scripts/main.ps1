@@ -324,7 +324,12 @@ $configurationHashtable
 
 }
 
+$summaryMarkdown += @"
+<details><summary>Test results</summary>
+<p>
 
+
+"@
 # For each property of testresults, output the value as a JSON object
 foreach ($property in $testResults.PSObject.Properties) {
     Write-Verbose "Setting output for [$($property.Name)]"
@@ -343,8 +348,15 @@ $value
 
 "@
 
-    # Set-GitHubOutput -Name $name -Value $value
 }
+
+$summaryMarkdown += @"
+
+
+</p>
+</details>
+
+"@
 Set-GitHubStepSummary -Summary $summaryMarkdown
 Set-GitHubOutput -Name 'TestResultEnabled' -Value $testResults.Configuration.TestResult.Enabled.Value
 Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.Configuration.TestResult.OutputPath.Value
