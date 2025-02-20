@@ -187,7 +187,7 @@ LogGroup 'Find containers' {
 }
 
 LogGroup 'Set Configuration - Result' {
-    $artifactName = $configuration.TestResult.TestSuiteName
+    $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
     $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
     $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
     $configuration.Run.PassThru = $true
