@@ -181,32 +181,33 @@ LogGroup 'Find containers' {
         Write-Output 'Searching for containers in Run.Path directories.'
         foreach ($testDir in $configuration.Run.Path) {
             Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse | ForEach-Object {
-                $containers += (. $_)
+                $item = (. $_)
+                Write-Output ($item | Format-Hashtable | Out-String)
+                $containers += $item
             }
         }
     }
     Write-Output "Containers found: [$($containers.Count)]"
-    Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
-LogGroup 'Set Configuration - Result' {
-    $artifactName = $configuration.TestResult.TestSuiteName
-    $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
-    $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
-    $configuration.Run.PassThru = $true
+# LogGroup 'Set Configuration - Result' {
+$artifactName = $configuration.TestResult.TestSuiteName
+$configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
+$configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
+$configuration.Run.PassThru = $true
 
-    # If any containers are defined as hashtables, convert them to PesterContainer objects
-    for ($i = 0; $i -lt $containers.Count; $i++) {
-        if ($configuration.Run.Container[$i] -is [hashtable]) {
-            $cntnr = $containers[$i]
-            $configuration.Run.Container[$i] = New-PesterContainer @cntnr
-        }
+# If any containers are defined as hashtables, convert them to PesterContainer objects
+for ($i = 0; $i -lt $containers.Count; $i++) {
+    if ($configuration.Run.Container[$i] -is [hashtable]) {
+        $cntnr = $containers[$i]
+        $configuration.Run.Container[$i] = New-PesterContainer @cntnr
     }
-
-    $configuration = New-PesterConfiguration -Hashtable $configuration
-    Write-Output ($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String)
-    # Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
+
+$configuration = New-PesterConfiguration -Hashtable $configuration
+Write-Output ($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String)
+# Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+# }
 
 $testResults = Invoke-Pester -Configuration $configuration
 
