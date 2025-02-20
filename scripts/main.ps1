@@ -187,7 +187,7 @@ LogGroup 'Find containers' {
         }
     }
     Write-Output "Added containers: [$($configuration.Run.Container.Count)]"
-    Write-Output ($configuration.Run.Container | Format-Hashtable | Out-String)
+    Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
 LogGroup 'Set Configuration - Result' {

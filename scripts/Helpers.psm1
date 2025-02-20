@@ -32,6 +32,7 @@
     )
 
     Get-ChildItem -Path $Path -Recurse -Filter *.Container.* | ForEach-Object {
+        Write-Host "Loading container file: $($_.FullName)"
         Import-Hashtable -Path $_
     }
 }
