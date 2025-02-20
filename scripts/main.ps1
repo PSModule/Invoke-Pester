@@ -237,7 +237,7 @@ LogGroup 'Test results summary' {
         $coverageString = "$coverage%"
     }
 
-    $testSuitName = $($configuration.TestResult.TestSuiteName)
+    $testSuitName = $($configuration.TestResult.TestSuiteName.Value)
     $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
     $formattedTestDuration = $testResults.Duration | Format-TimeSpan
     $summaryMarkdown = @"
