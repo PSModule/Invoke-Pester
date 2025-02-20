@@ -248,6 +248,7 @@ runs:
         GITHUB_ACTION_INPUT_TestDrive_Enabled: ${{ inputs.TestDrive_Enabled }}
         GITHUB_ACTION_INPUT_TestRegistry_Enabled: ${{ inputs.TestRegistry_Enabled }}
       with:
+        ShowInfo: false
         ShowOutput: true
         Script: |
           # Invoke-Pester
