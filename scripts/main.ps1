@@ -170,24 +170,25 @@ LogGroup 'Merge configuration' {
 }
 
 LogGroup 'Find containers' {
-    Write-Output "Containers from configuration: [$($configuration.Run.Container.Count)]"
-    if ($configuration.Run.Container.Count -eq 0) {
+    $containers = @()
+    $containers += $configuration.Run.Container
+    Write-Output "Containers from configuration: [$($containers.Count)]"
+    if ($containers.Count -eq 0) {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
-        Write-Output "No containers specified. Searching for containers in Run.Path directories."
+        Write-Output 'No containers specified. Searching for containers in Run.Path directories.'
         foreach ($testDir in $configuration.Run.Path) {
             Write-Output "Processing directory [$testDir]"
             if (Test-Path -LiteralPath $testDir -PathType Container) {
                 Write-Output "Searching for containers in [$testDir]"
-                Get-PesterContainer -Path $testDir | ForEach-Object {
-                    Write-Output "Adding container:"
-                    Write-Output ($_ | Format-Hashtable | Out-String)
-                    $configuration.Run.Container += $_
-                }
+                $containers += Get-PesterContainer -Path $testDir
             }
         }
     }
-    Write-Output "Added containers: [$($configuration.Run.Container.Count)]"
-    Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
+    Write-Output "Containers found: [$($containers.Count)]"
+    foreach ($container in $containers) {
+        Write-Output ($container | Format-Hashtable | Out-String)
+        $configuration.Run.Container += $container
+    }
 }
 
 LogGroup 'Set Configuration - Result' {
