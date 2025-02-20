@@ -22,8 +22,18 @@ LogGroup 'Get test kit versions' {
 }
 
 LogGroup 'Load inputs' {
+    $providedItem = Resolve-Path -Path $env:GITHUB_WORKSPACE/$env:GITHUB_ACTION_INPUT_Path | Select-Object -ExpandProperty Path | Get-Item
+    if ($providedItem -is [System.IO.DirectoryInfo]) {
+        $providedPath = $providedItem.FullName
+    } elseif ($providedItem -is [System.IO.FileInfo]) {
+        $providedPath = $providedItem.Directory.FullName
+    } else {
+        Write-GitHubError "❌ Provided path [$providedItem] is not a valid directory or file."
+        exit 1
+    }
+
     $inputs = @{
-        Path                               = $env:GITHUB_ACTION_INPUT_Path
+        Path                               = $providedPath
 
         Run_Path                           = $env:GITHUB_ACTION_INPUT_Run_Path
         Run_ExcludePath                    = $env:GITHUB_ACTION_INPUT_Run_ExcludePath

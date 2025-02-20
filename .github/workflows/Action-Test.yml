@@ -55,4 +55,4 @@ jobs:
       - name: Action-Test [3-Advanced]
         uses: ./
         with:
-          Path: tests/3-Advanced
+          Path: tests/3-Advanced/Pester.Configuration.ps1
