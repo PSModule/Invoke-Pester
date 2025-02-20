@@ -86,7 +86,7 @@ function Get-PesterConfiguration {
         Write-Host "Found $($file.Count) configuration files."
         if ($file.Count -eq 0) {
             Write-Host "No configuration files found in path: [$Path]"
-            return New-PesterConfiguration -Hashtable @{}
+            return @{}
         }
         if ($file.Count -gt 1) {
             throw "Multiple configuration files found in path: [$Path]"
@@ -96,9 +96,7 @@ function Get-PesterConfiguration {
     }
 
     Write-Host "Importing configuration data file: $($file.FullName)"
-    $hashtable = Import-Hashtable -Path $($file.FullName)
-    Write-Verbose ($hashtable | ConvertTo-Json -Depth 5) -Verbose
-    [PesterConfiguration]::Merge(@{}, $hashtable)
+    Import-Hashtable -Path $($file.FullName)
 }
 
 function Merge-PesterConfiguration {
