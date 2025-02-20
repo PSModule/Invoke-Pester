@@ -201,7 +201,7 @@ LogGroup 'Set Configuration - Result' {
     }
 
     $configuration = New-PesterConfiguration -Hashtable $configuration
-    Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String)
 }
 
 $testResults = Invoke-Pester -Configuration $configuration
