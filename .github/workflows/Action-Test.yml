@@ -42,6 +42,7 @@ jobs:
         uses: ./
         with:
           Path: tests/2-Standard
+          Output_CIFormat: GithubActions
 
   ActionTestAdvanced:
     name: Action-Test - [3-Advanced]

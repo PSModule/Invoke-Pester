@@ -1,15 +1,16 @@
 ﻿@{
-    Run        = @{
-        Path      = $PSScriptRoot
-        PassThru  = $true
-        Container = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse |
-            ForEach-Object { . $_ } | ForEach-Object { New-PesterContainer @_ }
+    Run          = @{
+        Path     = $PSScriptRoot
+        PassThru = $true
     }
-    TestResult = @{
+    TestResult   = @{
         Enabled       = $true
         TestSuiteName = 'Advanced'
     }
-    Output     = @{
+    CodeCoverage = @{
+        Enabled = $true
+    }
+    Output       = @{
         CIFormat            = 'Auto'
         StackTraceVerbosity = 'Filtered'
         Verbosity           = 'Detailed'

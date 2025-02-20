@@ -3,7 +3,7 @@
 param()
 
 LogGroup 'Setup prerequisites' {
-    'Pester', 'PSScriptAnalyzer' | ForEach-Object {
+    'Pester', 'PSScriptAnalyzer', 'Hashtable', 'TimeSpan' | ForEach-Object {
         Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
         Import-Module -Name $_ -Verbose:$false
     }
@@ -79,44 +79,14 @@ LogGroup 'Load inputs' {
     [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List
 }
 
-$customConfig = @{}
-$customInputs = @{}
-
 LogGroup 'Load configuration - Defaults' {
-    $defaultConfigPath = (Join-Path $PSScriptRoot -ChildPath 'Pester.Configuration.ps1')
-    if (Test-Path -Path $defaultConfigPath) {
-        $tmpDefault = . $defaultConfigPath
-    }
-    $defaultConfig = @{
-        Run          = $tmpDefault.Run ?? @{}
-        Filter       = $tmpDefault.Filter ?? @{}
-        CodeCoverage = $tmpDefault.CodeCoverage ?? @{}
-        TestResult   = $tmpDefault.TestResult ?? @{}
-        Should       = $tmpDefault.Should ?? @{}
-        Debug        = $tmpDefault.Debug ?? @{}
-        Output       = $tmpDefault.Output ?? @{}
-        TestDrive    = $tmpDefault.TestDrive ?? @{}
-        TestRegistry = $tmpDefault.TestRegistry ?? @{}
-    }
-    Write-Output ($defaultConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    $defaultConfig = New-PesterConfiguration | Convert-PesterConfigurationToHashtable
+    Write-Output ($defaultConfig | Format-Hashtable | Out-String)
 }
 
 LogGroup 'Load configuration - Custom settings file' {
-    $tmpCustom = Get-PesterConfiguration -Path $inputs.Path
-    $tmpCustomConfiguration = @{
-        Run          = $tmpCustom.Run ?? @{}
-        Filter       = $tmpCustom.Filter ?? @{}
-        CodeCoverage = $tmpCustom.CodeCoverage ?? @{}
-        TestResult   = $tmpCustom.TestResult ?? @{}
-        Should       = $tmpCustom.Should ?? @{}
-        Debug        = $tmpCustom.Debug ?? @{}
-        Output       = $tmpCustom.Output ?? @{}
-        TestDrive    = $tmpCustom.TestDrive ?? @{}
-        TestRegistry = $tmpCustom.TestRegistry ?? @{}
-    }
-
-    $customConfig = $tmpCustomConfiguration | Clear-PesterConfigurationEmptyValue
-    Write-Output ($customConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    $customConfig = Get-PesterConfiguration -Path $inputs.Path
+    Write-Output ($customConfig | Format-Hashtable | Out-String)
 }
 
 LogGroup 'Load configuration - Action overrides' {
@@ -184,71 +154,53 @@ LogGroup 'Load configuration - Action overrides' {
     }
 
     $customInputs = $customConfigInputMap | Clear-PesterConfigurationEmptyValue
-    Write-Output ($customInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($customInputs | Format-Hashtable | Out-String)
 }
 
-LogGroup 'Load configuration - Merge' {
-    $run = Merge-Hashtable -Main $defaultConfig.Run -Overrides $customConfig.Run, $customInputs.Run
-    $filter = Merge-Hashtable -Main $defaultConfig.Filter -Overrides $customConfig.Filter, $customInputs.Filter
-    $codeCoverage = Merge-Hashtable -Main $defaultConfig.CodeCoverage -Overrides $customConfig.CodeCoverage, $customInputs.CodeCoverage
-    $testResult = Merge-Hashtable -Main $defaultConfig.TestResult -Overrides $customConfig.TestResult, $customInputs.TestResult
-    $should = Merge-Hashtable -Main $defaultConfig.Should -Overrides $customConfig.Should, $customInputs.Should
-    $debug = Merge-Hashtable -Main $defaultConfig.Debug -Overrides $customConfig.Debug, $customInputs.Debug
-    $output = Merge-Hashtable -Main $defaultConfig.Output -Overrides $customConfig.Output, $customInputs.Output
-    $testDrive = Merge-Hashtable -Main $defaultConfig.TestDrive -Overrides $customConfig.TestDrive, $customInputs.TestDrive
-    $testRegistry = Merge-Hashtable -Main $defaultConfig.TestRegistry -Overrides $customConfig.TestRegistry, $customInputs.TestRegistry
+LogGroup 'Merge configuration' {
+    $configuration = Merge-PesterConfiguration -BaseConfiguration $defaultConfig -AdditionalConfiguration $customConfig, $customInputs
 
-    $configuration = @{
-        Run          = $run
-        Filter       = $filter
-        CodeCoverage = $codeCoverage
-        TestResult   = $testResult
-        Should       = $should
-        Debug        = $debug
-        Output       = $output
-        TestDrive    = $testDrive
-        TestRegistry = $testRegistry
-    }
-
-    if (-not $configuration.Run.Path) {
+    if ([string]::IsNullOrEmpty($configuration.Run.Path)) {
         $configuration.Run.Path = $inputs.Path
     }
+    Write-Output ($configuration | Format-Hashtable | Out-String)
 }
 
-LogGroup 'Load configuration - Add containers' {
-    Write-Output "Containers from configuration: [$($configuration.Run.Container.Count)]"
-    Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
-
-    # Load configuration - Add containers
-    if ($configuration.Run.Container.Count -eq 0) {
+LogGroup 'Find containers' {
+    $containers = @()
+    $configuration.Run.Container | Where-Object { $null -ne $_ } | ForEach-Object {
+        Write-Verbose "Processing container [$_]"
+        $containers += $_ | Convert-PesterConfigurationToHashtable
+    }
+    Write-Output "Containers from configuration: [$($containers.Count)]"
+    if ($containers.Count -eq 0) {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
+        Write-Output 'Searching for containers in Run.Path directories.'
         foreach ($testDir in $configuration.Run.Path) {
-            if (Test-Path -LiteralPath $testDir -PathType Container) {
-                $configuration.Run.Container += Get-PesterContainer -Path $testDir
+            Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse | ForEach-Object {
+                $containers += (. $_)
             }
         }
     }
-
-    # If any containers are defined as hashtables, convert them to PesterContainer objects
-    for ($i = 0; $i -lt $configuration.Run.Container.Count; $i++) {
-        $cntnr = $configuration.Run.Container[$i]
-        if ($cntnr -is [hashtable]) {
-            $configuration.Run.Container[$i] = New-PesterContainer @cntnr
-        }
-    }
-
-    Write-Output "Added containers: [$($configuration.Run.Container.Count)]"
-    Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
+    Write-Output "Containers found: [$($containers.Count)]"
+    Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
-LogGroup 'Load configuration - Result' {
-    $artifactName = $configuration.TestResult.TestSuiteName
+LogGroup 'Set Configuration - Result' {
+    $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
     $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
     $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
     $configuration.Run.PassThru = $true
 
-    $configuration = New-PesterConfiguration -Hashtable $configuration
+    # If any containers are defined as hashtables, convert them to PesterContainer objects
+    $configuration.Run.Container = @()
+    foreach ($container in $containers) {
+        Write-Verbose "Processing container [$container]" -Verbose
+        Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
+        $configuration.Run.Container += New-PesterContainer @container
+    }
 
+    $configuration = New-PesterConfiguration -Hashtable $configuration
     Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
 }
 
@@ -285,13 +237,24 @@ LogGroup 'Test results summary' {
         $coverageString = "$coverage%"
     }
 
-    $testSuitName = $($configuration.TestResult.TestSuiteName)
+    $testSuitName = $($configuration.TestResult.TestSuiteName.Value)
     $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
     $formattedTestDuration = $testResults.Duration | Format-TimeSpan
     $summaryMarkdown = @"
 
 <details><summary>$testSuitStatusIcon - $testSuitName ($formattedTestDuration)</summary>
 <p>
+
+<details><summary>Configuration</summary>
+<p>
+
+``````pwsh
+$($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String)
+``````
+
+</p>
+</details>
+
 
 | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |

@@ -49,37 +49,36 @@ Describe 'Get-Emoji' {
     Context 'Lookup by wildcard' {
         Context 'by prefix' {
             BeforeAll {
-                $script:emojis = Get-Emoji -Name pen*
+                $penEmojis = Get-Emoji -Name pen*
             }
-
             It 'Returns ✏️ (pencil)' {
-                $script:emojis | Should -Contain '✏️'
+                $penEmojis | Should -Contain '✏️'
             }
 
             It 'Returns 🐧 (penguin)' {
-                $script:emojis | Should -Contain '🐧'
+                $penEmojis | Should -Contain '🐧'
             }
 
             It 'Returns 😔 (pensive)' {
-                $script:emojis | Should -Contain '😔'
+                $penEmojis | Should -Contain '😔'
             }
         }
 
         Context 'by contains' {
             BeforeAll {
-                $script:emojis = Get-Emoji -Name *smiling*
+                $smilingEmojis = Get-Emoji -Name *smiling*
             }
 
             It 'Returns 🙂 (slightly smiling face)' {
-                $script:emojis | Should -Contain '🙂'
+                $smilingEmojis | Should -Contain '🙂'
             }
 
             It 'Returns 😁 (beaming face with smiling eyes)' {
-                $script:emojis | Should -Contain '😁'
+                $smilingEmojis | Should -Contain '😁'
             }
 
             It 'Returns 😊 (smiling face with smiling eyes)' {
-                $script:emojis | Should -Contain '😊'
+                $smilingEmojis | Should -Contain '😊'
             }
         }
     }

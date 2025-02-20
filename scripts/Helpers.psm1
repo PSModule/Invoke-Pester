@@ -31,16 +31,14 @@
         [string] $Path
     )
 
-    Get-ChildItem -Path $Path -Recurse -Filter *.Container.ps* | ForEach-Object {
-        $file = $_
-        switch ($file.Extension) {
-            '.ps1' {
-                . $file
-            }
-            '.psd1' {
-                Import-PowerShellDataFile -Path $file
-            }
-        }
+    $containerFiles = Get-ChildItem -Path $Path -Recurse -Filter *.Container.*
+    Write-Verbose "Found $($containerFiles.Count) container files."
+
+    foreach ($file in $containerFiles) {
+        Write-Verbose "Loading container file: [$file]"
+        $container = . $file
+        Write-Verbose ($container | Format-Hashtable | Out-String)
+        $container
     }
 }
 
@@ -81,7 +79,7 @@ function Get-PesterConfiguration {
         [string] $Path
     )
 
-    Write-Output "Path: [$Path]"
+    Write-Verbose "Path: [$Path]"
     $pathExists = Test-Path -Path $Path
     if (-not $pathExists) {
         throw "Test path does not exist: [$Path]"
@@ -89,7 +87,9 @@ function Get-PesterConfiguration {
     $item = $Path | Get-Item
 
     if ($item.PSIsContainer) {
+        Write-Verbose 'Path is a directory. Searching for configuration files...'
         $file = Get-ChildItem -Path $Path -Filter *.Configuration.*
+        Write-Verbose "Found $($file.Count) configuration files."
         if ($file.Count -eq 0) {
             Write-Verbose "No configuration files found in path: [$Path]"
             return @{}
@@ -101,14 +101,213 @@ function Get-PesterConfiguration {
         $file = $item
     }
 
-    switch ($file.Extension) {
-        '.ps1' {
-            . $file
+    Write-Verbose "Importing configuration data file: $($file.FullName)"
+    Import-Hashtable -Path $($file.FullName)
+}
+
+function Merge-PesterConfiguration {
+    <#
+        .SYNOPSIS
+        Merges a base Pester configuration with additional settings.
+
+        .DESCRIPTION
+        The `Merge-PesterConfiguration` function takes a base Pester configuration hashtable and merges it with
+        additional configuration settings. The function processes each additional configuration hashtable and
+        merges it into the base configuration. If multiple additional configurations are provided, the function
+        merges them sequentially, with each subsequent configuration overwriting the previous one.
+
+        .EXAMPLE
+        $baseConfig = @{
+            Run = @{
+                PassThru = $false
+            }
         }
-        '.psd1' {
-            Import-PowerShellDataFile -Path $file
+        $additionalConfig1 = @{
+            Run = @{
+                PassThru = $true
+            }
+        }
+        $additionalConfig2 = @{
+            Run = @{
+                PassThru    = $false
+                ExcludePath = "Test-Exclude"
+            }
+        }
+        Merge-PesterConfiguration -BaseConfiguration $baseConfig -AdditionalConfiguration $additionalConfig1, $additionalConfig2
+
+    .NOTES
+    General notes
+    #>
+    [CmdletBinding()]
+    param (
+        # The base configuration hashtable to merge into.
+        [Parameter(Mandatory)]
+        [hashtable] $BaseConfiguration,
+
+        # The additional configuration hashtable to merge into the base.
+        [Parameter(Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName
+        )]
+        [hashtable[]] $AdditionalConfiguration
+    )
+
+
+    begin {
+        $mergedConfiguration = $BaseConfiguration.Clone()
+    }
+
+    process {
+        foreach ($config in $AdditionalConfiguration) {
+            foreach ($category in $config.Keys) {
+                Write-Verbose "Merging category: [$category]"
+                $mergedConfiguration[$category] = Merge-Hashtable -Main $mergedConfiguration[$category] -Overrides $config[$category]
+            }
         }
     }
+
+    end {
+        return $mergedConfiguration
+    }
+}
+
+function New-PesterConfigurationHashtable {
+    <#
+        .SYNOPSIS
+        Generates a hashtable representing the structure of a Pester configuration.
+
+        .DESCRIPTION
+        This function creates a hashtable that mirrors the structure of a Pester configuration object.
+        Each top-level category (e.g., Run, Filter) is represented as a key in the hashtable, with subkeys
+        corresponding to individual settings. The values for these settings are initialized as `$null`.
+
+        This function is useful for creating configuration templates or inspecting the available settings
+        in a structured manner.
+
+        .EXAMPLE
+        New-PesterConfigurationHashtable
+
+        Output:
+        ```powershell
+        Name                           Value
+        ----                           -----
+        Run                            @{Container = $null; Exit = $null; PassThru = $null;...}
+        Filter                         @{Tag = $null; ExcludeTag = $null;...}
+        ...
+        ```
+
+        Generates a hashtable representing the Pester configuration structure.
+
+        .OUTPUTS
+        hashtable
+
+        .NOTES
+        Returns a hashtable containing the structure of a Pester configuration with `$null` values.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Creates an in-memory resource'
+    )]
+    [OutputType([hashtable])]
+    [CmdletBinding()]
+    param()
+
+    # Prepare the output hashtable
+    $result = @{}
+
+    $schema = [PesterConfiguration]::new()
+
+    # Iterate over each top-level category (Run, Filter, etc.)
+    foreach ($category in $schema.PSObject.Properties.Name) {
+        $categoryObj = $schema.$category
+        $subHash = @{}
+
+        # Iterate over each setting within the category
+        foreach ($settingName in $categoryObj.PSObject.Properties.Name) {
+            $subHash[$settingName] = $null
+        }
+
+        $result[$category] = $subHash
+    }
+    $result
+}
+
+filter Convert-PesterConfigurationToHashtable {
+    <#
+        .SYNOPSIS
+        Converts a PesterConfiguration object into a hashtable containing only modified settings.
+
+        .DESCRIPTION
+        This function iterates over a given PesterConfiguration object and extracts only the settings that have been modified.
+        It ensures that only properties with an `IsModified` flag set to `$true` are included in the output hashtable.
+        The function maintains the category structure of the configuration and retains type consistency when assigning values.
+
+        .EXAMPLE
+        $config = New-PesterConfiguration
+        $config.Run.PassThru = $true
+        Convert-PesterConfigurationToHashtable -PesterConfiguration $config
+
+        Output:
+        ```powershell
+        @{Run = @{PassThru = $true}}
+        ```
+
+        Converts the provided PesterConfiguration object into a hashtable containing only modified values.
+
+        .OUTPUTS
+        hashtable
+
+        .NOTES
+        A hashtable containing only modified settings from the provided PesterConfiguration object.
+    #>
+    [OutputType([hashtable])]
+    [CmdletBinding()]
+    param(
+        # The PesterConfiguration object to convert into a hashtable.
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline
+        )]
+        [PesterConfiguration] $PesterConfiguration
+    )
+
+    # Prepare the output hashtable
+    $result = @{}
+
+    # Iterate over each top-level category (Run, Filter, etc.)
+    foreach ($category in $PesterConfiguration.PSObject.Properties.Name) {
+        $categoryObj = $PesterConfiguration.$category
+        $subHash = @{}
+
+        # Iterate over each setting within the category
+        foreach ($settingName in $categoryObj.PSObject.Properties.Name) {
+            $setting = $categoryObj.$settingName
+
+            # Only consider settings that have IsModified true
+            if ($setting -and $setting.PSObject.Properties.Match('IsModified') -and $setting.IsModified) {
+
+                # Ensure both Default and Value properties exist.
+                if ($setting.PSObject.Properties.Match('Default') -and $setting.PSObject.Properties.Match('Value')) {
+
+                    # Compare types (unless handling of nulls is desired differently).
+                    if (($null -ne $setting.Value) -and ($null -ne $setting.Default)) {
+                        if ($setting.Value.GetType().FullName -eq $setting.Default.GetType().FullName) {
+                            $subHash[$settingName] = $setting.Value
+                        }
+                    } else {
+                        # If both are null, include the key (adjust as needed).
+                        if (($null -eq $setting.Value) -and ($null -eq $setting.Default)) {
+                            $subHash[$settingName] = $null
+                        }
+                    }
+                }
+            }
+        }
+
+        $result[$category] = $subHash
+    }
+
+    return $result
 }
 
 filter Clear-PesterConfigurationEmptyValue {
@@ -142,7 +341,7 @@ filter Clear-PesterConfigurationEmptyValue {
         .NOTES
         A cleaned hashtable with empty or null values removed.
     #>
-    [OutputType([Hashtable])]
+    [OutputType([hashtable])]
     [CmdletBinding()]
     param (
         # The hashtable containing Pester configuration settings to filter.
@@ -172,254 +371,6 @@ filter Clear-PesterConfigurationEmptyValue {
     }
 
     return $return
-}
-
-function Merge-Hashtable {
-    <#
-        .SYNOPSIS
-        Merges two or more hashtables, with later hashtables overriding earlier ones.
-
-        .DESCRIPTION
-        This function merges multiple hashtables by applying overrides in order.
-        The values from later hashtables in the `Overrides` parameter replace values
-        from earlier hashtables, following a "last write wins" strategy.
-        The function returns a new hashtable without modifying the original inputs.
-
-        .EXAMPLE
-        $Main = [ordered]@{
-            Action   = ''
-            Location = 'Main'
-            Name     = 'Main'
-            Mode     = 'Main'
-        }
-        $Override1 = [ordered]@{
-            Action   = ''
-            Location = ''
-            Name     = 'Override1'
-            Mode     = 'Override1'
-        }
-        $Override2 = [ordered]@{
-            Action   = ''
-            Location = ''
-            Name     = 'Override1'
-            Mode     = 'Override2'
-        }
-        Merge-Hashtables -Main $Main -Overrides $Override1, $Override2
-
-        Output:
-        ```powershell
-        Name     : Override1
-        Mode     : Override2
-        Location : Main
-        Action   :
-        ```
-
-        This example demonstrates merging multiple hashtables where values in later
-        overrides replace earlier values while preserving keys from the main hashtable.
-
-        .OUTPUTS
-        Hashtable
-
-        .NOTES
-        Returns a merged hashtable where values from later overrides replace earlier ones.
-    #>
-    [OutputType([Hashtable])]
-    [CmdletBinding()]
-    param (
-        # Main hashtable
-        [Parameter(Mandatory)]
-        [Hashtable] $Main,
-
-        # Hashtable with overrides.
-        # Providing a list of overrides will apply them in order.
-        # Last write wins.
-        [Parameter(Mandatory)]
-        [Hashtable[]] $Overrides
-    )
-
-    $Output = $Main.Clone()
-    foreach ($Override in $Overrides) {
-        foreach ($Key in $Override.Keys) {
-            if (($Output.Keys) -notcontains $Key) {
-                $Output.$Key = $Override.$Key
-            }
-            if (-not [string]::IsNullOrEmpty($Override[$Key])) {
-                $Output.$Key = $Override.$Key
-            }
-        }
-    }
-    return $Output
-}
-
-filter Format-TimeSpan {
-    <#
-        .SYNOPSIS
-        Formats a TimeSpan object into a human-readable string with the most appropriate unit.
-
-        .DESCRIPTION
-        The Format-TimeSpan function takes a TimeSpan object and returns a string representation of the duration
-        using the most significant unit (e.g., years, months, weeks, days, hours, minutes, etc.).
-
-        The function adapts dynamically to the scale of the input and ensures an appropriate level of rounding.
-        Negative TimeSpan values are handled properly by converting to absolute values for formatting
-        and appending a negative sign to the output.
-
-        .EXAMPLE
-        [TimeSpan]::FromDays(45) | Format-TimeSpan
-
-        Output:
-        ```powershell
-        1mo
-        ```
-
-        Formats a TimeSpan of 45 days into the closest unit, which is 1 month.
-
-        .EXAMPLE
-        [TimeSpan]::FromSeconds(90) | Format-TimeSpan
-
-        Output:
-        ```powershell
-        1m
-        ```
-
-        Converts 90 seconds into the most significant unit, which is 1 minute.
-
-        .EXAMPLE
-        [TimeSpan]::FromMilliseconds(500) | Format-TimeSpan
-
-        Output:
-        ```powershell
-        500ms
-        ```
-
-        Converts 500 milliseconds directly into milliseconds as it's the most appropriate unit.
-
-        .OUTPUTS
-        System.String
-
-        .NOTES
-        Returns a string representing the formatted TimeSpan using the most significant unit.
-    #>
-    [OutputType([string])]
-    [CmdletBinding()]
-    param(
-        # The TimeSpan object to be formatted into a human-readable string.
-        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
-        [TimeSpan] $TimeSpan
-    )
-
-    #----- 1) Handle negative TimeSpan -----
-    $isNegative = $TimeSpan.Ticks -lt 0
-    if ($isNegative) {
-        $TimeSpan = New-TimeSpan -Ticks (-1 * $TimeSpan.Ticks)
-    }
-
-    # Save original ticks for fractional math.
-    $originalTicks = $TimeSpan.Ticks
-
-    #----- 2) Define constants -----
-    [long] $ticks = $TimeSpan.Ticks
-    [long] $ticksInMillisecond = 10000       # 1 ms = 10,000 ticks
-    [long] $ticksInSecond = 10000000          # 1 s  = 10,000,000 ticks
-    [long] $ticksInMinute = $ticksInSecond * 60
-    [long] $ticksInHour = $ticksInMinute * 60
-    [long] $ticksInDay = $ticksInHour * 24
-    [long] $ticksInWeek = $ticksInDay * 7
-
-    # Approximate day-based constants for months & years
-    [double] $daysInMonth = 30.436875
-    [double] $daysInYear = 365.2425
-    [long] $ticksInMonth = [long]($daysInMonth * $ticksInDay)
-    [long] $ticksInYear = [long]($daysInYear * $ticksInDay)
-
-    #----- 3) Extract units from largest to smallest -----
-    $years = [math]::Floor($ticks / $ticksInYear)
-    $ticks %= $ticksInYear
-    $months = [math]::Floor($ticks / $ticksInMonth)
-    $ticks %= $ticksInMonth
-    $weeks = [math]::Floor($ticks / $ticksInWeek)
-    $ticks %= $ticksInWeek
-    $days = [math]::Floor($ticks / $ticksInDay)
-    $ticks %= $ticksInDay
-    $hours = [math]::Floor($ticks / $ticksInHour)
-    $ticks %= $ticksInHour
-    $minutes = [math]::Floor($ticks / $ticksInMinute)
-    $ticks %= $ticksInMinute
-    $seconds = [math]::Floor($ticks / $ticksInSecond)
-    $ticks %= $ticksInSecond
-    $milliseconds = [math]::Floor($ticks / $ticksInMillisecond)
-    $ticks %= $ticksInMillisecond
-    $microseconds = [math]::Floor($ticks / 10)
-    $ticks %= 10
-    $nanoseconds = $ticks * 100
-
-    #----- 4) Build a list of components -----
-    $components = [System.Collections.Generic.List[object]]::new()
-    $components.Add(@('Years', $years, 'y'))
-    $components.Add(@('Months', $months, 'mo'))
-    $components.Add(@('Weeks', $weeks, 'w'))
-    $components.Add(@('Days', $days, 'd'))
-    $components.Add(@('Hours', $hours, 'h'))
-    $components.Add(@('Minutes', $minutes, 'm'))
-    $components.Add(@('Seconds', $seconds, 's'))
-    $components.Add(@('Milliseconds', $milliseconds, 'ms'))
-    $components.Add(@('Microseconds', $microseconds, 'us'))
-    $components.Add(@('Nanoseconds', $nanoseconds, 'ns'))
-
-    # Map each unit to a numeric rank (lower = more significant)
-    $unitRank = @{
-        'Years'        = 1
-        'Months'       = 2
-        'Weeks'        = 3
-        'Days'         = 4
-        'Hours'        = 5
-        'Minutes'      = 6
-        'Seconds'      = 7
-        'Milliseconds' = 8
-        'Microseconds' = 9
-        'Nanoseconds'  = 10
-    }
-    # With no Precision parameter, allow all units (Nanoseconds rank is 10)
-    [int] $lowestUnitAllowed = 10
-
-    #----- 5) Adaptive rounding: Pick the first (highest) nonzero unit -----
-    $highestUnitComponent = $null
-    foreach ($comp in $components) {
-        $unitName = $comp[0]
-        $value = $comp[1]
-        if ($unitRank[$unitName] -le $lowestUnitAllowed -and $value -ne 0) {
-            $highestUnitComponent = $comp
-            break
-        }
-    }
-    if (-not $highestUnitComponent) {
-        # If all components are zero, fall back to Nanoseconds.
-        $highestUnitComponent = $components[-1]
-    }
-    $unitName = $highestUnitComponent[0]
-    $unitAbbr = $highestUnitComponent[2]
-
-    # Compute the full timespan in the chosen unit.
-    switch ($unitName) {
-        'Years' { $fractionalValue = $originalTicks / $ticksInYear }
-        'Months' { $fractionalValue = $originalTicks / $ticksInMonth }
-        'Weeks' { $fractionalValue = $originalTicks / $ticksInWeek }
-        'Days' { $fractionalValue = $originalTicks / $ticksInDay }
-        'Hours' { $fractionalValue = $originalTicks / $ticksInHour }
-        'Minutes' { $fractionalValue = $originalTicks / $ticksInMinute }
-        'Seconds' { $fractionalValue = $originalTicks / $ticksInSecond }
-        'Milliseconds' { $fractionalValue = $originalTicks / $ticksInMillisecond }
-        'Microseconds' { $fractionalValue = $originalTicks / 10 }
-        'Nanoseconds' { $fractionalValue = $originalTicks * 100 }
-    }
-
-    # Round to the nearest integer.
-    $roundedValue = [math]::Round($fractionalValue, 0, [System.MidpointRounding]::AwayFromZero)
-    $formatted = "$roundedValue$unitAbbr"
-    if ($isNegative) {
-        $formatted = "-$formatted"
-    }
-    return $formatted
 }
 
 function Get-GroupedTestMarkdown {
