@@ -172,7 +172,10 @@ LogGroup 'Merge configuration' {
 LogGroup 'Find containers' {
     $configuration.Run.Container
     $containers = @()
-    $containers += $configuration.Run.Container
+    $configuration.Run.Container | Where-Object { $null -ne $_ } | ForEach-Object {
+        Write-Host "Processing container [$_]"
+        $containers += $_
+    }
     Write-Output "Containers from configuration: [$($containers.Count)]"
     if ($containers.Count -eq 0) {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
