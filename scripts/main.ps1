@@ -178,7 +178,7 @@ LogGroup 'Merge configuration' {
 
 LogGroup 'Find containers' {
     $containers = @()
-    $configuration.Run.Container | Where-Object { $null -ne $_ } | ForEach-Object {
+    $($configuration.Run.Container) | ForEach-Object {
         Write-Verbose "Processing container [$_]"
         $containers += $_ | Convert-PesterConfigurationToHashtable
     }
@@ -186,8 +186,8 @@ LogGroup 'Find containers' {
     if ($containers.Count -eq 0) {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
         Write-Output 'Searching for containers in same location as config.'
-        foreach ($testDir in $inputs.Path) {
-            Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse | ForEach-Object {
+        foreach ($testDir in @($inputs.Path)) {
+            @(Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse) | ForEach-Object {
                 $containers += (. $_)
             }
         }
