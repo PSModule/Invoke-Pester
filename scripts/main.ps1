@@ -211,7 +211,8 @@ LogGroup 'Set Configuration - Result' {
     }
 
     $configuration = New-PesterConfiguration -Hashtable $configuration
-    Write-Output ($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String)
+    $configurationHashtable = $configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String
+    Write-Output $configurationHashtable
 }
 
 $testResults = Invoke-Pester -Configuration $configuration
@@ -264,7 +265,7 @@ LogGroup 'Test results summary' {
 <p>
 
 ``````pwsh
-$($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String)
+$configurationHashtable
 ``````
 
 </p>
