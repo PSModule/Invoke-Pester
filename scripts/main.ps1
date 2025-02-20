@@ -181,13 +181,12 @@ LogGroup 'Find containers' {
         Write-Output 'Searching for containers in Run.Path directories.'
         foreach ($testDir in $configuration.Run.Path) {
             Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse | ForEach-Object {
-                $item = (. $_)
-                Write-Output ($item | Format-Hashtable | Out-String)
-                $containers += $item
+                $containers += (. $_)
             }
         }
     }
     Write-Output "Containers found: [$($containers.Count)]"
+    Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
 # LogGroup 'Set Configuration - Result' {
