@@ -173,7 +173,7 @@ LogGroup 'Find containers' {
     $containers = @()
     $configuration.Run.Container | Where-Object { $null -ne $_ } | ForEach-Object {
         Write-Verbose "Processing container [$_]"
-        $containers += $_
+        $containers += $_ | Convert-PesterConfigurationToHashtable
     }
     Write-Output "Containers from configuration: [$($containers.Count)]"
     if ($containers.Count -eq 0) {
@@ -205,17 +205,8 @@ $pesterContainers = @()
 $configuration.Run.Container = @()
 foreach ($container in $containers) {
     Write-Verbose "Processing container [$container]" -Verbose
-    if ($container -is [hashtable]) {
-        Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
-        $pesterContainers += New-PesterContainer @container
-    } else {
-        Write-Verbose 'Adding container as is' -Verbose
-        $pesterContainers += $container
-    }
-}
-foreach ($container in $pesterContainers) {
-    Write-Verbose "Container: [$container]"
-    $configuration.Run.Container += $container
+    Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
+    $configuration.Run.Container += New-PesterContainer @container
 }
 
 $configuration = New-PesterConfiguration -Hashtable $configuration
