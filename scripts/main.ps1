@@ -190,17 +190,25 @@ LogGroup 'Find containers' {
 }
 
 # LogGroup 'Set Configuration - Result' {
+Write-Verbose 'Setting configuration values' -Verbose
 $artifactName = $configuration.TestResult.TestSuiteName
+Write-Verbose "Artifact name: [$artifactName]" -Verbose
 $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
+Write-Verbose "Test result output path: [$($configuration.TestResult.OutputPath)]" -Verbose
 $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
+Write-Verbose "Code coverage output path: [$($configuration.CodeCoverage.OutputPath)]" -Verbose
 $configuration.Run.PassThru = $true
+Write-Verbose "PassThru: [$($configuration.Run.PassThru)]" -Verbose
 
 # If any containers are defined as hashtables, convert them to PesterContainer objects
 $pesterContainers = @()
 foreach ($container in $containers) {
+    Write-Verbose "Processing container [$container]" -Verbose
     if ($container -is [hashtable]) {
+        Write-Verbose "Converting hashtable to PesterContainer" -Verbose
         $pesterContainers += New-PesterContainer @container
     } else {
+        Write-Verbose "Adding container as is" -Verbose
         $pesterContainers += $container
     }
 }
