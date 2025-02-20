@@ -179,6 +179,8 @@ LogGroup 'Find containers' {
             if (Test-Path -LiteralPath $testDir -PathType Container) {
                 Write-Output "Searching for containers in [$testDir]"
                 Get-PesterContainer -Path $testDir | ForEach-Object {
+                    Write-Output "Adding container:"
+                    Write-Output ($_ | Format-Hashtable | Out-String)
                     $configuration.Run.Container += $_
                 }
             }
