@@ -198,8 +198,10 @@ LogGroup 'Set Configuration - Result' {
 
     # If any containers are defined as hashtables, convert them to PesterContainer objects
     for ($i = 0; $i -lt $containers.Count; $i++) {
-        $cntnr = $containers.Container[$i]
-        $configuration.Run.Container[$i] = New-PesterContainer @cntnr
+        if ($configuration.Run.Container[$i] -is [hashtable]) {
+            $cntnr = $containers[$i]
+            $configuration.Run.Container[$i] = New-PesterContainer @cntnr
+        }
     }
 
     $configuration = New-PesterConfiguration -Hashtable $configuration
