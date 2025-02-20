@@ -183,6 +183,7 @@ LogGroup 'Find containers' {
             Write-Output "Processing directory [$testDir]"
             if (Test-Path -LiteralPath $testDir -PathType Container) {
                 $containers += Get-PesterContainer -Path $testDir
+                $containers
             }
         }
     }
