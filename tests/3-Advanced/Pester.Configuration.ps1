@@ -1,11 +1,7 @@
 ﻿@{
     Run        = @{
-        Path      = $PSScriptRoot
-        PassThru  = $true
-        Container = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse | ForEach-Object {
-            $ht = . $_
-            New-PesterContainer @ht
-        }
+        Path     = $PSScriptRoot
+        PassThru = $true
     }
     TestResult = @{
         Enabled       = $true
