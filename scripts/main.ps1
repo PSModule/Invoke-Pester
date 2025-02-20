@@ -243,6 +243,17 @@ LogGroup 'Test results summary' {
     $summaryMarkdown = @"
 
 <details><summary>$testSuitStatusIcon - $testSuitName ($formattedTestDuration)</summary>
+
+<details><summary>Configuration</summary>
+<p>
+
+``````json
+$($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+``````
+
+</p>
+</details>
+
 <p>
 
 | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
