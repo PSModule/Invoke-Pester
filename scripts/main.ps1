@@ -170,6 +170,7 @@ LogGroup 'Merge configuration' {
 }
 
 LogGroup 'Find containers' {
+    $configuration.Run.Container
     $containers = @()
     $containers += $configuration.Run.Container
     Write-Output "Containers from configuration: [$($containers.Count)]"
