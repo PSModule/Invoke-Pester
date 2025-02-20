@@ -314,14 +314,6 @@ $configurationHashtable
 
 '@
     }
-
-    $summaryMarkdown += @'
-
-</p>
-</details>
-
-'@
-
 }
 
 $summaryMarkdown += @"
@@ -357,6 +349,15 @@ $summaryMarkdown += @"
 </details>
 
 "@
+
+$summaryMarkdown += @'
+
+</p>
+</details>
+
+'@
+
+
 Set-GitHubStepSummary -Summary $summaryMarkdown
 Set-GitHubOutput -Name 'TestResultEnabled' -Value $testResults.Configuration.TestResult.Enabled.Value
 Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.Configuration.TestResult.OutputPath.Value
