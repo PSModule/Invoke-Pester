@@ -146,14 +146,16 @@ function Merge-PesterConfiguration {
         [hashtable[]] $AdditionalConfiguration
     )
 
+
     begin {
-        $mergedConfiguration = $BaseConfiguration
+        $mergedConfiguration = $BaseConfiguration.Clone()
     }
 
     process {
         foreach ($config in $AdditionalConfiguration) {
-
-
+            foreach ($category in $config.Keys) {
+                Merge-Hashtable -Main $mergedConfiguration[$category] -Overrides $config[$category]
+            }
         }
     }
 
