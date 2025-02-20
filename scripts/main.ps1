@@ -180,7 +180,7 @@ LogGroup 'Find containers' {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
         Write-Output 'Searching for containers in Run.Path directories.'
         foreach ($testDir in $configuration.Run.Path) {
-            $containers += Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse |
+            $containers += Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse |
                 ForEach-Object { . $_ }
         }
     }
