@@ -36,6 +36,70 @@
     }
 }
 
+function Get-PesterConfiguration {
+    <#
+        .SYNOPSIS
+        Retrieves a Pester configuration file from the specified path.
+
+        .DESCRIPTION
+        This function checks the specified path for a Pester configuration file. If the path is a directory,
+        it searches for files matching the pattern `*.Configuration.*`. If multiple configuration files
+        are found, an error is thrown. The function supports `.ps1` and `.psd1` files, executing or importing them
+        accordingly.
+
+        .EXAMPLE
+        Get-PesterConfiguration -Path "C:\\Pester\\Config"
+
+        Output:
+        ```powershell
+        Path: [C:\Pester\Config]
+        @{Setting1 = 'Value1'; Setting2 = 'Value2'}
+        ```
+
+        Retrieves the Pester configuration from the specified directory.
+
+        .OUTPUTS
+        hashtable
+
+        .NOTES
+        The function returns a hashtable containing the Pester configuration if found.
+        If no configuration file is found, an empty hashtable is returned.
+    #>
+    [OutputType([hashtable])]
+    [CmdletBinding()]
+    param(
+        # Specifies the path where the Pester configuration file is located.
+        [Parameter(Mandatory)]
+        [string] $Path
+    )
+
+    Write-Host "Path: [$Path]"
+    $pathExists = Test-Path -Path $Path
+    if (-not $pathExists) {
+        throw "Test path does not exist: [$Path]"
+    }
+    $item = $Path | Get-Item
+
+    if ($item.PSIsContainer) {
+        Write-Host 'Path is a directory. Searching for configuration files...'
+        $file = Get-ChildItem -Path $Path -Filter *.Configuration.*
+        Write-Host "Found $($file.Count) configuration files."
+        if ($file.Count -eq 0) {
+            Write-Host "No configuration files found in path: [$Path]"
+            return New-PesterConfiguration -Hashtable @{}
+        }
+        if ($file.Count -gt 1) {
+            throw "Multiple configuration files found in path: [$Path]"
+        }
+    } else {
+        $file = $item
+    }
+
+    Write-Host "Importing configuration data file: $($file.FullName)"
+    $hashtable = Import-Hashtable -Path $($file.FullName)
+    Write-Verbose ($hashtable | ConvertTo-Json -Depth 5) -Verbose
+    [PesterConfiguration]::Merge(@{}, $hashtable)
+}
 
 function Merge-PesterConfiguration {
     <#
@@ -90,7 +154,7 @@ function Merge-PesterConfiguration {
 
     process {
         foreach ($config in $AdditionalConfiguration) {
-            
+
 
         }
     }

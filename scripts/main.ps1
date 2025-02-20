@@ -88,7 +88,7 @@ LogGroup 'Load configuration - Defaults' {
 }
 
 LogGroup 'Load configuration - Custom settings file' {
-    $customConfig = Import-Hashtable -Path $inputs.Path
+    $customConfig = Get-PesterConfiguration -Path $inputs.Path
     Write-Output ($customConfig | Format-Hashtable | Out-String)
 }
 
