@@ -180,10 +180,8 @@ LogGroup 'Find containers' {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
         Write-Output 'Searching for containers in Run.Path directories.'
         foreach ($testDir in $configuration.Run.Path) {
-            Write-Output "Processing directory [$testDir]"
-            if (Test-Path -LiteralPath $testDir -PathType Container) {
-                $containers += Get-PesterContainer -Path $testDir
-            }
+            $containers += Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse |
+                ForEach-Object { . $_ }
         }
     }
     Write-Output "Containers found: [$($containers.Count)]"
