@@ -175,8 +175,8 @@ LogGroup 'Find containers' {
     Write-Output "Containers from configuration: [$($containers.Count)]"
     if ($containers.Count -eq 0) {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
-        Write-Output 'Searching for containers in Run.Path directories.'
-        foreach ($testDir in $configuration.Run.Path) {
+        Write-Output 'Searching for containers in same location as config.'
+        foreach ($testDir in $inputs.Path) {
             Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse | ForEach-Object {
                 $containers += (. $_)
             }
@@ -205,6 +205,11 @@ LogGroup 'Set Configuration - Result' {
 }
 
 $testResults = Invoke-Pester -Configuration $configuration
+
+if ($null -eq $testResults) {
+    Write-GitHubError '❌ No test results were returned.'
+    exit 1
+}
 
 LogGroup 'Test results' {
     $testResults | Format-List
