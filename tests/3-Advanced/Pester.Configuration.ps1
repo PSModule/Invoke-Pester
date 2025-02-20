@@ -1,6 +1,5 @@
 ﻿@{
     Run          = @{
-        Path     = $PSScriptRoot
         PassThru = $true
     }
     TestResult   = @{
