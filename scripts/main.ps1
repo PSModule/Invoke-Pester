@@ -196,12 +196,11 @@ $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverag
 $configuration.Run.PassThru = $true
 
 # If any containers are defined as hashtables, convert them to PesterContainer objects
-for ($i = 0; $i -lt $containers.Count; $i++) {
-    if ($configuration.Run.Container[$i] -is [hashtable]) {
-        $cntnr = $containers[$i]
-        $configuration.Run.Container[$i] = New-PesterContainer @cntnr
-    }
+$pesterContainers = @()
+foreach ($container in $containers) {
+    $pesterContainers += New-PesterContainer @container
 }
+$configuration.Run.Container = $pesterContainers
 
 $configuration = New-PesterConfiguration -Hashtable $configuration
 Write-Output ($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String)
