@@ -84,12 +84,12 @@ $customInputs = @{}
 
 LogGroup 'Load configuration - Defaults' {
     $defaultConfig = New-PesterConfiguration | Convert-PesterConfigurationToHashtable
-    Write-Output ($defaultConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($defaultConfig | Format-Hashtable | Out-String)
 }
 
 LogGroup 'Load configuration - Custom settings file' {
     $customConfig = Get-PesterConfiguration -Path $inputs.Path
-    Write-Output ($customConfig | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($customConfig | Format-Hashtable | Out-String)
 }
 
 LogGroup 'Load configuration - Action overrides' {
@@ -157,10 +157,10 @@ LogGroup 'Load configuration - Action overrides' {
     }
 
     $customInputs = $customConfigInputMap | Clear-PesterConfigurationEmptyValue
-    Write-Output ($customInputs | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    Write-Output ($customInputs | Format-Hashtable | Out-String)
 }
 
-LogGroup 'Load configuration - Merge' {
+LogGroup 'Merge configuration' {
     $configuration = Merge-PesterConfiguration -BaseConfiguration $defaultConfig -AdditionalConfiguration $customConfig, $customInputs
 
     if ([string]::IsNullOrEmpty($configuration.Run.Path.Value)) {
@@ -168,7 +168,7 @@ LogGroup 'Load configuration - Merge' {
     }
 }
 
-LogGroup 'Load configuration - Add containers' {
+LogGroup 'Add configuration - Containers' {
     Write-Output "Containers from configuration: [$($configuration.Run.Container.Count)]"
     Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 
@@ -197,7 +197,7 @@ LogGroup 'Load configuration - Add containers' {
     Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
-LogGroup 'Load configuration - Result' {
+LogGroup 'Set Configuration - Result' {
     $artifactName = $configuration.TestResult.TestSuiteName
     $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
     $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
