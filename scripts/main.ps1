@@ -202,17 +202,21 @@ Write-Verbose "PassThru: [$($configuration.Run.PassThru)]" -Verbose
 
 # If any containers are defined as hashtables, convert them to PesterContainer objects
 $pesterContainers = @()
+$configuration.Run.Container = @()
 foreach ($container in $containers) {
     Write-Verbose "Processing container [$container]" -Verbose
     if ($container -is [hashtable]) {
-        Write-Verbose "Converting hashtable to PesterContainer" -Verbose
+        Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
         $pesterContainers += New-PesterContainer @container
     } else {
-        Write-Verbose "Adding container as is" -Verbose
+        Write-Verbose 'Adding container as is' -Verbose
         $pesterContainers += $container
     }
 }
-$configuration.Run.Container = $pesterContainers
+foreach ($container in $pesterContainers) {
+    Write-Verbose "Container: [$container]"
+    $configuration.Run.Container += $container
+}
 
 $configuration = New-PesterConfiguration -Hashtable $configuration
 Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
