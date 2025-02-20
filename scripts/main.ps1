@@ -321,9 +321,31 @@ $configurationHashtable
 </details>
 
 '@
-    Set-GitHubStepSummary -Summary $summaryMarkdown
+
 }
 
+
+# For each property of testresults, output the value as a JSON object
+foreach ($property in $testResults.PSObject.Properties) {
+    Write-Verbose "Setting output for [$($property.Name)]"
+    $name = $property.Name
+    $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
+    $summaryMarkdown += @"
+<details><summary>$name</summary>
+<p>
+
+``````json
+$value
+``````
+
+</p>
+</details>
+
+"@
+
+    # Set-GitHubOutput -Name $name -Value $value
+}
+Set-GitHubStepSummary -Summary $summaryMarkdown
 Set-GitHubOutput -Name 'TestResultEnabled' -Value $testResults.Configuration.TestResult.Enabled.Value
 Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.Configuration.TestResult.OutputPath.Value
 Set-GitHubOutput -Name 'TestSuiteName' -Value $testResults.Configuration.TestResult.TestSuiteName.Value
