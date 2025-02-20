@@ -7,7 +7,7 @@
         Enabled       = $true
         TestSuiteName = 'Advanced'
     }
-    CodeCoderage = @{
+    CodeCoverage = @{
         Enabled = $true
     }
     Output       = @{
