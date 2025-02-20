@@ -36,7 +36,9 @@
 
     foreach ($file in $containerFiles) {
         Write-Host "Loading container file: $($file.FullName)"
-        Import-Hashtable -Path $file.FullName
+        $container = Import-Hashtable -Path $file.FullName
+        Write-Host ($container | Format-Hashtable | Out-String)
+        $container
     }
 }
 

@@ -170,10 +170,9 @@ LogGroup 'Merge configuration' {
 }
 
 LogGroup 'Find containers' {
-    $configuration.Run.Container
     $containers = @()
     $configuration.Run.Container | Where-Object { $null -ne $_ } | ForEach-Object {
-        Write-Host "Processing container [$_]"
+        Write-Verbose "Processing container [$_]"
         $containers += $_
     }
     Write-Output "Containers from configuration: [$($containers.Count)]"
@@ -189,10 +188,6 @@ LogGroup 'Find containers' {
         }
     }
     Write-Output "Containers found: [$($containers.Count)]"
-    foreach ($container in $containers) {
-        Write-Output ($container | Format-Hashtable | Out-String)
-        $configuration.Run.Container += $container
-    }
 }
 
 LogGroup 'Set Configuration - Result' {
@@ -202,11 +197,9 @@ LogGroup 'Set Configuration - Result' {
     $configuration.Run.PassThru = $true
 
     # If any containers are defined as hashtables, convert them to PesterContainer objects
-    for ($i = 0; $i -lt $configuration.Run.Container.Count; $i++) {
-        $cntnr = $configuration.Run.Container[$i]
-        if ($cntnr -is [hashtable]) {
-            $configuration.Run.Container[$i] = New-PesterContainer @cntnr
-        }
+    for ($i = 0; $i -lt $containers.Count; $i++) {
+        $cntnr = $containers.Container[$i]
+        $configuration.Run.Container[$i] = New-PesterContainer @cntnr
     }
 
     $configuration = New-PesterConfiguration -Hashtable $configuration
