@@ -236,10 +236,10 @@ LogGroup 'Test results' {
 
     if ($failedTests -eq 0 -and $testResults.Result -eq 'Passed') {
         Write-GitHubNotice '✅ All tests passed.'
-        Set-GitHubOutput -Name 'passed' -Value $true
+        Set-GitHubOutput -Name 'Passed' -Value $true
     } else {
         Write-GitHubError "❌ Some [$failedTests] tests failed."
-        Set-GitHubOutput -Name 'passed' -Value $false
+        Set-GitHubOutput -Name 'Passed' -Value $false
     }
 }
 
@@ -323,14 +323,6 @@ $configurationHashtable
 '@
     Set-GitHubStepSummary -Summary $summaryMarkdown
 }
-
-# For each property of testresults, output the value as a JSON object
-# foreach ($property in $testResults.PSObject.Properties) {
-#     Write-Verbose "Setting output for [$($property.Name)]"
-#     $name = $property.Name
-#     $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
-#     Set-GitHubOutput -Name $name -Value $value
-# }
 
 Set-GitHubOutput -Name 'TestResultEnabled' -Value $testResults.Configuration.TestResult.Enabled.Value
 Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.Configuration.TestResult.OutputPath.Value
