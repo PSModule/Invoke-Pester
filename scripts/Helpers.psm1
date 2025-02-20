@@ -35,8 +35,10 @@
     Write-Host "Found $($containerFiles.Count) container files."
 
     foreach ($file in $containerFiles) {
-        Write-Host "Loading container file: $($file.FullName)"
-        . $file.FullName
+        Write-Host "Loading container file: [$file]"
+        $container = . $file
+        Write-Host ($container | Format-Hashtable | Out-String)
+        $container
     }
 }
 
