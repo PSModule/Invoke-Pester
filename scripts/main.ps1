@@ -198,7 +198,11 @@ $configuration.Run.PassThru = $true
 # If any containers are defined as hashtables, convert them to PesterContainer objects
 $pesterContainers = @()
 foreach ($container in $containers) {
-    $pesterContainers += New-PesterContainer @container
+    if ($container -is [hashtable]) {
+        $pesterContainers += New-PesterContainer @container
+    } else {
+        $pesterContainers += $container
+    }
 }
 $configuration.Run.Container = $pesterContainers
 
