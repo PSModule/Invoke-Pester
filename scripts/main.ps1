@@ -328,7 +328,7 @@ foreach ($property in $testResults.PSObject.Properties) {
     $name = $property.Name
     $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
     $summaryMarkdown += @"
-<details><summary>$name</summary>
+<details><summary>$indent - $name</summary>
 <p>
 
 ``````json
