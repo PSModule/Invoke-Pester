@@ -169,11 +169,8 @@ LogGroup 'Merge configuration' {
     Write-Output ($configuration | Format-Hashtable | Out-String)
 }
 
-LogGroup 'Add configuration - Containers' {
+LogGroup 'Find containers' {
     Write-Output "Containers from configuration: [$($configuration.Run.Container.Count)]"
-    Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
-
-    # Load configuration - Add containers
     if ($configuration.Run.Container.Count -eq 0) {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
         Write-Output "No containers specified. Searching for containers in Run.Path directories."
@@ -181,19 +178,12 @@ LogGroup 'Add configuration - Containers' {
             Write-Output "Processing directory [$testDir]"
             if (Test-Path -LiteralPath $testDir -PathType Container) {
                 Write-Output "Searching for containers in [$testDir]"
-                $configuration.Run.Container += Get-PesterContainer -Path $testDir
+                Get-PesterContainer -Path $testDir | ForEach-Object {
+                    $configuration.Run.Container += $_
+                }
             }
         }
     }
-
-    # If any containers are defined as hashtables, convert them to PesterContainer objects
-    for ($i = 0; $i -lt $configuration.Run.Container.Count; $i++) {
-        $cntnr = $configuration.Run.Container[$i]
-        if ($cntnr -is [hashtable]) {
-            $configuration.Run.Container[$i] = New-PesterContainer @cntnr
-        }
-    }
-
     Write-Output "Added containers: [$($configuration.Run.Container.Count)]"
     Write-Output ($configuration.Run.Container | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
@@ -203,6 +193,14 @@ LogGroup 'Set Configuration - Result' {
     $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
     $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
     $configuration.Run.PassThru = $true
+
+    # If any containers are defined as hashtables, convert them to PesterContainer objects
+    for ($i = 0; $i -lt $configuration.Run.Container.Count; $i++) {
+        $cntnr = $configuration.Run.Container[$i]
+        if ($cntnr -is [hashtable]) {
+            $configuration.Run.Container[$i] = New-PesterContainer @cntnr
+        }
+    }
 
     $configuration = New-PesterConfiguration -Hashtable $configuration
     Write-Output ($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String)

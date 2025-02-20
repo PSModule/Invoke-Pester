@@ -73,7 +73,7 @@ function Get-PesterConfiguration {
         [string] $Path
     )
 
-    Write-Host "Path: [$Path]"
+    Write-Verbose "Path: [$Path]"
     $pathExists = Test-Path -Path $Path
     if (-not $pathExists) {
         throw "Test path does not exist: [$Path]"
@@ -81,11 +81,11 @@ function Get-PesterConfiguration {
     $item = $Path | Get-Item
 
     if ($item.PSIsContainer) {
-        Write-Host 'Path is a directory. Searching for configuration files...'
+        Write-Verbose 'Path is a directory. Searching for configuration files...'
         $file = Get-ChildItem -Path $Path -Filter *.Configuration.*
-        Write-Host "Found $($file.Count) configuration files."
+        Write-Verbose "Found $($file.Count) configuration files."
         if ($file.Count -eq 0) {
-            Write-Host "No configuration files found in path: [$Path]"
+            Write-Verbose "No configuration files found in path: [$Path]"
             return @{}
         }
         if ($file.Count -gt 1) {
@@ -95,7 +95,7 @@ function Get-PesterConfiguration {
         $file = $item
     }
 
-    Write-Host "Importing configuration data file: $($file.FullName)"
+    Write-Verbose "Importing configuration data file: $($file.FullName)"
     Import-Hashtable -Path $($file.FullName)
 }
 
@@ -154,7 +154,7 @@ function Merge-PesterConfiguration {
     process {
         foreach ($config in $AdditionalConfiguration) {
             foreach ($category in $config.Keys) {
-                Write-Host "Merging category: [$category]"
+                Write-Verbose "Merging category: [$category]"
                 $mergedConfiguration[$category] = Merge-Hashtable -Main $mergedConfiguration[$category] -Overrides $config[$category]
             }
         }
