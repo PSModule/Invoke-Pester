@@ -1,32 +1,35 @@
 # Invoke-Pester
 
-This GitHub Action runs [Pester](https://pester.dev) tests in PowerShell, producing code coverage and test result artifacts. It automates many tasks to streamline continuous integration for PowerShell projects:
+This GitHub Action runs [Pester](https://pester.dev) tests in PowerShell, producing code coverage and test result artifacts. It automates many tasks
+to streamline continuous integration for PowerShell projects:
 
 - Installation and import of required modules (Pester, PSScriptAnalyzer).
 - Automatic merging of default configuration, test suite configuration, and direct inputs into a final Pester configuration.
 - Optional uploading of test results and coverage reports.
-- Clear step summary in GitHub’s job logs.
+- Clear step summary in GitHub's job logs.
 
 ## Introduction & Scope
 
 **Invoke-Pester** is designed to:
 - **Execute all Pester tests** in your repository, with optional container-based test organization.
 - **Collect code coverage** metrics, if desired.
-- **Summarize test results** with a neat table in the workflow’s step summary.
+- **Summarize test results** with a neat table in the workflow's step summary.
 - **Upload artifacts** (e.g. coverage reports, test results) to GitHub for later inspection.
 - **Allow flexible configuration** through a layered approach—defaults, repository-level config, and direct inputs.
 
-By default, it tries to “just work” for the majority of scenarios. Advanced users can configure everything from coverage thresholds to skipping slow tests.
+By default, it tries to “just work” for the majority of scenarios.
+Advanced users can configure everything from coverage thresholds to skipping slow tests.
 
 ## Configuration Hierarchy
 
-The action’s behavior is controlled by **layered configuration**:
+The action's behavior is controlled by **layered configuration**:
 
 1. **Default Config**
    Packaged with the action (in `Pester.Configuration.ps1` if provided). Sets base paths, coverage toggles, artifact names, etc.
 
 2. **Test Suite Config**
-   If your test suite contains a Pester config file (e.g., `MyTests.Configuration.psd1` or `Pester.Configuration.ps1`), the action loads and merges those settings on top of the defaults.
+   If your test suite contains a Pester config file (e.g., `MyTests.Configuration.psd1` or `Pester.Configuration.ps1`), the action loads and merges
+   those settings on top of the defaults.
 
 3. **Direct Inputs**
    Finally, any inputs specified under the `with:` clause in your GitHub Action workflow override both the default and test suite config.
@@ -38,7 +41,7 @@ This **“last-write-wins”** strategy means you can set global defaults while 
 ## How This Action Processes Your Tests
 
 1. **Prerequisite Setup**
-   - Installs required PowerShell modules (Pester, PSScriptAnalyzer) if they’re not present.
+   - Installs required PowerShell modules (Pester, PSScriptAnalyzer) if they're not present.
    - Imports the modules so the testing framework is ready to use.
 
 2. **Loading Inputs and Configuration**
@@ -65,7 +68,7 @@ This **“last-write-wins”** strategy means you can set global defaults while 
 
 6. **Summary in GitHub**
    - A step summary is generated, showing how many tests passed/failed/skipped, plus coverage info.
-   - If containers are in use, each container’s results appear in a collapsible section.
+   - If containers are in use, each container's results appear in a collapsible section.
 
 7. **Publishing Outputs**
    - Key metrics (e.g., `Result`, `FailedCount`, `Duration`) are encoded in JSON and published as outputs.
@@ -89,7 +92,8 @@ This **“last-write-wins”** strategy means you can set global defaults while 
 ## Artifact Management
 
 - **Test Result Artifacts**
-  - By default, if `TestResult_Enabled` is true, the action saves a test result file (XML/JSON) to `TestResult_OutputPath` and uploads it with GitHub’s `actions/upload-artifact`.
+  - By default, if `TestResult_Enabled` is true, the action saves a test result file (XML/JSON) to `TestResult_OutputPath` and uploads it with
+    GitHub's `actions/upload-artifact`.
 - **Coverage Report Artifacts**
   - If `CodeCoverage_Enabled` is true, a coverage file (Cobertura, JaCoCo, etc.) is generated and uploaded similarly.
 - **Naming & Paths**
@@ -108,7 +112,7 @@ This **“last-write-wins”** strategy means you can set global defaults while 
 
 ## Potential Pitfalls
 
-- If your tests are in a subfolder and `Path` or `Run_Path` isn’t updated, you might discover zero tests.
+- If your tests are in a subfolder and `Path` or `Run_Path` isn't updated, you might discover zero tests.
 - Code coverage can differ between breakpoint-based (default) and profiler-based methods—choose which suits your environment (`CodeCoverage_UseBreakpoints`).
 - Containers are optional in Pester 5. If you rely on them but name them incorrectly, Pester might skip them.
 
@@ -140,10 +144,10 @@ jobs:
       - name: Run Pester Tests
         uses: PSModule/Invoke-Pester@v1
         with:
-          Path: './tests'
-          CodeCoverage_Enabled: 'true'
-          TestResult_Enabled: 'true'
-          TestResult_TestSuiteName: 'IntegrationTests'
+          Path: ./tests
+          CodeCoverage_Enabled: true
+          TestResult_Enabled: true
+          TestResult_TestSuiteName: IntegrationTests
           # Configure additional inputs, e.g. Run_Throw, Run_Exit, etc.
 
       # If coverage & results are enabled, the action automatically uploads them as artifacts.
@@ -209,46 +213,9 @@ No secrets are directly required by this Action.
 
 After the test run completes, these outputs become available. They are all JSON-encoded strings, so you can parse them in subsequent steps if needed:
 
-| **Output**               | **Description**                                     |
-|--------------------------|------------------------------------------------------|
-| `Containers`             | Containers object used during the test.              |
-| `Result`                 | Whether the tests passed (`Passed`, `Failed`, etc.). |
-| `FailedCount`            | Number of failed tests.                              |
-| `FailedBlocksCount`      | Number of failed blocks.                             |
-| `FailedContainersCount`  | Number of failed containers.                         |
-| `PassedCount`            | Number of passed tests.                              |
-| `SkippedCount`           | Number of skipped tests.                             |
-| `InconclusiveCount`      | Number of inconclusive tests.                        |
-| `NotRunCount`            | Number of tests not run.                             |
-| `TotalCount`             | Total number of tests.                               |
-| `Duration`               | Duration of the test run.                            |
-| `Executed`               | Number of tests actually executed.                   |
-| `ExecutedAt`             | DateTime of the test run.                            |
-| `Version`                | Pester version.                                      |
-| `PSVersion`              | PowerShell version.                                  |
-| `PSBoundParameters`      | The final set of parameters used to run the tests.   |
-| `Plugins`                | Plugins used during the run.                         |
-| `PluginConfiguration`    | Configuration for those plugins.                     |
-| `PluginData`             | Data from those plugins.                             |
-| `Configuration`          | The merged final Pester configuration used.          |
-| `DiscoveryDuration`      | Discovery-phase duration.                            |
-| `UserDuration`           | Duration of user code execution.                     |
-| `FrameworkDuration`      | Duration of framework code execution.                |
-| `Failed`                 | Info on failed tests.                                |
-| `FailedBlocks`           | Info on failed blocks.                               |
-| `FailedContainers`       | Info on failed containers.                           |
-| `Passed`                 | Info on passed tests.                                |
-| `Skipped`                | Info on skipped tests.                               |
-| `Inconclusive`           | Info on inconclusive tests.                          |
-| `NotRun`                 | Info on tests not run.                               |
-| `Tests`                  | All discovered tests.                                |
-| `CodeCoverage`           | Code coverage report object.                         |
-| `TestResultEnabled`      | `true`/`false` based on `TestResult_Enabled`.        |
-| `TestResultOutputPath`   | Path to the test result file.                        |
-| `TestSuiteName`          | Name of the test suite.                              |
-| `CodeCoverageEnabled`    | `true`/`false` based on `CodeCoverage_Enabled`.      |
-| `CodeCoverageOutputPath` | Where the coverage report was saved.                 |
-
+| **Output** | **Description**     |
+|------------|---------------------|
+| `Passed`   | Did all tests pass? |
 
 ### Tips & Notes
 
@@ -268,5 +235,3 @@ After the test run completes, these outputs become available. They are all JSON-
 The **Invoke-Pester** GitHub Action streamlines automated PowerShell testing in CI/CD by merging multiple configuration layers, running Pester tests,
 collecting coverage, generating artifacts, and neatly summarizing results. It helps maintain a robust CI environment for PowerShell projects of all
 sizes. If you have questions or want to contribute, feel free to open an issue or pull request.
-
-Happy pestering!

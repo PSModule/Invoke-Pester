@@ -22,8 +22,18 @@ LogGroup 'Get test kit versions' {
 }
 
 LogGroup 'Load inputs' {
+    $providedItem = Resolve-Path -Path $env:GITHUB_ACTION_INPUT_Path | Select-Object -ExpandProperty Path | Get-Item
+    if ($providedItem -is [System.IO.DirectoryInfo]) {
+        $providedPath = $providedItem.FullName
+    } elseif ($providedItem -is [System.IO.FileInfo]) {
+        $providedPath = $providedItem.Directory.FullName
+    } else {
+        Write-GitHubError "❌ Provided path [$providedItem] is not a valid directory or file."
+        exit 1
+    }
+
     $inputs = @{
-        Path                               = $env:GITHUB_ACTION_INPUT_Path
+        Path                               = $providedPath
 
         Run_Path                           = $env:GITHUB_ACTION_INPUT_Run_Path
         Run_ExcludePath                    = $env:GITHUB_ACTION_INPUT_Run_ExcludePath
@@ -168,17 +178,24 @@ LogGroup 'Merge configuration' {
 
 LogGroup 'Find containers' {
     $containers = @()
-    $configuration.Run.Container | Where-Object { $null -ne $_ } | ForEach-Object {
-        Write-Verbose "Processing container [$_]"
-        $containers += $_ | Convert-PesterConfigurationToHashtable
+    $existingContainers = $configuration.Run.Container
+    if ($existingContainers.Count -gt 0) {
+        Write-Output "Containers from configuration: [$($existingContainers.Count)]"
+        foreach ($existingContainer in $existingContainers) {
+            Write-Output "Processing container [$existingContainer]"
+            $containers += $existingContainer | Convert-PesterConfigurationToHashtable
+        }
     }
     Write-Output "Containers from configuration: [$($containers.Count)]"
     if ($containers.Count -eq 0) {
         # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
-        Write-Output 'Searching for containers in Run.Path directories.'
-        foreach ($testDir in $configuration.Run.Path) {
-            Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse | ForEach-Object {
-                $containers += (. $_)
+        Write-Output 'Searching for containers in same location as config.'
+        foreach ($testDir in $inputs.Path) {
+            $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
+            Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
+            foreach ($containerFile in $containerFiles) {
+                Write-Output "Processing container file [$containerFile]"
+                $containers += Import-Hashtable $containerFile
             }
         }
     }
@@ -201,21 +218,28 @@ LogGroup 'Set Configuration - Result' {
     }
 
     $configuration = New-PesterConfiguration -Hashtable $configuration
-    Write-Output ($configuration | ConvertTo-Json -Depth 5 -WarningAction SilentlyContinue)
+    $configurationHashtable = $configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String
+    Write-Output $configurationHashtable
 }
 
 $testResults = Invoke-Pester -Configuration $configuration
+
+if ($null -eq $testResults) {
+    Write-GitHubError '❌ No test results were returned.'
+    exit 1
+}
 
 LogGroup 'Test results' {
     $testResults | Format-List
 
     $failedTests = [int]$testResults.FailedCount
 
-    if (($failedTests -gt 0) -or ($testResults.Result -ne 'Passed')) {
-        Write-GitHubError "❌ Some [$failedTests] tests failed."
-    }
-    if ($failedTests -eq 0) {
+    if ($failedTests -eq 0 -and $testResults.Result -eq 'Passed') {
         Write-GitHubNotice '✅ All tests passed.'
+        Set-GitHubOutput -Name 'Passed' -Value $true
+    } else {
+        Write-GitHubError "❌ Some [$failedTests] tests failed."
+        Set-GitHubOutput -Name 'Passed' -Value $false
     }
 }
 
@@ -245,17 +269,6 @@ LogGroup 'Test results summary' {
 <details><summary>$testSuitStatusIcon - $testSuitName ($formattedTestDuration)</summary>
 <p>
 
-<details><summary>Configuration</summary>
-<p>
-
-``````pwsh
-$($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String)
-``````
-
-</p>
-</details>
-
-
 | Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
 | ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
 | $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
@@ -269,7 +282,12 @@ $($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | O
         Write-Verbose "Processing container [$containerPath]" -Verbose
         $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
         Write-Verbose "Container name: [$containerName]" -Verbose
-        $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
+        $containerStatusIcon = switch ($container.Result) {
+            'Passed' { '✅' }
+            'Failed' { '❌' }
+            'Skipped' { '⚠️' }
+            default { $container.Result }
+        }
         $formattedContainerDuration = $container.Duration | Format-TimeSpan
         $summaryMarkdown += @"
 <details><summary>$Indent$containerStatusIcon - $containerName ($formattedContainerDuration)</summary>
@@ -290,24 +308,68 @@ $($configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | O
 
 '@
     }
+}
 
-    $summaryMarkdown += @'
+$summaryMarkdown += @"
+
+-----------------------------------------
+
+<details><summary>Configuration</summary>
+<p>
+
+``````pwsh
+$configurationHashtable
+``````
+
+</p>
+</details>
+
+
+<details><summary>Test results</summary>
+<p>
+
+
+"@
+# For each property of testresults, output the value as a JSON object
+foreach ($property in $testResults.PSObject.Properties) {
+    Write-Verbose "Setting output for [$($property.Name)]"
+    if ($property.Name -ne 'Containers') {
+        continue
+    }
+    $name = $property.Name
+    $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
+    $summaryMarkdown += @"
+<details><summary>$indent - $name</summary>
+<p>
+
+``````json
+$value
+``````
+
+</p>
+</details>
+
+"@
+
+}
+
+$summaryMarkdown += @'
+
 
 </p>
 </details>
 
 '@
-    Set-GitHubStepSummary -Summary $summaryMarkdown
-}
 
-# For each property of testresults, output the value as a JSON object
-foreach ($property in $testResults.PSObject.Properties) {
-    Write-Verbose "Setting output for [$($property.Name)]"
-    $name = $property.Name
-    $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
-    Set-GitHubOutput -Name $name -Value $value
-}
+$summaryMarkdown += @'
 
+</p>
+</details>
+
+'@
+
+
+Set-GitHubStepSummary -Summary $summaryMarkdown
 Set-GitHubOutput -Name 'TestResultEnabled' -Value $testResults.Configuration.TestResult.Enabled.Value
 Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.Configuration.TestResult.OutputPath.Value
 Set-GitHubOutput -Name 'TestSuiteName' -Value $testResults.Configuration.TestResult.TestSuiteName.Value

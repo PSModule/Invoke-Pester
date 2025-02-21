@@ -27,8 +27,19 @@ jobs:
 
       - name: Action-Test [1-Simple]
         uses: ./
+        id: action-test
         with:
           Path: tests/1-Simple
+
+      - name: Status
+        shell: pwsh
+        env:
+          PASSED: ${{ steps.action-test.outputs.passed }}
+        run: |
+          Write-Host "Passed: [$env:PASSED]"
+          if ($env:PASSED -ne 'true') {
+            exit 1
+          }
 
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
@@ -40,9 +51,20 @@ jobs:
 
       - name: Action-Test [2-Standard]
         uses: ./
+        id: action-test
         with:
           Path: tests/2-Standard
           Output_CIFormat: GithubActions
+
+      - name: Status
+        shell: pwsh
+        env:
+          PASSED: ${{ steps.action-test.outputs.passed }}
+        run: |
+          Write-Host "Passed: [$env:PASSED]"
+          if ($env:PASSED -ne 'true') {
+            exit 1
+          }
 
   ActionTestAdvanced:
     name: Action-Test - [3-Advanced]
@@ -54,5 +76,16 @@ jobs:
 
       - name: Action-Test [3-Advanced]
         uses: ./
+        id: action-test
         with:
           Path: tests/3-Advanced/Pester.Configuration.ps1
+
+      - name: Status
+        shell: pwsh
+        env:
+          PASSED: ${{ steps.action-test.outputs.passed }}
+        run: |
+          Write-Host "Passed: [$env:PASSED]"
+          if ($env:PASSED -ne 'true') {
+            exit 1
+          }

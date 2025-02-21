@@ -452,7 +452,12 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
             # Otherwise, list each test at this level
             foreach ($test in $groupTests) {
                 $testName = $test.Path[$Depth]
-                $testStatusIcon = $test.Result -eq 'Passed' ? '✅' : '❌'
+                $testStatusIcon = switch ($test.Result) {
+                    'Passed' { '✅' }
+                    'Failed' { '❌' }
+                    'Skipped' { '⚠️' }
+                    default { $test.Result }
+                }
                 $formattedDuration = $test.Duration | Format-TimeSpan
                 $markdown += @"
 <details><summary>$groupIndent$testStatusIcon - $testName ($formattedDuration)</summary>
