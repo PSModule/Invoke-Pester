@@ -286,7 +286,7 @@ LogGroup 'Test results summary' {
             'Passed' { '✅' }
             'Failed' { '❌' }
             'Skipped' { '⚠️' }
-            default { '❓' }
+            default { $container.Result }
         }
         $formattedContainerDuration = $container.Duration | Format-TimeSpan
         $summaryMarkdown += @"

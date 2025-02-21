@@ -456,7 +456,7 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
                     'Passed' { '✅' }
                     'Failed' { '❌' }
                     'Skipped' { '⚠️' }
-                    default { '❓' }
+                    default { $test.Result }
                 }
                 $formattedDuration = $test.Duration | Format-TimeSpan
                 $markdown += @"
