@@ -282,7 +282,12 @@ LogGroup 'Test results summary' {
         Write-Verbose "Processing container [$containerPath]" -Verbose
         $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
         Write-Verbose "Container name: [$containerName]" -Verbose
-        $containerStatusIcon = $container.Result -eq 'Passed' ? '✅' : '❌'
+        $containerStatusIcon = switch ($container.Result) {
+            'Passed' { '✅' }
+            'Failed' { '❌' }
+            'Skipped' { '⚠️' }
+            default { '❓' }
+        }
         $formattedContainerDuration = $container.Duration | Format-TimeSpan
         $summaryMarkdown += @"
 <details><summary>$Indent$containerStatusIcon - $containerName ($formattedContainerDuration)</summary>
