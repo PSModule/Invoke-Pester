@@ -190,7 +190,7 @@ inputs:
     default: 'false'
 outputs:
   Passed:
-    description: Passed tests.
+    description: Did all tests pass?
     value: ${{ fromJSON(steps.test.outputs.result).Passed }}
 
 runs:
