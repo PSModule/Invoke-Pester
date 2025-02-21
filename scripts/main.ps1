@@ -3,7 +3,7 @@
 param()
 
 LogGroup 'Setup prerequisites' {
-    'Pester', 'PSScriptAnalyzer', 'Hashtable', 'TimeSpan' | ForEach-Object {
+    'Pester', 'Hashtable', 'TimeSpan' | ForEach-Object {
         Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
         Import-Module -Name $_ -Verbose:$false
     }
@@ -11,13 +11,11 @@ LogGroup 'Setup prerequisites' {
 }
 
 LogGroup 'Get test kit versions' {
-    $PSSAModule = Get-PSResource -Name PSScriptAnalyzer -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
     $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
 
     [PSCustomObject]@{
-        PowerShell       = $PSVersionTable.PSVersion.ToString()
-        Pester           = $pesterModule.Version
-        PSScriptAnalyzer = $PSSAModule.Version
+        PowerShell = $PSVersionTable.PSVersion.ToString()
+        Pester     = $pesterModule.Version
     } | Format-List
 }
 

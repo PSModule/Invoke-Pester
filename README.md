@@ -3,7 +3,7 @@
 This GitHub Action runs [Pester](https://pester.dev) tests in PowerShell, producing code coverage and test result artifacts. It automates many tasks
 to streamline continuous integration for PowerShell projects:
 
-- Installation and import of required modules (Pester, PSScriptAnalyzer).
+- Installation and import of required modules.
 - Automatic merging of default configuration, test suite configuration, and direct inputs into a final Pester configuration.
 - Optional uploading of test results and coverage reports.
 - Clear step summary in GitHub's job logs.
@@ -41,7 +41,7 @@ This **“last-write-wins”** strategy means you can set global defaults while 
 ## How This Action Processes Your Tests
 
 1. **Prerequisite Setup**
-   - Installs required PowerShell modules (Pester, PSScriptAnalyzer) if they're not present.
+   - Installs required PowerShell modules if they're not present.
    - Imports the modules so the testing framework is ready to use.
 
 2. **Loading Inputs and Configuration**
