@@ -1,4 +1,7 @@
-﻿function Get-PesterContainer {
+$nbsp = [char]0x00A0
+$indent = "$nbsp" * 4
+
+function Get-PesterContainer {
     <#
         .SYNOPSIS
         Loads Pester container files from the specified path.
@@ -697,6 +700,3 @@ $($test.ErrorRecord.Exception.Message)
     }
     return $markdown
 }
-
-$nbsp = [char]0x00A0
-$indent = "$nbsp" * 4
