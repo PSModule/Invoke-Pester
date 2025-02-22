@@ -5,38 +5,115 @@ to streamline continuous integration for PowerShell projects:
 
 - Installation and import of required modules.
 - Automatic merging of default configuration, test suite configuration, and direct inputs into a final Pester configuration.
-- Optional uploading of test results and coverage reports.
+- Uploading of test results and coverage reports.
 - Clear step summary in GitHub's job logs.
 
-## Introduction & Scope
+## Dependencies
 
-**Invoke-Pester** is designed to:
-- **Execute all Pester tests** in your repository, with optional container-based test organization.
-- **Collect code coverage** metrics, if desired.
-- **Summarize test results** with a neat table in the workflow's step summary.
-- **Upload artifacts** (e.g. coverage reports, test results) to GitHub for later inspection.
-- **Allow flexible configuration** through a layered approach—defaults, repository-level config, and direct inputs.
-
-By default, it tries to “just work” for the majority of scenarios.
-Advanced users can configure everything from coverage thresholds to skipping slow tests.
+- This action.
+- [`Pester` module](https://github.com/Pester/Pester)
+- [`GitHub-Script` action](https://github.com/PSModule/GitHub-Script)
+- [`GitHub` module](https://github.com/PSModule/GitHub)
 
 ## Configuration Hierarchy
 
-The action's behavior is controlled by **layered configuration**:
+The action's behavior is controlled by a **layered configuration** system, which merges settings from multiple sources in a specific order. The
+highest-priority settings override lower-priority ones. The order of precedence is as follows:
 
-1. **Default Config**
-   Packaged with the action (in `Pester.Configuration.ps1` if provided). Sets base paths, coverage toggles, artifact names, etc.
+| Setting    | Default | Test Suite | Direct Inputs | Result |
+|------------|---------|------------|---------------|--------|
+| `SettingA` | `X`     |            |               | `X`    |
+| `SettingB` | `X`     | `Y`        |               | `Y`    |
+| `SettingC` | `X`     | `Y`        | `Z`           | `Z`    |
 
-2. **Test Suite Config**
+This **last-write-wins** strategy means you can set global defaults while retaining the flexibility to override them at the action level.
+
+### 1. Default Configuration
+   The action defaults use the `PesterConfiguration` defaults.
+
+<details>
+<summary>Default Configuration</summary>
+
+```powershell
+@{
+    TestDrive    = @{
+        Enabled = $true
+    }
+    TestResult   = @{
+        TestSuiteName  = 'Pester'
+        OutputFormat   = 'NUnitXml'
+        OutputEncoding = 'UTF8'
+        OutputPath     = 'testResults.xml'
+        Enabled        = $false
+    }
+    Run          = @{
+        ExcludePath            = $null
+        Exit                   = $false
+        SkipRun                = $false
+        Path                   = '.'
+        Throw                  = $false
+        PassThru               = $false
+        SkipRemainingOnFailure = 'None'
+        ScriptBlock            = $null
+        Container              = $null
+        TestExtension          = '.Tests.ps1'
+    }
+    Output       = @{
+        CILogLevel          = 'Error'
+        StackTraceVerbosity = 'Filtered'
+        RenderMode          = 'Auto'
+        CIFormat            = 'Auto'
+        Verbosity           = 'Normal'
+    }
+    Debug        = @{
+        ShowNavigationMarkers  = $false
+        ShowFullErrors         = $false
+        WriteDebugMessagesFrom = @(
+            'Discovery'
+            'Skip'
+            'Mock'
+            'CodeCoverage'
+        )
+        WriteDebugMessages     = $false
+        ReturnRawResultObject  = $false
+    }
+    TestRegistry = @{
+        Enabled = $true
+    }
+    CodeCoverage = @{
+        Path                  = $null
+        OutputEncoding        = 'UTF8'
+        CoveragePercentTarget = '75'
+        UseBreakpoints        = $true
+        ExcludeTests          = $true
+        RecursePaths          = $true
+        OutputPath            = 'coverage.xml'
+        SingleHitBreakpoints  = $true
+        Enabled               = $false
+        OutputFormat          = 'JaCoCo'
+    }
+    Should       = @{
+        ErrorAction = 'Stop'
+    }
+    Filter       = @{
+        Line        = $null
+        Tag         = $null
+        ExcludeLine = $null
+        FullName    = $null
+        ExcludeTag  = $null
+    }
+}
+```
+
+</details>
+
+### 2. Test Suite Configuration
    If your test suite contains a Pester config file (e.g., `MyTests.Configuration.psd1` or `Pester.Configuration.ps1`), the action loads and merges
    those settings on top of the defaults.
 
-3. **Direct Inputs**
+### 3. Direct Action Inputs
    Finally, any inputs specified under the `with:` clause in your GitHub Action workflow override both the default and test suite config.
    > *Example:* If you specify `CodeCoverage_Enabled: true` here, it will enable coverage even if the test suite config says otherwise.
-
-This **“last-write-wins”** strategy means you can set global defaults while retaining the flexibility to override them at the action level.
-
 
 ## How This Action Processes Your Tests
 
@@ -45,39 +122,37 @@ This **“last-write-wins”** strategy means you can set global defaults while 
    - Imports the modules so the testing framework is ready to use.
 
 2. **Loading Inputs and Configuration**
-   - Reads all GitHub Action inputs from `action.yml` environment variables.
-   - (Optional) Loads a base config file included with the action (e.g., `Pester.Configuration.ps1` in the action folder).
+   - Loads a default pester configuration.
    - If `Path` points to a location with a Pester configuration file, merges that config.
    - Finally, merges any direct inputs provided in your workflow.
    - The result is a **final Pester configuration** that determines what tests to run and how to run them.
 
-3. **Building the Final Pester Configuration**
-   - Collects all merged settings into a single configuration object.
-   - If no “containers” (advanced Pester 5 grouping) are explicitly defined, it attempts to discover them automatically (files matching `*.Container.*`).
+3. **Add containers**
+   - If no containers are explicitly defined, it attempts to discover them automatically (files matching `*.Container.*`).
+   - Adds these containers to the final configuration.
 
 4. **Running the Tests**
    - Calls [`Invoke-Pester`](https://pester.dev/docs/commands/Invoke-Pester) using that final configuration.
-   - **Discovery Phase**: Finds test files/containers.
-   - **Execution Phase**: Runs tests, logs pass/fail/skipped/inconclusive.
-   - **Results Gathering**: Aggregates outcomes into a final test object.
+   - Finds test files/containers.
+   - Runs tests, logs pass/fail/skipped/inconclusive.
+   - Aggregates outcomes into a final test object.
 
-5. **Generating Reports (Optional)**
+5. **Generating Reports**
    - **Test Results** (e.g., NUnit/XML) if `TestResult_Enabled` is `true`. The file is saved to `TestResult_OutputPath`.
    - **Code Coverage** if `CodeCoverage_Enabled` is `true`. Saves coverage data (Cobertura, JaCoCo, etc.) to `CodeCoverage_OutputPath`.
-   - These reports can automatically be uploaded as workflow artifacts.
+   - These reports are automatically uploaded as workflow artifacts. The artifact names are:
+     - `<TestSuiteName>-TestResults`
+     - `<TestSuiteName>-CodeCoverage`
+
+    > [!TIP] Use the `TestResult_TestSuiteName` to change the variable name of the artifact.
 
 6. **Summary in GitHub**
    - A step summary is generated, showing how many tests passed/failed/skipped, plus coverage info.
    - If containers are in use, each container's results appear in a collapsible section.
 
 7. **Publishing Outputs**
-   - Key metrics (e.g., `Result`, `FailedCount`, `Duration`) are encoded in JSON and published as outputs.
-   - Subsequent steps can parse these to decide whether to fail the build, open an issue, or notify a channel.
-
-8. **Exit Code**
-   - By default, returns a non-zero exit code if any tests fail (unless you override with `Run_Exit: false` or `Run_Throw: false`).
-   - This ensures the GitHub job is marked as failed if your tests do not pass.
-
+   - The action outputs a JSON string with a `Passed` key, indicating whether all tests passed.
+   - This can be accessed from other steps in your workflow using `${{ steps.<step-id>.outputs.Passed }}` in the workflow.
 
 ## Failure Handling
 
@@ -85,43 +160,6 @@ This **“last-write-wins”** strategy means you can set global defaults while 
   The entire suite runs, capturing all failures before deciding on pass/fail.
 - **Allowed Failures / Coverage Threshold**:
   You can configure if any test failure leads to a fail, or whether certain coverage levels must be met.
-- **Default Behavior**:
-  If any test fails, the job fails at the end (exit code != 0). You can change this via `Run_Exit` or `Run_Throw`.
-
-
-## Artifact Management
-
-- **Test Result Artifacts**
-  - By default, if `TestResult_Enabled` is true, the action saves a test result file (XML/JSON) to `TestResult_OutputPath` and uploads it with
-    GitHub's `actions/upload-artifact`.
-- **Coverage Report Artifacts**
-  - If `CodeCoverage_Enabled` is true, a coverage file (Cobertura, JaCoCo, etc.) is generated and uploaded similarly.
-- **Naming & Paths**
-  - You can override default filenames or directories in your config or direct inputs.
-- **Logs & Extras**
-  - Generally, the action only uploads essential coverage and test result files, though you can adapt it to collect additional logs if needed.
-
-## Step Summary & Coverage Reporting
-
-- **Detailed Markdown Summary**:
-  Displays overall test results (passed, failed, skipped) and coverage in a table.
-- **Collapsible Breakdown**:
-  Each container or test file can be expanded for deeper inspection.
-- **Always Visible**:
-  Even if the action fails, the summary is posted so you can quickly see why.
-
-## Potential Pitfalls
-
-- If your tests are in a subfolder and `Path` or `Run_Path` isn't updated, you might discover zero tests.
-- Code coverage can differ between breakpoint-based (default) and profiler-based methods—choose which suits your environment (`CodeCoverage_UseBreakpoints`).
-- Containers are optional in Pester 5. If you rely on them but name them incorrectly, Pester might skip them.
-
-## Automation Notes
-
-- **Threshold Enforcement**: You can parse `CoveragePercent` from the outputs in a subsequent step and fail the build if coverage is below X%.
-- **Automatic Notifications**: Use the published JSON outputs (e.g., `Failed`) to highlight failing tests in Slack or Teams.
-- **Versioning & Releases**: If `FailedCount` is zero, you could trigger a deployment or release pipeline automatically.
-
 
 ## Usage
 
@@ -142,16 +180,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Pester Tests
-        uses: PSModule/Invoke-Pester@v1
+        uses: PSModule/Invoke-Pester@v2
         with:
-          Path: ./tests
-          CodeCoverage_Enabled: true
-          TestResult_Enabled: true
           TestResult_TestSuiteName: IntegrationTests
-          # Configure additional inputs, e.g. Run_Throw, Run_Exit, etc.
+          Path: ./tests
+          Run_Path: ./src
 
-      # If coverage & results are enabled, the action automatically uploads them as artifacts.
-      # The step exit code will be non-zero if any tests fail, unless overridden.
 ```
 
 ### Inputs
@@ -216,22 +250,3 @@ After the test run completes, these outputs become available. They are all JSON-
 | **Output** | **Description**     |
 |------------|---------------------|
 | `Passed`   | Did all tests pass? |
-
-### Tips & Notes
-
-- To **skip coverage** or **test result uploads**, set `CodeCoverage_Enabled: false` or `TestResult_Enabled: false`.
-- If you do **not** want a failing test to cause the step to fail, set `Run_Exit: false` and `Run_Throw: false`.
-- For deeper debug info, set `Debug: 'true'` (which uses the [PSModule/Debug@v0](https://github.com/PSModule/Debug) action).
-- If your tests require a **custom Pester config**, place it in your repository and point `Path` or `Run_Path` to it. The action merges that file with defaults.
-
-## Contributing
-
-1. Open a pull request with your proposed changes (bugfixes, improvements, new features).
-2. Test your branch in a real or mock workflow if possible to confirm it behaves as intended.
-3. We welcome any ideas for streamlining test runs, coverage generation, or other enhancements.
-
-## Conclusion
-
-The **Invoke-Pester** GitHub Action streamlines automated PowerShell testing in CI/CD by merging multiple configuration layers, running Pester tests,
-collecting coverage, generating artifacts, and neatly summarizing results. It helps maintain a robust CI environment for PowerShell projects of all
-sizes. If you have questions or want to contribute, feel free to open an issue or pull request.

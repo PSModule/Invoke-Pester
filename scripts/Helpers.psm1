@@ -241,6 +241,7 @@ filter Convert-PesterConfigurationToHashtable {
         This function iterates over a given PesterConfiguration object and extracts only the settings that have been modified.
         It ensures that only properties with an `IsModified` flag set to `$true` are included in the output hashtable.
         The function maintains the category structure of the configuration and retains type consistency when assigning values.
+        When the -IncludeDefaults switch is provided, it includes settings that have not been modified, outputting their default values.
 
         .EXAMPLE
         $config = New-PesterConfiguration
@@ -252,13 +253,18 @@ filter Convert-PesterConfigurationToHashtable {
         @{Run = @{PassThru = $true}}
         ```
 
-        Converts the provided PesterConfiguration object into a hashtable containing only modified values.
+        .EXAMPLE
+        $config = New-PesterConfiguration
+        Convert-PesterConfigurationToHashtable -PesterConfiguration $config -IncludeDefaults
+
+        Output:
+        The complete hashtable with each setting using its default value (unless it was modified).
 
         .OUTPUTS
         hashtable
 
         .NOTES
-        A hashtable containing only modified settings from the provided PesterConfiguration object.
+        A hashtable containing only modified settings (or all settings if -IncludeDefaults is used) from the provided PesterConfiguration object.
     #>
     [OutputType([hashtable])]
     [CmdletBinding()]
@@ -268,7 +274,11 @@ filter Convert-PesterConfigurationToHashtable {
             Mandatory,
             ValueFromPipeline
         )]
-        [PesterConfiguration] $PesterConfiguration
+        [PesterConfiguration] $PesterConfiguration,
+
+        # Include default values in the output hashtable.
+        [Parameter()]
+        [switch] $All
     )
 
     # Prepare the output hashtable
@@ -283,27 +293,15 @@ filter Convert-PesterConfigurationToHashtable {
         foreach ($settingName in $categoryObj.PSObject.Properties.Name) {
             $setting = $categoryObj.$settingName
 
-            # Only consider settings that have IsModified true
-            if ($setting -and $setting.PSObject.Properties.Match('IsModified') -and $setting.IsModified) {
+            # Process the setting if it's either modified or we want to include defaults.
+            if ($setting.IsModified -or $All) {
 
-                # Ensure both Default and Value properties exist.
-                if ($setting.PSObject.Properties.Match('Default') -and $setting.PSObject.Properties.Match('Value')) {
-
-                    # Compare types (unless handling of nulls is desired differently).
-                    if (($null -ne $setting.Value) -and ($null -ne $setting.Default)) {
-                        if ($setting.Value.GetType().FullName -eq $setting.Default.GetType().FullName) {
-                            $subHash[$settingName] = $setting.Value
-                        }
-                    } else {
-                        # If both are null, include the key (adjust as needed).
-                        if (($null -eq $setting.Value) -and ($null -eq $setting.Default)) {
-                            $subHash[$settingName] = $null
-                        }
-                    }
-                }
+                # If modified, use Value; if not, use Default.
+                $subHash[$settingName] = if ($setting.IsModified) { $setting.Value } else { $setting.Default }
             }
         }
 
+        # Add the category sub-hashtable to the result even if empty, to preserve structure.
         $result[$category] = $subHash
     }
 
