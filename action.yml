@@ -188,6 +188,11 @@ inputs:
       Enable debug mode.
     required: false
     default: 'false'
+  continue-on-error:
+    description: |
+      Continue on error.
+    required: false
+    default: 'false'
 outputs:
   Passed:
     description: Did all tests pass?
