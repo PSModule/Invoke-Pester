@@ -675,7 +675,7 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
         } else {
             # Otherwise, list each test at this level
             foreach ($test in $groupTests) {
-                $testName = $test.ExpandedPath[$Depth]
+                $testName = $test.Path[$Depth]
                 $testStatusIcon = switch ($test.Result) {
                     'Passed' { '✅' }
                     'Failed' { '❌' }
