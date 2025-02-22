@@ -89,7 +89,7 @@ LogGroup 'Load inputs' {
 
 LogGroup 'Load configuration - Defaults' {
     $defaultConfig = New-PesterConfigurationHashtable
-    $defaultToPrint = New-PesterConfigurationHashtable -Default
+    $defaultToPrint = New-PesterConfiguration -Hashtable $defaultConfig | Convert-PesterConfigurationToHashtable
     Write-Output ($defaultToPrint | Format-Hashtable | Out-String)
 }
 
