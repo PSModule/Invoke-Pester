@@ -643,7 +643,14 @@ function Get-GroupedTestMarkdown {
 
     $markdown = ''
     # Group tests by the element at position $Depth (or "Ungrouped" if not present)
-    $groups = $Tests | Group-Object { if ($_.Path.Count -gt $Depth) { $_.Path[$Depth] } else { 'Ungrouped' } } | Sort-Object Name
+    $groups = $Tests | Group-Object {
+        if ($_.Path.Count -gt $Depth) {
+            $_.Path[$Depth]
+        } else {
+            'Ungrouped'
+        }
+    } | Sort-Object Name
+    # $group = $groups[0]
     foreach ($group in $groups) {
         $groupName = $group.Name
         $groupTests = $group.Group
@@ -656,7 +663,7 @@ function Get-GroupedTestMarkdown {
         $formattedGroupDuration = $groupDuration | Format-TimeSpan
 
         # If any test has further parts, create a nested details block...
-        if ($groupTests | Where-Object { $_.ExpandedPath.Count -gt ($Depth + 1) }) {
+        if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
             $markdown += @"
 <details><summary>$groupIndent$groupStatusIcon - $groupName ($formattedGroupDuration)</summary>
 <p>

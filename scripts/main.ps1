@@ -266,6 +266,7 @@ LogGroup 'Test results summary' {
 
     Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
     # For each container, group tests by their test path parts
+    # $container = $testResults.Containers[0]
     foreach ($container in $testResults.Containers) {
         $containerPath = $container.Item.FullName
         Write-Verbose "Processing container [$containerPath]" -Verbose
@@ -283,12 +284,12 @@ LogGroup 'Test results summary' {
 <p>
 
 "@
-        $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } |
+        $tests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } |
             Sort-Object -Property Path
-        Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
+        Write-Verbose "Processing tests [$($tests.Count)]" -Verbose
 
         # Build the nested details markdown grouping tests by their test path parts
-        $groupedMarkdown = Get-GroupedTestMarkdown -Tests $containerTests -Depth 0
+        $groupedMarkdown = Get-GroupedTestMarkdown -Tests $tests -Depth 0
         $summaryMarkdown += $groupedMarkdown
 
         $summaryMarkdown += @'
