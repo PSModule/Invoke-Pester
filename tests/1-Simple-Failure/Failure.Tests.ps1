@@ -18,12 +18,9 @@ Describe 'Failure' {
         @{ Category = 'Set-PSModuleTest'; Expected = 'Hello, World!' }
     )
 
-    Context '<Category> should be <Expected>' {
-        $Name = 'Get-PSModuleTest'
-        $Expected = 'Hello, World!'
-
-        It '<Name> should be <Expected>' {
-            $Name | Should -Be $Expected
+    Context 'Cat: <Category> should be <Expected>' -ForEach $categories {
+        It 'Cat: <Category> should be <Expected>' {
+            $Category | Should -Be $Expected
         }
     }
 

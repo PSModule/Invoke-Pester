@@ -1,4 +1,4 @@
-$nbsp = [char]0x00A0
+﻿$nbsp = [char]0x00A0
 $indent = "$nbsp" * 4
 
 function Get-PesterContainer {
@@ -656,7 +656,7 @@ function Get-GroupedTestMarkdown {
         $formattedGroupDuration = $groupDuration | Format-TimeSpan
 
         # If any test has further parts, create a nested details block...
-        if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
+        if ($groupTests | Where-Object { $_.ExpandedPath.Count -gt ($Depth + 1) }) {
             $markdown += @"
 <details><summary>$groupIndent$groupStatusIcon - $groupName ($formattedGroupDuration)</summary>
 <p>
@@ -668,7 +668,7 @@ $(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
         } else {
             # Otherwise, list each test at this level
             foreach ($test in $groupTests) {
-                $testName = $test.Path[$Depth]
+                $testName = $test.ExpandedPath[$Depth]
                 $testStatusIcon = switch ($test.Result) {
                     'Passed' { '✅' }
                     'Failed' { '❌' }
