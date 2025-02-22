@@ -270,13 +270,13 @@ runs:
         name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage
         path: ${{ fromJSON(steps.test.outputs.result).CodeCoverageOutputPath }}
 
-    # - name: Status
-    #   shell: pwsh
-    #   if: ${{ inputs.continue-on-error }}
-    #   env:
-    #     PASSED: ${{ fromJSON(steps.test.outputs.result).Passed }}
-    #   run: |
-    #     Write-Host "Passed: [$env:PASSED]"
-    #     if ($env:PASSED -ne 'true') {
-    #       exit 1
-    #     }
+    - name: Status
+      shell: pwsh
+      # if: ${{ inputs.continue-on-error }}
+      env:
+        PASSED: ${{ fromJSON(steps.test.outputs.result).Passed }}
+      run: |
+        Write-Host "Passed: [$env:PASSED]"
+        if ($env:PASSED -ne 'true') {
+          exit 1
+        }
