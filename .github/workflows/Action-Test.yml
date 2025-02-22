@@ -20,6 +20,9 @@ jobs:
   ActionTest1Simple:
     name: Action-Test - [1-Simple]
     runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.action-test.outcome }}
+      conclusion: ${{ steps.action-test.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -33,17 +36,46 @@ jobs:
 
       - name: Status
         shell: pwsh
-        env:
-          PASSED: ${{ steps.action-test.outputs.passed }}
         run: |
-          Write-Host "Passed: [$env:PASSED]"
-          if ($env:PASSED -ne 'true') {
-            exit 1
-          }
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
+
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
+
+  ActionTest1SimpleFailure:
+    name: Action-Test - [1-Simple-Failure]
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.action-test.outcome }}
+      conclusion: ${{ steps.action-test.conclusion }}
+    steps:
+      # Need to check out as part of the test, as its a local action
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Action-Test [1-Simple-Failure]
+        uses: ./
+        id: action-test
+        continue-on-error: true
+        with:
+          Path: tests/1-Simple-Failure
+
+      - name: Status
+        shell: pwsh
+        run: |
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
+
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
 
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
     runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.action-test.outcome }}
+      conclusion: ${{ steps.action-test.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -58,17 +90,19 @@ jobs:
 
       - name: Status
         shell: pwsh
-        env:
-          PASSED: ${{ steps.action-test.outputs.passed }}
         run: |
-          Write-Host "Passed: [$env:PASSED]"
-          if ($env:PASSED -ne 'true') {
-            exit 1
-          }
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
 
-  ActionTestAdvanced:
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
+
+  ActionTest3Advanced:
     name: Action-Test - [3-Advanced]
     runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.action-test.outcome }}
+      conclusion: ${{ steps.action-test.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -82,10 +116,109 @@ jobs:
 
       - name: Status
         shell: pwsh
-        env:
-          PASSED: ${{ steps.action-test.outputs.passed }}
         run: |
-          Write-Host "Passed: [$env:PASSED]"
-          if ($env:PASSED -ne 'true') {
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
+
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
+
+  CatchJob:
+    name: "Catch Job - Aggregate Status"
+    needs:
+      - ActionTest1Simple
+      - ActionTest1SimpleFailure
+      - ActionTest2Standard
+      - ActionTest3Advanced
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Display Aggregated Results as a Table"
+        shell: pwsh
+        run: |
+          # Build an array of objects for each job
+          $ActionTest1SimpleOutcome = "${{ needs.ActionTest1Simple.outputs.outcome }}"
+          $ActionTest1SimpleExpectedOutcome = "success"
+          $ActionTest1SimpleOutcomeResult = $ActionTest1SimpleOutcome -eq $ActionTest1SimpleExpectedOutcome
+          $ActionTest1SimpleConclusion = "${{ needs.ActionTest1Simple.outputs.conclusion }}"
+          $ActionTest1SimpleExpectedConclusion = "success"
+          $ActionTest1SimpleConclusionResult = $ActionTest1SimpleConclusion -eq $ActionTest1SimpleExpectedConclusion
+          $ActionTest1SimpleFailureOutcome = "${{ needs.ActionTest1SimpleFailure.outputs.outcome }}"
+          $ActionTest1SimpleFailureExpectedOutcome = "failure"
+          $ActionTest1SimpleFailureOutcomeResult = $ActionTest1SimpleFailureOutcome -eq $ActionTest1SimpleFailureExpectedOutcome
+          $ActionTest1SimpleFailureConclusion = "${{ needs.ActionTest1SimpleFailure.outputs.conclusion }}"
+          $ActionTest1SimpleFailureExpectedConclusion = "success"
+          $ActionTest1SimpleFailureConclusionResult = $ActionTest1SimpleFailureConclusion -eq $ActionTest1SimpleFailureExpectedConclusion
+          $ActionTest2StandardOutcome = "${{ needs.ActionTest2Standard.outputs.outcome }}"
+          $ActionTest2StandardExpectedOutcome = "success"
+          $ActionTest2StandardOutcomeResult = $ActionTest2StandardOutcome -eq $ActionTest2StandardExpectedOutcome
+          $ActionTest2StandardConclusion = "${{ needs.ActionTest2Standard.outputs.conclusion }}"
+          $ActionTest2StandardExpectedConclusion = "success"
+          $ActionTest2StandardConclusionResult = $ActionTest2StandardConclusion -eq $ActionTest2StandardExpectedConclusion
+          $ActionTest3AdvancedOutcome = "${{ needs.ActionTest3Advanced.outputs.outcome }}"
+          $ActionTest3AdvancedExpectedOutcome = "success"
+          $ActionTest3AdvancedOutcomeResult = $ActionTest3AdvancedOutcome -eq $ActionTest3AdvancedExpectedOutcome
+          $ActionTest3AdvancedConclusion = "${{ needs.ActionTest3Advanced.outputs.conclusion }}"
+          $ActionTest3AdvancedExpectedConclusion = "success"
+          $ActionTest3AdvancedConclusionResult = $ActionTest3AdvancedConclusion -eq $ActionTest3AdvancedExpectedConclusion
+
+
+          $jobs = @(
+            [PSCustomObject]@{
+              Name               = "ActionTest1Simple"
+              Outcome            = $ActionTest1SimpleOutcome
+              ExpectedOutcome    = $ActionTest1SimpleExpectedOutcome
+              PassedOutcome      = $ActionTest1SimpleOutcomeResult
+              Conclusion         = $ActionTest1SimpleConclusion
+              ExpectedConclusion = $ActionTest1SimpleExpectedConclusion
+              PassedConclusion   = $ActionTest1SimpleConclusionResult
+            },
+            [PSCustomObject]@{
+              Name               = "ActionTest1SimpleFailure"
+              Outcome            = $ActionTest1SimpleFailureOutcome
+              ExpectedOutcome    = $ActionTest1SimpleFailureExpectedOutcome
+              PassedOutcome      = $ActionTest1SimpleFailureOutcomeResult
+              Conclusion         = $ActionTest1SimpleFailureConclusion
+              ExpectedConclusion = $ActionTest1SimpleFailureExpectedConclusion
+              PassedConclusion   = $ActionTest1SimpleFailureConclusionResult
+            },
+            [PSCustomObject]@{
+              Name               = "ActionTest2Standard"
+              Outcome            = $ActionTest2StandardOutcome
+              ExpectedOutcome    = $ActionTest2StandardExpectedOutcome
+              PassedOutcome      = $ActionTest2StandardOutcomeResult
+              Conclusion         = $ActionTest2StandardConclusion
+              ExpectedConclusion = $ActionTest2StandardExpectedConclusion
+              PassedConclusion   = $ActionTest2StandardConclusionResult
+            },
+            [PSCustomObject]@{
+              Name               = "ActionTest3Advanced"
+              Outcome            = $ActionTest3AdvancedOutcome
+              ExpectedOutcome    = $ActionTest3AdvancedExpectedOutcome
+              PassedOutcome      = $ActionTest3AdvancedOutcomeResult
+              Conclusion         = $ActionTest3AdvancedConclusion
+              ExpectedConclusion = $ActionTest3AdvancedExpectedConclusion
+              PassedConclusion   = $ActionTest3AdvancedConclusionResult
+            }
+          )
+
+          # Display the table in the workflow logs
+          $jobs | Format-List
+
+          $passed = $true
+          $jobs | ForEach-Object {
+            if (-not $_.PassedOutcome) {
+              Write-Error "Job $($_.Name) failed with Outcome $($_.Outcome) and Expected Outcome $($_.ExpectedOutcome)"
+              $passed = $false
+            }
+
+            if (-not $_.PassedConclusion) {
+              Write-Error "Job $($_.Name) failed with Conclusion $($_.Conclusion) and Expected Conclusion $($_.ExpectedConclusion)"
+              $passed = $false
+            }
+          }
+
+          if (-not $passed) {
+            Write-GithubError "One or more jobs failed"
             exit 1
           }
