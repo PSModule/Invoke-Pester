@@ -41,6 +41,21 @@ jobs:
             exit 1
           }
 
+  ActionTest1SimpleFailure:
+    name: Action-Test - [1-Simple-Failure]
+    runs-on: ubuntu-latest
+    steps:
+      # Need to check out as part of the test, as its a local action
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Action-Test [1-Simple-Failure]
+        uses: ./
+        id: action-test
+        with:
+          continue-on-error: true
+          Path: tests/1-Simple-Failure
+
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
     runs-on: ubuntu-latest
