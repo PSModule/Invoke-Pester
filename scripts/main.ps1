@@ -165,7 +165,7 @@ LogGroup 'Load configuration - Action overrides' {
 }
 
 LogGroup 'Merge configuration' {
-    $configuration = Merge-PesterConfiguration -BaseConfiguration $customConfig -AdditionalConfiguration $customInputs
+    $configuration = Merge-PesterConfiguration -BaseConfiguration @{} -AdditionalConfiguration $customConfig, $customInputs
 
     if ([string]::IsNullOrEmpty($configuration.Run.Path)) {
         $configuration.Run.Path = $inputs.Path
