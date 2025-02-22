@@ -33,13 +33,9 @@ jobs:
 
       - name: Status
         shell: pwsh
-        env:
-          PASSED: ${{ steps.action-test.outputs.passed }}
         run: |
-          Write-Host "Passed: [$env:PASSED]"
-          if ($env:PASSED -ne 'true') {
-            exit 1
-          }
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
 
   ActionTest1SimpleFailure:
     name: Action-Test - [1-Simple-Failure]
@@ -87,6 +83,12 @@ jobs:
             exit 1
           }
 
+      - name: Status
+        shell: pwsh
+        run: |
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+
   ActionTestAdvanced:
     name: Action-Test - [3-Advanced]
     runs-on: ubuntu-latest
@@ -103,10 +105,46 @@ jobs:
 
       - name: Status
         shell: pwsh
-        env:
-          PASSED: ${{ steps.action-test.outputs.passed }}
         run: |
-          Write-Host "Passed: [$env:PASSED]"
-          if ($env:PASSED -ne 'true') {
-            exit 1
-          }
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+
+  CatchJob:
+    name: "Catch Job - Aggregate Status"
+    needs:
+      - ActionTest1Simple
+      - ActionTest1SimpleFailure
+      - ActionTest2Standard
+      - ActionTestAdvanced
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Display Aggregated Results as a Table"
+        shell: pwsh
+        run: |
+          # Build an array of objects for each job
+          $jobs = @(
+            [PSCustomObject]@{
+              Name       = "ActionTest1Simple"
+              Outcome    = "${{ needs.ActionTest1Simple.outputs.outcome }}"
+              Conclusion = "${{ needs.ActionTest1Simple.outputs.conclusion }}"
+            },
+            [PSCustomObject]@{
+              Name       = "ActionTest1SimpleFailure"
+              Outcome    = "${{ needs.ActionTest1SimpleFailure.outputs.outcome }}"
+              Conclusion = "${{ needs.ActionTest1SimpleFailure.outputs.conclusion }}"
+            },
+            [PSCustomObject]@{
+              Name       = "ActionTest2Standard"
+              Outcome    = "${{ needs.ActionTest2Standard.outputs.outcome }}"
+              Conclusion = "${{ needs.ActionTest2Standard.outputs.conclusion }}"
+            },
+            [PSCustomObject]@{
+              Name       = "ActionTestAdvanced"
+              Outcome    = "${{ needs.ActionTestAdvanced.outputs.outcome }}"
+              Conclusion = "${{ needs.ActionTestAdvanced.outputs.conclusion }}"
+            }
+          )
+
+          # Display the table in the workflow logs
+          $jobs | Format-Table -AutoSize
