@@ -21,8 +21,8 @@ jobs:
     name: Action-Test - [1-Simple]
     runs-on: ubuntu-latest
     outputs:
-      outcome: ${{ steps.action-test.outputs.outcome }}
-      conclusion: ${{ steps.action-test.outputs.conclusion }}
+      outcome: ${{ steps.action-test.outcome }}
+      conclusion: ${{ steps.action-test.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -38,17 +38,17 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
+          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
 
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
-          Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
+          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
 
   ActionTest1SimpleFailure:
     name: Action-Test - [1-Simple-Failure]
     runs-on: ubuntu-latest
     outputs:
-      outcome: ${{ steps.action-test.outputs.outcome }}
-      conclusion: ${{ steps.action-test.outputs.conclusion }}
+      outcome: ${{ steps.action-test.outcome }}
+      conclusion: ${{ steps.action-test.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -65,17 +65,17 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
+          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
 
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
-          Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
+          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
 
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
     runs-on: ubuntu-latest
     outputs:
-      outcome: ${{ steps.action-test.outputs.outcome }}
-      conclusion: ${{ steps.action-test.outputs.conclusion }}
+      outcome: ${{ steps.action-test.outcome }}
+      conclusion: ${{ steps.action-test.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -92,17 +92,17 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
+          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
 
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
-          Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
+          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
 
   ActionTestAdvanced:
     name: Action-Test - [3-Advanced]
     runs-on: ubuntu-latest
     outputs:
-      outcome: ${{ steps.action-test.outputs.outcome }}
-      conclusion: ${{ steps.action-test.outputs.conclusion }}
+      outcome: ${{ steps.action-test.outcome }}
+      conclusion: ${{ steps.action-test.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -118,10 +118,10 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
+          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
 
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
-          Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
+          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
 
   CatchJob:
     name: "Catch Job - Aggregate Status"
