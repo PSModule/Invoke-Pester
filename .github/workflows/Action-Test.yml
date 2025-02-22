@@ -52,9 +52,17 @@ jobs:
       - name: Action-Test [1-Simple-Failure]
         uses: ./
         id: action-test
+        continue-on-error: true
         with:
-          continue-on-error: true
           Path: tests/1-Simple-Failure
+
+      - name: Status
+        shell: pwsh
+        run: |
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+
+          Write-Host ('${{ fromJson(steps.action-test) }}' | ConvertFrom-Json)
 
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
