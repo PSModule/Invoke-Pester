@@ -88,9 +88,7 @@ LogGroup 'Load inputs' {
 }
 
 LogGroup 'Load configuration - Defaults' {
-    $defaultConfig = New-PesterConfigurationHashtable
-    $defaultToPrint = New-PesterConfiguration -Hashtable $defaultConfig | Convert-PesterConfigurationToHashtable
-    Write-Output ($defaultToPrint | Format-Hashtable | Out-String)
+    Write-Output (New-PesterConfigurationHashtable -Default | Format-Hashtable | Out-String)
 }
 
 LogGroup 'Load configuration - Custom settings file' {
@@ -167,7 +165,7 @@ LogGroup 'Load configuration - Action overrides' {
 }
 
 LogGroup 'Merge configuration' {
-    $configuration = Merge-PesterConfiguration -BaseConfiguration $defaultConfig -AdditionalConfiguration $customConfig, $customInputs
+    $configuration = Merge-PesterConfiguration -BaseConfiguration $customConfig -AdditionalConfiguration $customInputs
 
     if ([string]::IsNullOrEmpty($configuration.Run.Path)) {
         $configuration.Run.Path = $inputs.Path
