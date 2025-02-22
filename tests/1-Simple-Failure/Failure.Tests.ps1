@@ -19,7 +19,7 @@ Describe 'Failure' {
     )
 
     Context 'Cat: <Category> should be <Expected>' -ForEach $categories {
-        It 'Cat: <Category> should be <Expected>' {
+        It 'ItCat: <Category> should be <Expected>' {
             $Category | Should -Be $Expected
         }
     }
