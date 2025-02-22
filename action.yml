@@ -274,7 +274,7 @@ runs:
       shell: pwsh
       if: ${{ inputs.continue-on-error }}
       env:
-        PASSED: ${{ steps.test.outputs.passed }}
+        PASSED: ${{ fromJSON(steps.test.outputs.result).Passed }}
       run: |
         Write-Host "Passed: [$env:PASSED]"
         if ($env:PASSED -ne 'true') {
