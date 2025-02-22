@@ -20,6 +20,9 @@ jobs:
   ActionTest1Simple:
     name: Action-Test - [1-Simple]
     runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.action-test.outputs.outcome }}
+      conclusion: ${{ steps.action-test.outputs.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -43,6 +46,9 @@ jobs:
   ActionTest1SimpleFailure:
     name: Action-Test - [1-Simple-Failure]
     runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.action-test.outputs.outcome }}
+      conclusion: ${{ steps.action-test.outputs.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -67,6 +73,9 @@ jobs:
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
     runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.action-test.outputs.outcome }}
+      conclusion: ${{ steps.action-test.outputs.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -81,16 +90,6 @@ jobs:
 
       - name: Status
         shell: pwsh
-        env:
-          PASSED: ${{ steps.action-test.outputs.passed }}
-        run: |
-          Write-Host "Passed: [$env:PASSED]"
-          if ($env:PASSED -ne 'true') {
-            exit 1
-          }
-
-      - name: Status
-        shell: pwsh
         run: |
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
           Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
@@ -101,6 +100,9 @@ jobs:
   ActionTestAdvanced:
     name: Action-Test - [3-Advanced]
     runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.action-test.outputs.outcome }}
+      conclusion: ${{ steps.action-test.outputs.conclusion }}
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
