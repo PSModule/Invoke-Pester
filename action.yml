@@ -196,9 +196,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: PSModule/Debug@v0
-      if: ${{ inputs.Debug == 'true' }}
-
     - name: Invoke-Pester
       uses: PSModule/GitHub-Script@v1
       id: test

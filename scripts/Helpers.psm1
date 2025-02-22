@@ -185,18 +185,155 @@ function New-PesterConfigurationHashtable {
         in a structured manner.
 
         .EXAMPLE
-        New-PesterConfigurationHashtable
+        New-PesterConfigurationHashtable | Format-Hashtable
 
         Output:
         ```powershell
-        Name                           Value
-        ----                           -----
-        Run                            @{Container = $null; Exit = $null; PassThru = $null;...}
-        Filter                         @{Tag = $null; ExcludeTag = $null;...}
-        ...
+        @{
+            Should       = @{
+                ErrorAction = $null
+            }
+            CodeCoverage = @{
+                ExcludeTests          = $null
+                UseBreakpoints        = $null
+                SingleHitBreakpoints  = $null
+                RecursePaths          = $null
+                OutputEncoding        = $null
+                CoveragePercentTarget = $null
+                Path                  = $null
+                Enabled               = $null
+                OutputPath            = $null
+                OutputFormat          = $null
+            }
+            TestRegistry = @{
+                Enabled = $null
+            }
+            Output       = @{
+                StackTraceVerbosity = $null
+                CILogLevel          = $null
+                Verbosity           = $null
+                CIFormat            = $null
+                RenderMode          = $null
+            }
+            Filter       = @{
+                ExcludeLine = $null
+                ExcludeTag  = $null
+                Line        = $null
+                FullName    = $null
+                Tag         = $null
+            }
+            Debug        = @{
+                ShowFullErrors         = $null
+                WriteDebugMessagesFrom = $null
+                ReturnRawResultObject  = $null
+                WriteDebugMessages     = $null
+                ShowNavigationMarkers  = $null
+            }
+            Run          = @{
+                Exit                   = $null
+                Path                   = $null
+                PassThru               = $null
+                Container              = $null
+                ScriptBlock            = $null
+                Throw                  = $null
+                SkipRemainingOnFailure = $null
+                SkipRun                = $null
+                ExcludePath            = $null
+                TestExtension          = $null
+            }
+            TestDrive    = @{
+                Enabled = $null
+            }
+            TestResult   = @{
+                OutputFormat   = $null
+                OutputPath     = $null
+                Enabled        = $null
+                OutputEncoding = $null
+                TestSuiteName  = $null
+            }
+        }
         ```
 
-        Generates a hashtable representing the Pester configuration structure.
+        Generates a hashtable representing the Pester configuration structure with `$null` values.
+
+        .EXAMPLE
+        New-PesterConfigurationHashtable -Default | Format-Hashtable
+
+        Output:
+        ```powershell
+        @{
+            Should       = @{
+                ErrorAction = 'Stop'
+            }
+            CodeCoverage = @{
+                ExcludeTests          = $true
+                UseBreakpoints        = $true
+                SingleHitBreakpoints  = $true
+                RecursePaths          = $true
+                OutputEncoding        = 'UTF8'
+                CoveragePercentTarget = '75'
+                Path                  = @()
+                Enabled               = $false
+                OutputPath            = 'coverage.xml'
+                OutputFormat          = 'JaCoCo'
+            }
+            TestRegistry = @{
+                Enabled = $true
+            }
+            Output       = @{
+                StackTraceVerbosity = 'Filtered'
+                CILogLevel          = 'Error'
+                Verbosity           = 'Normal'
+                CIFormat            = 'Auto'
+                RenderMode          = 'Auto'
+            }
+            Filter       = @{
+                ExcludeLine = @()
+                ExcludeTag  = @()
+                Line        = @()
+                FullName    = @()
+                Tag         = @()
+            }
+            Debug        = @{
+                ShowFullErrors         = $false
+                WriteDebugMessagesFrom = @(
+                    'Discovery'
+                    'Skip'
+                    'Mock'
+                    'CodeCoverage'
+                )
+                ReturnRawResultObject  = $false
+                WriteDebugMessages     = $false
+                ShowNavigationMarkers  = $false
+            }
+            Run          = @{
+                Exit                   = $false
+                Path                   = @(
+                    '.'
+                )
+                PassThru               = $false
+                Container              = @()
+                ScriptBlock            = @()
+                Throw                  = $false
+                SkipRemainingOnFailure = 'None'
+                SkipRun                = $false
+                ExcludePath            = @()
+                TestExtension          = '.Tests.ps1'
+            }
+            TestDrive    = @{
+                Enabled = $true
+            }
+            TestResult   = @{
+                OutputFormat   = 'NUnitXml'
+                OutputPath     = 'testResults.xml'
+                Enabled        = $false
+                OutputEncoding = 'UTF8'
+                TestSuiteName  = 'Pester'
+            }
+        }
+        ```
+
+        Generates a hashtable representing the Pester configuration structure with default values.
 
         .OUTPUTS
         hashtable
@@ -210,7 +347,9 @@ function New-PesterConfigurationHashtable {
     )]
     [OutputType([hashtable])]
     [CmdletBinding()]
-    param()
+    param(
+        [switch] $Default
+    )
 
     # Prepare the output hashtable
     $result = @{}
@@ -224,7 +363,11 @@ function New-PesterConfigurationHashtable {
 
         # Iterate over each setting within the category
         foreach ($settingName in $categoryObj.PSObject.Properties.Name) {
-            $subHash[$settingName] = $null
+            if ($Default) {
+                $subHash[$settingName] = $schema.$category.$settingName.Value
+            } else {
+                $subHash[$settingName] = $null
+            }
         }
 
         $result[$category] = $subHash
@@ -241,24 +384,104 @@ filter Convert-PesterConfigurationToHashtable {
         This function iterates over a given PesterConfiguration object and extracts only the settings that have been modified.
         It ensures that only properties with an `IsModified` flag set to `$true` are included in the output hashtable.
         The function maintains the category structure of the configuration and retains type consistency when assigning values.
+        When the -IncludeDefaults switch is provided, it includes settings that have not been modified, outputting their default values.
+
+        .EXAMPLE
+        New-PesterConfiguration | Convert-PesterConfigurationToHashtable | Format-Hashtable
+
+        Output:
+        ```powershell
+        @{
+            TestDrive    = @{
+                Enabled = $true
+            }
+            TestResult   = @{
+                TestSuiteName  = 'Pester'
+                OutputFormat   = 'NUnitXml'
+                OutputEncoding = 'UTF8'
+                OutputPath     = 'testResults.xml'
+                Enabled        = $false
+            }
+            Run          = @{
+                ExcludePath            = $null
+                Exit                   = $false
+                SkipRun                = $false
+                Path                   = '.'
+                Throw                  = $false
+                PassThru               = $false
+                SkipRemainingOnFailure = 'None'
+                ScriptBlock            = $null
+                Container              = $null
+                TestExtension          = '.Tests.ps1'
+            }
+            Output       = @{
+                CILogLevel          = 'Error'
+                StackTraceVerbosity = 'Filtered'
+                RenderMode          = 'Auto'
+                CIFormat            = 'Auto'
+                Verbosity           = 'Normal'
+            }
+            Debug        = @{
+                ShowNavigationMarkers  = $false
+                ShowFullErrors         = $false
+                WriteDebugMessagesFrom = @(
+                    'Discovery'
+                    'Skip'
+                    'Mock'
+                    'CodeCoverage'
+                )
+                WriteDebugMessages     = $false
+                ReturnRawResultObject  = $false
+            }
+            TestRegistry = @{
+                Enabled = $true
+            }
+            CodeCoverage = @{
+                Path                  = $null
+                OutputEncoding        = 'UTF8'
+                CoveragePercentTarget = '75'
+                UseBreakpoints        = $true
+                ExcludeTests          = $true
+                RecursePaths          = $true
+                OutputPath            = 'coverage.xml'
+                SingleHitBreakpoints  = $true
+                Enabled               = $false
+                OutputFormat          = 'JaCoCo'
+            }
+            Should       = @{
+                ErrorAction = 'Stop'
+            }
+            Filter       = @{
+                Line        = $null
+                Tag         = $null
+                ExcludeLine = $null
+                FullName    = $null
+                ExcludeTag  = $null
+            }
+        }
+        ```
+
+        The complete hashtable with all settings including both modified and defaults.
 
         .EXAMPLE
         $config = New-PesterConfiguration
         $config.Run.PassThru = $true
-        Convert-PesterConfigurationToHashtable -PesterConfiguration $config
+        Convert-PesterConfigurationToHashtable -PesterConfiguration $config -OnlyModified | Format-Hashtable
 
         Output:
         ```powershell
-        @{Run = @{PassThru = $true}}
+        @{
+            Run = @{
+                PassThru = $true
+            }
+        }
         ```
-
-        Converts the provided PesterConfiguration object into a hashtable containing only modified values.
 
         .OUTPUTS
         hashtable
 
         .NOTES
-        A hashtable containing only modified settings from the provided PesterConfiguration object.
+        A hashtable containing only modified settings (or all settings if -IncludeDefaults is used) from the provided PesterConfiguration object.
     #>
     [OutputType([hashtable])]
     [CmdletBinding()]
@@ -268,7 +491,11 @@ filter Convert-PesterConfigurationToHashtable {
             Mandatory,
             ValueFromPipeline
         )]
-        [PesterConfiguration] $PesterConfiguration
+        [PesterConfiguration] $PesterConfiguration,
+
+        # Include default values in the output hashtable.
+        [Parameter()]
+        [switch] $OnlyModified
     )
 
     # Prepare the output hashtable
@@ -281,29 +508,16 @@ filter Convert-PesterConfigurationToHashtable {
 
         # Iterate over each setting within the category
         foreach ($settingName in $categoryObj.PSObject.Properties.Name) {
-            $setting = $categoryObj.$settingName
-
-            # Only consider settings that have IsModified true
-            if ($setting -and $setting.PSObject.Properties.Match('IsModified') -and $setting.IsModified) {
-
-                # Ensure both Default and Value properties exist.
-                if ($setting.PSObject.Properties.Match('Default') -and $setting.PSObject.Properties.Match('Value')) {
-
-                    # Compare types (unless handling of nulls is desired differently).
-                    if (($null -ne $setting.Value) -and ($null -ne $setting.Default)) {
-                        if ($setting.Value.GetType().FullName -eq $setting.Default.GetType().FullName) {
-                            $subHash[$settingName] = $setting.Value
-                        }
-                    } else {
-                        # If both are null, include the key (adjust as needed).
-                        if (($null -eq $setting.Value) -and ($null -eq $setting.Default)) {
-                            $subHash[$settingName] = $null
-                        }
-                    }
+            if ($OnlyModified) {
+                if ($setting.IsModified) {
+                    $subHash[$settingName] = $setting.Value
                 }
+            } else {
+                $subHash[$settingName] = if ($setting.IsModified) { $setting.Value } else { $setting.Default }
             }
         }
 
+        # Add the category sub-hashtable to the result even if empty, to preserve structure.
         $result[$category] = $subHash
     }
 
