@@ -52,7 +52,7 @@ jobs:
       - name: Action-Test [1-Simple-Failure]
         uses: ./
         id: action-test
-        continue-on-error: true
+        # continue-on-error: true
         with:
           Path: tests/1-Simple-Failure
 
