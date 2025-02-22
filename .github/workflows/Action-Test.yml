@@ -59,7 +59,8 @@ jobs:
       - name: Status
         shell: pwsh
         run: |
-          '${{ fromJson(steps) }}' | ConvertFrom-Json
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
 
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
