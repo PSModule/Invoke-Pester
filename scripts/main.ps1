@@ -222,27 +222,18 @@ LogGroup 'Set Configuration - Result' {
 
 $testResults = Invoke-Pester -Configuration $configuration
 
-if ($null -eq $testResults) {
-    Write-GitHubError '❌ No test results were returned.'
-    exit 1
-}
-
 LogGroup 'Test results' {
-    $testResults | Format-List
+    if ($null -eq $testResults) {
+        Write-GitHubError '❌ No test results were returned.'
+        exit 1
+    }
 
+    $testResults | Format-List
     $failedTests = [int]$testResults.FailedCount
 
-    if ($failedTests -eq 0 -and $testResults.Result -eq 'Passed') {
-        Write-GitHubNotice '✅ All tests passed.'
-        Set-GitHubOutput -Name 'Passed' -Value $true
-    } else {
-        Write-GitHubError "❌ Some [$failedTests] tests failed."
-        Set-GitHubOutput -Name 'Passed' -Value $false
-    }
 }
 
 LogGroup 'Test results summary' {
-
     $nbsp = [char]0x00A0
     $indent = "$nbsp" * 4
 
@@ -292,7 +283,8 @@ LogGroup 'Test results summary' {
 <p>
 
 "@
-        $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } | Sort-Object -Property Path
+        $containerTests = $testResults.Tests | Where-Object { $_.Block.BlockContainer.Item.FullName -eq $containerPath } |
+            Sort-Object -Property Path
         Write-Verbose "Processing tests [$($containerTests.Count)]" -Verbose
 
         # Build the nested details markdown grouping tests by their test path parts
@@ -306,9 +298,8 @@ LogGroup 'Test results summary' {
 
 '@
     }
-}
 
-$summaryMarkdown += @"
+    $summaryMarkdown += @"
 
 -----------------------------------------
 
@@ -328,15 +319,15 @@ $configurationHashtable
 
 
 "@
-# For each property of testresults, output the value as a JSON object
-foreach ($property in $testResults.PSObject.Properties) {
-    Write-Verbose "Setting output for [$($property.Name)]"
-    if ($property.Name -ne 'Containers') {
-        continue
-    }
-    $name = $property.Name
-    $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
-    $summaryMarkdown += @"
+    # For each property of testresults, output the value as a JSON object
+    foreach ($property in $testResults.PSObject.Properties) {
+        Write-Verbose "Setting output for [$($property.Name)]"
+        if ($property.Name -ne 'Containers') {
+            continue
+        }
+        $name = $property.Name
+        $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
+        $summaryMarkdown += @"
 <details><summary>$indent - $name</summary>
 <p>
 
@@ -349,29 +340,41 @@ $value
 
 "@
 
+    }
+
+    $summaryMarkdown += @'
+
+
+</p>
+</details>
+
+'@
+
+    $summaryMarkdown += @'
+
+</p>
+</details>
+
+'@
+
+    Set-GitHubStepSummary -Summary $summaryMarkdown
 }
 
-$summaryMarkdown += @'
+LogGroup 'Set outputs' {
+    Set-GitHubOutput -Name 'TestSuiteName' -Value $testResults.Configuration.TestResult.TestSuiteName.Value
+    Set-GitHubOutput -Name 'TestResultEnabled' -Value $testResults.Configuration.TestResult.Enabled.Value
+    Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.Configuration.TestResult.OutputPath.Value
+    Set-GitHubOutput -Name 'CodeCoverageEnabled' -Value $testResults.Configuration.CodeCoverage.Enabled.Value
+    Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $testResults.Configuration.CodeCoverage.OutputPath.Value
+}
 
+if ($testResults.Result -eq 'Passed') {
+    Write-GitHubNotice '✅ All tests passed.'
+    exit 0
+}
 
-</p>
-</details>
-
-'@
-
-$summaryMarkdown += @'
-
-</p>
-</details>
-
-'@
-
-
-Set-GitHubStepSummary -Summary $summaryMarkdown
-Set-GitHubOutput -Name 'TestResultEnabled' -Value $testResults.Configuration.TestResult.Enabled.Value
-Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.Configuration.TestResult.OutputPath.Value
-Set-GitHubOutput -Name 'TestSuiteName' -Value $testResults.Configuration.TestResult.TestSuiteName.Value
-Set-GitHubOutput -Name 'CodeCoverageEnabled' -Value $testResults.Configuration.CodeCoverage.Enabled.Value
-Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $testResults.Configuration.CodeCoverage.OutputPath.Value
-
-exit $failedTests
+Write-GitHubError "❌ Some [$failedTests] tests failed."
+if ($failedTests -gt 0) {
+    exit $failedTests
+}
+exit 1
