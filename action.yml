@@ -188,11 +188,6 @@ inputs:
       Enable debug mode.
     required: false
     default: 'false'
-  continue-on-error:
-    description: |
-      Continue on error.
-    required: false
-    default: 'false'
 outputs:
   Passed:
     description: Did all tests pass?
@@ -272,11 +267,9 @@ runs:
 
     - name: Status
       shell: pwsh
-      # if: ${{ inputs.continue-on-error }}
-      env:
-        PASSED: ${{ fromJSON(steps.test.outputs.result).Passed }}
       run: |
-        Write-Host "Passed: [$env:PASSED]"
-        if ($env:PASSED -ne 'true') {
+        $passed = '${{ fromJSON(steps.test.outputs.result).Passed }}'
+        Write-Host "Passed: [$passed]"
+        if ($passed -ne 'true') {
           exit 1
         }
