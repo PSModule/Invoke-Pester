@@ -719,7 +719,14 @@ filter Set-PesterReportSummaryTable {
         [Pester.Run] $TestResults
     )
 
-    $statusTable = $testResults | Select-Object -Property TotalCount, PassedCount, FailedCount, SkippedCount, InconclusiveCount, NotRunCount
+    $statusTable = [pscustomobject]@{
+        Total        = $testResults.TotalCount
+        Passed       = $testResults.PassedCount
+        Failed       = $testResults.FailedCount
+        Skipped      = $testResults.SkippedCount
+        Inconclusive = $testResults.InconclusiveCount
+        NotRun       = $testResults.NotRunCount
+    }
 
     if ($configuration.CodeCoverage.Enabled) {
         $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
