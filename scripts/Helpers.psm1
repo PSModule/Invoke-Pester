@@ -590,120 +590,130 @@ filter Clear-PesterConfigurationEmptyValue {
     return $return
 }
 
-function Get-GroupedTestMarkdown {
+filter Get-PesterTestTree {
     <#
         .SYNOPSIS
-        Generates a grouped and formatted Markdown summary of test results.
+        Processes Pester test results and returns a structured test tree.
 
         .DESCRIPTION
-        This function takes a collection of test results and organizes them into a hierarchical
-        Markdown format based on their path depth. It groups tests dynamically and represents their
-        results using icons, displaying test failures and durations appropriately. If a group contains
-        nested test results, the function calls itself recursively to generate a structured summary.
+        This function processes Pester test results and organizes them into a structured
+        test tree. It categorizes objects as Runs, Containers, Blocks, or Tests,
+        adding relevant properties such as depth and item type. This allows for better
+        visualization and analysis of Pester test results.
 
         .EXAMPLE
-        Get-GroupedTestMarkdown -Tests $testResults -Depth 0
+        $testResults = Invoke-Pester -Path 'C:\Repos\GitHub\PSModule\Action\Invoke-Pester\tests\1-Simple-Failure\Failure.Tests.ps1' -PassThru
+        $testResults | Get-PesterTestTree | Format-Table -AutoSize -Property Depth, Name, ItemType, Result, Duration, ErrorRecord
 
         Output:
-        ```
-        <details><summary>✅ - Group A (00:02:30)</summary>
-        <p>
-        <details><summary>❌ - Test 1 (00:00:45)</summary>
-        <p>
-
-        ``````
-        Test failed due to timeout
-        ``````
-
-        </p>
-        </details>
-        </p>
-        </details>
+        ```powershell
+        Depth Name              ItemType   Result   Duration ErrorRecord
+        ----- ----              --------   ------   -------- -----------
+            0 Failure.Tests     Container Passed   0.012s
+            1 Describe Block 1  Block     Failed   0.003s    System.Exception: Failure message
         ```
 
-        Generates a Markdown summary of test results, grouping them by their hierarchical depth.
+        Retrieves and formats Pester test results into a hierarchical tree structure.
 
         .OUTPUTS
-        string
+        PSCustomObject
 
         .NOTES
-        A formatted Markdown string summarizing test results.
+        Returns an object representing the hierarchical structure of
+        Pester test results, including depth, name, item type, and result status.
     #>
+
+    [OutputType([PSCustomObject])]
+    [CmdletBinding()]
+    param (
+        # Specifies the input object, which is expected to be an object in the Pester test result hierarchy.
+        # Run, Container, Block, or Test objects are supported.
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline
+        )]
+        [object] $InputObject
+    )
+
+    $inputObject = [pscustomobject]$InputObject
+
+    Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
+    switch ($InputObject.GetType().Name) {
+        'Run' {
+            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 0
+            $inputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'TestSuite'
+            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value $($testResults.Configuration.TestResult.TestSuiteName.Value) -Force
+            $inputObject
+            $inputObject.Containers | Get-PesterTestTree
+        }
+        'Container' {
+            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 1
+            $inputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'Container'
+            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ((Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1') -Force
+            $inputObject
+            $InputObject.Blocks | Get-PesterTestTree
+        }
+        'Block' {
+            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
+            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
+            $inputObject
+            $InputObject.Order | Get-PesterTestTree
+        }
+        'Test' {
+            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
+            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
+            $inputObject
+        }
+        default {
+            Write-Error "Unknown object type: [$($InputObject.GetType().Name)]"
+        }
+    }
+}
+
+function Set-PesterReportSummary {
+    <#
+
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
     [OutputType([string])]
     [CmdletBinding()]
     param(
-        # The collection of test results to be grouped and formatted.
+        # The Pester result object.
         [Parameter(Mandatory)]
-        [array] $Tests,
-
-        # The depth at which to group tests. Defaults to 0.
-        [Parameter()]
-        [int] $Depth
+        [PSCustomObject] $TestResults
     )
 
-    $markdown = ''
-    # Group tests by the element at position $Depth (or "Ungrouped" if not present)
-    $groups = $Tests | Group-Object {
-        if ($_.Path.Count -gt $Depth) {
-            $_.Path[$Depth]
-        } else {
-            'Ungrouped'
-        }
-    } | Sort-Object Name
-    # $group = $groups[0]
-    foreach ($group in $groups) {
-        $groupName = $group.Name
-        $groupTests = $group.Group
-        $groupIndent = $Indent * ($Depth + 2)
-        # Calculate aggregate status: if any test failed, mark the group as failed
-        $groupStatusIcon = if ($groupTests | Where-Object { $_.Result -eq 'Failed' }) { '❌' } else { '✅' }
-        # Calculate aggregate duration: sum all test durations
-        $groupDuration = [System.TimeSpan]::Zero
-        $groupTests.Duration | ForEach-Object { $groupDuration += $_ }
-        $formattedGroupDuration = $groupDuration | Format-TimeSpan
+    $totalTests = $testResults.TotalCount
+    $passedTests = $testResults.PassedCount
+    $failedTests = $testResults.FailedCount
+    $skippedTests = $testResults.SkippedCount
+    $inconclusiveTests = $testResults.InconclusiveCount
+    $notRunTests = $testResults.NotRunCount
 
-        # If any test has further parts, create a nested details block...
-        if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
-            $markdown += @"
-<details><summary>$groupIndent$groupStatusIcon - $groupName ($formattedGroupDuration)</summary>
-<p>
-$(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
-</p>
-</details>
+    $coverageString = 'N/A'
+    if ($configuration.CodeCoverage.Enabled) {
+        $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
+        $coverageString = "$coverage%"
+    }
 
-"@
-        } else {
-            # Otherwise, list each test at this level
-            foreach ($test in $groupTests) {
-                $testName = $test.Path[$Depth]
-                $testStatusIcon = switch ($test.Result) {
-                    'Passed' { '✅' }
-                    'Failed' { '❌' }
-                    'Skipped' { '⚠️' }
-                    default { $test.Result }
-                }
-                $formattedDuration = $test.Duration | Format-TimeSpan
-                $markdown += @"
-<details><summary>$groupIndent$testStatusIcon - $testName ($formattedDuration)</summary>
-<p>
+    $testSuitName = $($configuration.TestResult.TestSuiteName.Value)
+    $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
+    $formattedTestDuration = $testResults.Duration | Format-TimeSpan
 
-"@
-                if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
-                    $markdown += @"
-
-``````
-$($test.ErrorRecord.Exception.Message)
-``````
-
-"@
-                }
-                $markdown += @'
-</p>
-</details>
-
-'@
+    Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
+        Table {
+            [pscustomobject]@{
+                Total        = $totalTests
+                Passed       = $passedTests
+                Failed       = $failedTests
+                Skipped      = $skippedTests
+                Inconclusive = $inconclusiveTests
+                NotRun       = $notRunTests
+                Coverage     = $coverageString
             }
         }
     }
-    return $markdown
 }

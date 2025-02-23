@@ -34,6 +34,14 @@ Describe 'Failure' {
         $Name | Should -Be $Expected
     }
 
+    Context 'Something' {
+        Describe 'Another thing' {
+            It 'True should be false' -Skip {
+                $true | Should -Be $false
+            }
+        }
+    }
+
     It 'True should be false' {
         $true | Should -Be $false
     }

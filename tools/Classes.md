@@ -1,6 +1,6 @@
-﻿# Classes
+﻿# Pester Class Hierarchy
 
-## TestResults
+## Run
 
 ```plaintext
 Containers            : {[-] C:\Repos\GitHub\PSModule\Action\Invoke-Pester\tests\1-Simple-Failure\Failure.Tests.ps1}

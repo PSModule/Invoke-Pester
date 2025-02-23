@@ -3,7 +3,7 @@
 param()
 
 LogGroup 'Setup prerequisites' {
-    'Pester', 'Hashtable', 'TimeSpan' | ForEach-Object {
+    'Pester', 'Hashtable', 'TimeSpan', 'Markdown' | ForEach-Object {
         Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
         Import-Module -Name $_ -Verbose:$false
     }
@@ -229,40 +229,13 @@ LogGroup 'Test results' {
     }
 
     $testResults | Format-List
-    $failedTests = [int]$testResults.FailedCount
-
 }
 
 LogGroup 'Test results summary' {
     $nbsp = [char]0x00A0
     $indent = "$nbsp" * 4
 
-    $totalTests = $testResults.TotalCount
-    $passedTests = $testResults.PassedCount
-    $failedTests = $testResults.FailedCount
-    $skippedTests = $testResults.SkippedCount
-    $inconclusiveTests = $testResults.InconclusiveCount
-    $notRunTests = $testResults.NotRunCount
-
-    $coverageString = 'N/A'
-    if ($configuration.CodeCoverage.Enabled) {
-        $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
-        $coverageString = "$coverage%"
-    }
-
-    $testSuitName = $($configuration.TestResult.TestSuiteName.Value)
-    $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
-    $formattedTestDuration = $testResults.Duration | Format-TimeSpan
-    $summaryMarkdown = @"
-
-<details><summary>$testSuitStatusIcon - $testSuitName ($formattedTestDuration)</summary>
-<p>
-
-| Total | Passed | Failed | Skipped | Inconclusive | NotRun | Coverage |
-| ----- | ------ | ------ | ------- | ------------ | ------ | -------- |
-| $($totalTests) | $($passedTests) | $($failedTests) | $($skippedTests) | $($inconclusiveTests) | $($notRunTests) | $coverageString |
-
-"@
+    $markdown = Set-PesterReportSummary -TestResults $testResults
 
     Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
     # For each container, group tests by their test path parts
@@ -369,13 +342,15 @@ LogGroup 'Set outputs' {
     Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $testResults.Configuration.CodeCoverage.OutputPath.Value
 }
 
-if ($testResults.Result -eq 'Passed') {
-    Write-GitHubNotice '✅ All tests passed.'
-    exit 0
-}
+LogGroup 'Exit' {
+    if ($testResults.Result -eq 'Passed') {
+        Write-GitHubNotice '✅ All tests passed.'
+        exit 0
+    }
 
-Write-GitHubError "❌ Some [$failedTests] tests failed."
-if ($failedTests -gt 0) {
-    exit $failedTests
+    Write-GitHubError "❌ Some [$failedTests] tests failed."
+    if ($failedTests -gt 0) {
+        exit $failedTests
+    }
+    exit 1
 }
-exit 1
