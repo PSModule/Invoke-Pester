@@ -245,14 +245,16 @@ LogGroup 'Set outputs' {
 LogGroup 'Exit' {
     if ($testResults.Result -eq 'Passed') {
         Write-GitHubNotice '✅ All tests passed.'
-        $exit = 0
+        $script:exit = 0
     } else {
-        Write-GitHubError "❌ Some [$failedTests] tests failed."
         if ($failedTests -gt 0) {
-            $exit = $failedTests
+            Write-GitHubError "❌ Some [$failedTests] tests failed."
+            $script:exit = $failedTests
+        } else {
+            Write-GitHubError '❌ Some tests failed.'
+            $script:exit = 1
         }
-        $exit = 1
     }
 }
 
-exit $exit
+exit $script:exit

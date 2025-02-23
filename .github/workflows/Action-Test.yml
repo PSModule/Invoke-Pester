@@ -155,7 +155,7 @@ jobs:
 
             $jobs = @(
               [PSCustomObject]@{
-                Name               = "ActionTest1Simple"
+                Name               = "Action-Test - [1-Simple]"
                 Outcome            = $ActionTest1SimpleOutcome
                 ExpectedOutcome    = $ActionTest1SimpleExpectedOutcome
                 PassedOutcome      = $ActionTest1SimpleOutcomeResult
@@ -164,7 +164,7 @@ jobs:
                 PassedConclusion   = $ActionTest1SimpleConclusionResult
               },
               [PSCustomObject]@{
-                Name               = "ActionTest1SimpleFailure"
+                Name               = "Action-Test - [1-Simple-Failure]"
                 Outcome            = $ActionTest1SimpleFailureOutcome
                 ExpectedOutcome    = $ActionTest1SimpleFailureExpectedOutcome
                 PassedOutcome      = $ActionTest1SimpleFailureOutcomeResult
@@ -173,7 +173,7 @@ jobs:
                 PassedConclusion   = $ActionTest1SimpleFailureConclusionResult
               },
               [PSCustomObject]@{
-                Name               = "ActionTest2Standard"
+                Name               = "Action-Test - [2-Standard]"
                 Outcome            = $ActionTest2StandardOutcome
                 ExpectedOutcome    = $ActionTest2StandardExpectedOutcome
                 PassedOutcome      = $ActionTest2StandardOutcomeResult
@@ -182,7 +182,7 @@ jobs:
                 PassedConclusion   = $ActionTest2StandardConclusionResult
               },
               [PSCustomObject]@{
-                Name               = "ActionTest3Advanced"
+                Name               = "Action-Test - [3-Advanced]"
                 Outcome            = $ActionTest3AdvancedOutcome
                 ExpectedOutcome    = $ActionTest3AdvancedExpectedOutcome
                 PassedOutcome      = $ActionTest3AdvancedOutcomeResult
