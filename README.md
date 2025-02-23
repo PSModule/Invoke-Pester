@@ -249,7 +249,7 @@ jobs:
 
 ### Inputs
 
-_All inputs are optional unless noted otherwise. For more details, refer to the [Pester Configuration documentation](https://pester.dev/docs/usage/configuration)._
+*All inputs are optional unless noted otherwise. For more details, refer to the [Pester Configuration documentation](https://pester.dev/docs/usage/configuration).*
 `Run.PassThru` is forced to `$true` to ensure the action can capture test results.
 
 | **Input**                            | **Description**                                                                                        | **Default**                     |
