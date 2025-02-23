@@ -695,11 +695,11 @@ function Set-PesterReportSummary {
     Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
         $testResults | Set-PesterReportSummaryTable
 
-        $testResults | Set-PesterReportTestsSummary
+        # $testResults | Set-PesterReportTestsSummary
 
-        $testResults | Set-PesterReportConfigurationSummary
+        # $testResults | Set-PesterReportConfigurationSummary
 
-        $testResults | Set-PesterReportRunSummary -Sections 'Containers'
+        # $testResults | Set-PesterReportRunSummary -Sections 'Containers'
     }
 }
 
