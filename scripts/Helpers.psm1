@@ -688,7 +688,7 @@ function Set-PesterReportSummary {
         [Pester.Run] $TestResults
     )
 
-    $testSuitName = $($configuration.TestResult.TestSuiteName.Value)
+    $testSuitName = $TestResults.Configuration.TestResult.TestSuiteName.Value
     $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
     $formattedTestDuration = $testResults.Duration | Format-TimeSpan
 
