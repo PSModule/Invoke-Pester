@@ -719,21 +719,7 @@ filter Set-PesterReportSummaryTable {
         [Pester.Run] $TestResults
     )
 
-    $totalTests = $testResults.TotalCount
-    $passedTests = $testResults.PassedCount
-    $failedTests = $testResults.FailedCount
-    $skippedTests = $testResults.SkippedCount
-    $inconclusiveTests = $testResults.InconclusiveCount
-    $notRunTests = $testResults.NotRunCount
-
-    $statusTable = [pscustomobject]@{
-        Total        = $totalTests
-        Passed       = $passedTests
-        Failed       = $failedTests
-        Skipped      = $skippedTests
-        Inconclusive = $inconclusiveTests
-        NotRun       = $notRunTests
-    }
+    $statusTable = $testResults | Select-Object -Property TotalCount, PassedCount, FailedCount, SkippedCount, InconclusiveCount, NotRunCount
 
     if ($configuration.CodeCoverage.Enabled) {
         $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
@@ -767,8 +753,6 @@ filter Set-PesterReportTestsSummary {
         [int] $Depth = 0
     )
 
-    $inputObject = [pscustomobject]$InputObject
-
     $formattedTestDuration = $inputObject.Duration | Format-TimeSpan
     $testStatusIcon = switch ($Item.Result) {
         'Passed' { '✅' }
@@ -784,7 +768,7 @@ filter Set-PesterReportTestsSummary {
             $testName = $testResults.Configuration.TestResult.TestSuiteName.Value
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Containers | Set-PesterReportTestsSummary -Depth $Depth++
+                $inputObject.Containers | Set-PesterReportTestsSummary -Depth ($Depth++)
             }
         }
         'Container' {
@@ -792,7 +776,7 @@ filter Set-PesterReportTestsSummary {
             $testName = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth $Depth++
+                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth ($Depth++)
             }
         }
         'Block' {
@@ -800,7 +784,7 @@ filter Set-PesterReportTestsSummary {
             $testName = $InputObject.ExpandedName
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Order | Set-PesterReportTestsSummary -Depth $Depth++
+                $inputObject.Order | Set-PesterReportTestsSummary -Depth ($Depth++)
             }
         }
         'Test' {
@@ -839,7 +823,7 @@ filter Set-PesterReportConfigurationSummary {
         [Pester.Run] $TestResults
     )
 
-    $configurationHashtable = $testResults.Configuration | Convert-PesterConfigurationToHashtable
+    $configurationHashtable = $testResults.Configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable
 
     Details 'Configuration' {
         CodeBlock 'pwsh' {
@@ -867,11 +851,8 @@ filter Set-PesterReportRunSummary {
         [string[]] $Sections
     )
 
-    foreach ($property in $testResults.PSObject.Properties) {
+    foreach ($property in ($testResults.PSObject.Properties | Where-Object { $_.Name -notin $Sections })) {
         Write-Verbose "Setting output for [$($property.Name)]"
-        if ($property.Name -notin $Sections) {
-            continue
-        }
         $name = $property.Name
         $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
 
