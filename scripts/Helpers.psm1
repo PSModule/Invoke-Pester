@@ -816,7 +816,7 @@ filter Set-PesterReportTestsSummary {
                 Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
                     CodeBlock 'pwsh' {
                         $InputObject.ErrorRecord
-                    }
+                    } -Execute
                 }
             } else {
                 Paragraph {
