@@ -672,9 +672,14 @@ filter Get-PesterTestTree {
     }
 }
 
-function Set-PesterReportSummary {
+filter Set-PesterReportSummary {
     <#
+        .SYNOPSIS
+        Generates a summary report from Pester test results.
 
+        .DESCRIPTION
+        Processes Pester test results and outputs a formatted summary including test suite name, status icon,
+        and duration. The function also invokes additional reporting functions to display test details.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSUseShouldProcessForStateChangingFunctions', '',
@@ -684,7 +689,7 @@ function Set-PesterReportSummary {
     [CmdletBinding()]
     param(
         # The Pester result object.
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ValueFromPipeline)]
         [Pester.Run] $TestResults
     )
 
@@ -697,7 +702,7 @@ function Set-PesterReportSummary {
 
         $testResults.Containers | Set-PesterReportTestsSummary
 
-        "----"
+        '----'
 
         $testResults | Set-PesterReportConfigurationSummary
     }
@@ -705,7 +710,13 @@ function Set-PesterReportSummary {
 
 filter Set-PesterReportSummaryTable {
     <#
+        .SYNOPSIS
+        Generates a summary table of Pester test results.
 
+        .DESCRIPTION
+        This filter processes a Pester test results object and generates a summary table that includes counts of
+        passed, failed, skipped, inconclusive, total, and not run tests. If code coverage is enabled,
+        the coverage percentage is also included in the summary table.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSUseShouldProcessForStateChangingFunctions', '',
@@ -741,7 +752,13 @@ filter Set-PesterReportSummaryTable {
 
 filter Set-PesterReportTestsSummary {
     <#
+        .SYNOPSIS
+        Formats and outputs a summary of Pester test results.
 
+        .DESCRIPTION
+        Processes objects in the Pester test result hierarchy (Run, Container, Block, or Test) and formats
+        their results into a structured summary. This filter uses indentation to indicate hierarchy levels
+        and includes status icons for clarity.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSUseShouldProcessForStateChangingFunctions', '',
@@ -815,7 +832,13 @@ filter Set-PesterReportTestsSummary {
 
 filter Set-PesterReportConfigurationSummary {
     <#
+        .SYNOPSIS
+        Formats and sets a summary of the Pester configuration.
 
+        .DESCRIPTION
+        This function takes a Pester test results object and extracts its configuration settings.
+        The configuration is then converted into a formatted hashtable representation and displayed as a code block.
+        The function outputs a formatted string representation of the Pester configuration.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSUseShouldProcessForStateChangingFunctions', '',
@@ -840,7 +863,13 @@ filter Set-PesterReportConfigurationSummary {
 
 filter Set-PesterReportRunSummary {
     <#
+        .SYNOPSIS
+        Filters and formats the output of a Pester test run summary.
 
+        .DESCRIPTION
+        Processes a Pester test result object and outputs a formatted summary excluding specified sections.
+        The function converts non-empty properties to JSON and structures them into a readable format.
+        Filters out 'Passed' and 'Failed' sections and outputs the remaining test result properties.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSUseShouldProcessForStateChangingFunctions', '',
@@ -853,6 +882,7 @@ filter Set-PesterReportRunSummary {
         [Parameter(Mandatory, ValueFromPipeline)]
         [Pester.Run] $TestResults,
 
+        # The sections to exclude from the output.
         [Parameter(Mandatory)]
         [string[]] $Sections
     )

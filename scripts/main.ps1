@@ -232,7 +232,7 @@ LogGroup 'Test results' {
 }
 
 LogGroup 'Test results summary' {
-    Set-GitHubStepSummary -Summary (Set-PesterReportSummary -TestResults $testResults)
+    Set-GitHubStepSummary -Summary ($testResults | Set-PesterReportSummary)
 }
 
 LogGroup 'Set outputs' {
