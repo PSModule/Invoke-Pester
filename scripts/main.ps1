@@ -1,5 +1,4 @@
-﻿
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param()
 
 LogGroup 'Setup prerequisites' {
