@@ -184,8 +184,18 @@ inputs:
       Enable TestRegistry.
     required: false
   Debug:
-    description: |
-      Enable debug mode.
+    description: Enable debug output.
+    required: false
+    default: 'false'
+  Verbose:
+    description: Enable verbose output.
+    required: false
+    default: 'false'
+  Version:
+    description: Specifies the version of the GitHub module to be installed. The value must be an exact version.
+    required: false
+  Prerelease:
+    description: Allow prerelease versions if available.
     required: false
     default: 'false'
 
@@ -243,6 +253,10 @@ runs:
       with:
         ShowInfo: false
         ShowOutput: true
+        Debug: ${{ inputs.Debug }}
+        Prerelease: ${{ inputs.Prerelease }}
+        Verbose: ${{ inputs.Verbose }}
+        Version: ${{ inputs.Version }}
         Script: |
           # Invoke-Pester
           ${{ github.action_path }}\scripts\main.ps1

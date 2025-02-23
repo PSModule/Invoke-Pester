@@ -297,7 +297,10 @@ jobs:
 | `Output_RenderMode`                  | How to render console output: `Auto`, `Ansi`, `ConsoleColor`, `Plaintext`.                             | *(none)*                        |
 | `TestDrive_Enabled`                  | Enable `TestDrive`.                                                                                    | *(none)*                        |
 | `TestRegistry_Enabled`               | Enable `TestRegistry`.                                                                                 | *(none)*                        |
-| `Debug`                              | Enable debug mode (`true`/`false`). When `true`, uses `PSModule/Debug@v0`.                             | `false`                         |
+| `Debug`                              | Enable debug output.                                                                                   | `'false'`                       |
+| `Verbose`                            | Enable verbose output.                                                                                 | `'false'`                       |
+| `Version`                            | Specifies the exact version of the GitHub module to install.                                           |                                 |
+| `Prerelease`                         | Allow prerelease versions if available.                                                                | `'false'`                       |
 
 ### Outputs
 
