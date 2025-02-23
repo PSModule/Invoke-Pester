@@ -624,7 +624,7 @@ filter Get-PesterTestTree {
         Pester test results, including depth, name, item type, and result status.
     #>
 
-    [OutputType([PSCustomObject])]
+    [OutputType([object])]
     [CmdletBinding()]
     param (
         # Specifies the input object, which is expected to be an object in the Pester test result hierarchy.
@@ -636,14 +636,13 @@ filter Get-PesterTestTree {
         [object] $InputObject
     )
 
-    $inputObject = [pscustomobject]$InputObject
-
     Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
     switch ($InputObject.GetType().Name) {
         'Run' {
             $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 0
             $inputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'TestSuite'
             $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value $($testResults.Configuration.TestResult.TestSuiteName.Value) -Force
+            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $inputObject.Containers
             $inputObject
             $inputObject.Containers | Get-PesterTestTree
         }
@@ -651,12 +650,14 @@ filter Get-PesterTestTree {
             $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 1
             $inputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'Container'
             $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ((Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1') -Force
+            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Blocks
             $inputObject
             $InputObject.Blocks | Get-PesterTestTree
         }
         'Block' {
             $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
             $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
+            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Order
             $inputObject
             $InputObject.Order | Get-PesterTestTree
         }
@@ -745,7 +746,7 @@ function Set-PesterReportSummaryTable {
     }
 }
 
-function Set-PesterReportTestsSummary {
+filter Set-PesterReportTestsSummary {
     <#
 
     #>
@@ -755,69 +756,72 @@ function Set-PesterReportTestsSummary {
     )]
     [OutputType([string])]
     [CmdletBinding()]
-    param(
-        # The Pester result object.
-        [Parameter(Mandatory)]
-        [PSCustomObject] $TestResults
+    param (
+        # Specifies the input object, which is expected to be an object in the Pester test result hierarchy.
+        # Run, Container, Block, or Test objects are supported.
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline
+        )]
+        [object] $InputObject,
+
+        # The indentation level for the current item.
+        [Parameter()]
+        [int] $Depth = 0
     )
 
-    Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
+    $inputObject = [pscustomobject]$InputObject
 
-    $hierarchy = $TestResults | Get-PesterTestTree
-
-    foreach ($container in $testResults.Containers) {
-        $containerPath = $container.Item.FullName
-        Write-Verbose "Processing container [$containerPath]" -Verbose
-        $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
-        Write-Verbose "Container name: [$containerName]" -Verbose
-        $containerStatusIcon = switch ($container.Result) {
-            'Passed' { '✅' }
-            'Failed' { '❌' }
-            'Skipped' { '⚠️' }
-            default { $container.Result }
-        }
-        $formattedContainerDuration = $container.Duration | Format-TimeSpan
-
-
-
-
-        Details "$Indent$containerStatusIcon - $containerName ($formattedContainerDuration)" {
-
-
-        }
-    }
-}
-
-function Set-PesterReportTestsSummertItem {
-    <#
-
-    #>
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        'PSUseShouldProcessForStateChangingFunctions', '',
-        Justification = 'Sets text in memory'
-    )]
-    [OutputType([string])]
-    [CmdletBinding()]
-    param(
-        # The Pester result object.
-        [Parameter(Mandatory)]
-        [PSCustomObject] $Item
-    )
-
-    $testName = $Item.Name
+    $formattedTestDuration = $inputObject.Duration | Format-TimeSpan
     $testStatusIcon = switch ($Item.Result) {
         'Passed' { '✅' }
         'Failed' { '❌' }
         'Skipped' { '⚠️' }
         default { $Item.Result }
     }
-    $formattedTestDuration = $Item.Duration | Format-TimeSpan
 
-    Details "$Indent$Indent$testStatusIcon - $testName ($formattedTestDuration)" {
-        if ($Item.ErrorRecord) {
-            CodeBlock 'pwsh' {
-                $Item.ErrorRecord
+    Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
+    switch ($InputObject.GetType().Name) {
+        'Run' {
+            $itemIndent = $Indent * $Depth
+            $testName = $testResults.Configuration.TestResult.TestSuiteName.Value
+
+            Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
+                $inputObject.Containers | Set-PesterReportTestsSummary -Depth $Depth++
             }
+        }
+        'Container' {
+            $itemIndent = $Indent * $Depth
+            $testName = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
+
+            Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
+                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth $Depth++
+            }
+        }
+        'Block' {
+            $itemIndent = $Indent * $Depth
+            $testName = $InputObject.ExpandedName
+
+            Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
+                $inputObject.Order | Set-PesterReportTestsSummary -Depth $Depth++
+            }
+        }
+        'Test' {
+            $itemIndent = $Indent * $Depth
+            $testName = $InputObject.ExpandedName
+
+            if ($Item.ErrorRecord) {
+                Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
+                    CodeBlock 'pwsh' {
+                        $Item.ErrorRecord
+                    }
+                }
+            } else {
+                "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)"
+            }
+        }
+        default {
+            Write-Error "Unknown object type: [$($InputObject.GetType().Name)]"
         }
     }
 }
