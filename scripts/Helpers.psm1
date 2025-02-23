@@ -1,4 +1,13 @@
-﻿function Get-PesterContainer {
+﻿$nbsp = [char]0x00A0
+$indent = "$nbsp" * 4
+$statusIcon = @{
+    Passed       = '✅'
+    Failed       = '❌'
+    Skipped      = '⚠️'
+    Inconclusive = '❓'
+}
+
+function Get-PesterContainer {
     <#
         .SYNOPSIS
         Loads Pester container files from the specified path.
@@ -587,116 +596,307 @@ filter Clear-PesterConfigurationEmptyValue {
     return $return
 }
 
-function Get-GroupedTestMarkdown {
+filter Get-PesterTestTree {
     <#
         .SYNOPSIS
-        Generates a grouped and formatted Markdown summary of test results.
+        Processes Pester test results and returns a structured test tree.
 
         .DESCRIPTION
-        This function takes a collection of test results and organizes them into a hierarchical
-        Markdown format based on their path depth. It groups tests dynamically and represents their
-        results using icons, displaying test failures and durations appropriately. If a group contains
-        nested test results, the function calls itself recursively to generate a structured summary.
+        This function processes Pester test results and organizes them into a structured
+        test tree. It categorizes objects as Runs, Containers, Blocks, or Tests,
+        adding relevant properties such as depth and item type. This allows for better
+        visualization and analysis of Pester test results.
 
         .EXAMPLE
-        Get-GroupedTestMarkdown -Tests $testResults -Depth 0
+        $testResults = Invoke-Pester -Path 'C:\Repos\GitHub\PSModule\Action\Invoke-Pester\tests\1-Simple-Failure\Failure.Tests.ps1' -PassThru
+        $testResults | Get-PesterTestTree | Format-Table -AutoSize -Property Depth, Name, ItemType, Result, Duration, ErrorRecord
 
         Output:
-        ```
-        <details><summary>✅ - Group A (00:02:30)</summary>
-        <p>
-        <details><summary>❌ - Test 1 (00:00:45)</summary>
-        <p>
-
-        ``````
-        Test failed due to timeout
-        ``````
-
-        </p>
-        </details>
-        </p>
-        </details>
+        ```powershell
+        Depth Name              ItemType   Result   Duration ErrorRecord
+        ----- ----              --------   ------   -------- -----------
+            0 Failure.Tests     TestSuite Passed   0.015s
+            1 Failure.Tests     Container Passed   0.012s
+            2 Describe Block 1  Block     Failed   0.003s    System.Exception: Failure message
         ```
 
-        Generates a Markdown summary of test results, grouping them by their hierarchical depth.
+        Retrieves and formats Pester test results into a hierarchical tree structure.
 
         .OUTPUTS
-        string
+        PSCustomObject
 
         .NOTES
-        A formatted Markdown string summarizing test results.
+        Returns an object representing the hierarchical structure of
+        Pester test results, including depth, name, item type, and result status.
     #>
+
+    [OutputType([object])]
+    [CmdletBinding()]
+    param (
+        # Specifies the input object, which is expected to be an object in the Pester test result hierarchy.
+        # Run, Container, Block, or Test objects are supported.
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline
+        )]
+        [object] $InputObject
+    )
+
+    Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
+    switch ($InputObject.GetType().Name) {
+        'Run' {
+            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 0
+            $inputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'TestSuite'
+            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value $($testResults.Configuration.TestResult.TestSuiteName.Value) -Force
+            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $inputObject.Containers
+            $inputObject
+            $inputObject.Containers | Get-PesterTestTree
+        }
+        'Container' {
+            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 1
+            $inputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'Container'
+            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ((Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1') -Force
+            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Blocks
+            $inputObject
+            $InputObject.Blocks | Get-PesterTestTree
+        }
+        'Block' {
+            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
+            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
+            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Order
+            $inputObject
+            $InputObject.Order | Get-PesterTestTree
+        }
+        'Test' {
+            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
+            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
+            $inputObject
+        }
+        default {
+            Write-Error "Unknown object type: [$($InputObject.GetType().Name)]"
+        }
+    }
+}
+
+filter Set-PesterReportSummary {
+    <#
+        .SYNOPSIS
+        Generates a summary report from Pester test results.
+
+        .DESCRIPTION
+        Processes Pester test results and outputs a formatted summary including test suite name, status icon,
+        and duration. The function also invokes additional reporting functions to display test details.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
     [OutputType([string])]
     [CmdletBinding()]
     param(
-        # The collection of test results to be grouped and formatted.
-        [Parameter(Mandatory)]
-        [array] $Tests,
-
-        # The depth at which to group tests. Defaults to 0.
-        [Parameter()]
-        [int] $Depth
+        # The Pester result object.
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [Pester.Run] $TestResults
     )
 
-    $markdown = ''
-    # Group tests by the element at position $Depth (or "Ungrouped" if not present)
-    $groups = $Tests | Group-Object { if ($_.Path.Count -gt $Depth) { $_.Path[$Depth] } else { 'Ungrouped' } } | Sort-Object Name
-    foreach ($group in $groups) {
-        $groupName = $group.Name
-        $groupTests = $group.Group
-        $groupIndent = $Indent * ($Depth + 2)
-        # Calculate aggregate status: if any test failed, mark the group as failed
-        $groupStatusIcon = if ($groupTests | Where-Object { $_.Result -eq 'Failed' }) { '❌' } else { '✅' }
-        # Calculate aggregate duration: sum all test durations
-        $groupDuration = [System.TimeSpan]::Zero
-        $groupTests.Duration | ForEach-Object { $groupDuration += $_ }
-        $formattedGroupDuration = $groupDuration | Format-TimeSpan
+    $testSuitName = $TestResults.Configuration.TestResult.TestSuiteName.Value
+    $testSuitStatusIcon = $statusIcon[$TestResults.Result]
+    $formattedTestDuration = $testResults.Duration | Format-TimeSpan
 
-        # If any test has further parts, create a nested details block...
-        if ($groupTests | Where-Object { $_.Path.Count -gt ($Depth + 1) }) {
-            $markdown += @"
-<details><summary>$groupIndent$groupStatusIcon - $groupName ($formattedGroupDuration)</summary>
-<p>
-$(Get-GroupedTestMarkdown -Tests $groupTests -Depth ($Depth + 1))
-</p>
-</details>
+    Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
+        $testResults | Set-PesterReportSummaryTable
 
-"@
-        } else {
-            # Otherwise, list each test at this level
-            foreach ($test in $groupTests) {
-                $testName = $test.Path[$Depth]
-                $testStatusIcon = switch ($test.Result) {
-                    'Passed' { '✅' }
-                    'Failed' { '❌' }
-                    'Skipped' { '⚠️' }
-                    default { $test.Result }
+        $testResults.Containers | Set-PesterReportTestsSummary
+
+        '----'
+
+        $testResults | Set-PesterReportConfigurationSummary
+    }
+}
+
+filter Set-PesterReportSummaryTable {
+    <#
+        .SYNOPSIS
+        Generates a summary table of Pester test results.
+
+        .DESCRIPTION
+        This filter processes a Pester test results object and generates a summary table that includes counts of
+        passed, failed, skipped, inconclusive, total, and not run tests. If code coverage is enabled,
+        the coverage percentage is also included in the summary table.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
+    [OutputType([string])]
+    [CmdletBinding()]
+    param(
+        # The Pester result object.
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [Pester.Run] $TestResults
+    )
+
+    $statusTable = [pscustomobject]@{
+        Passed       = $testResults.PassedCount
+        Failed       = $testResults.FailedCount
+        Skipped      = $testResults.SkippedCount
+        Inconclusive = $testResults.InconclusiveCount
+        NotRun       = $testResults.NotRunCount
+        Total        = $testResults.TotalCount
+    }
+
+    if ($testResults.Configuration.CodeCoverage.Enabled.Value) {
+        $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
+        $coverageString = "$coverage%"
+        $statusTable | Add-Member -MemberType NoteProperty -Name 'Coverage' -Value $coverageString
+    }
+
+    Table {
+        $statusTable
+    }
+}
+
+filter Set-PesterReportTestsSummary {
+    <#
+        .SYNOPSIS
+        Formats and outputs a summary of Pester test results.
+
+        .DESCRIPTION
+        Processes objects in the Pester test result hierarchy (Run, Container, Block, or Test) and formats
+        their results into a structured summary. This filter uses indentation to indicate hierarchy levels
+        and includes status icons for clarity.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
+    [OutputType([string])]
+    [CmdletBinding()]
+    param (
+        # Specifies the input object, which is expected to be an object in the Pester test result hierarchy.
+        # Run, Container, Block, or Test objects are supported.
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [object] $InputObject,
+
+        # The indentation level for the current item.
+        [Parameter()]
+        [int] $Depth = 0
+    )
+
+    $itemIndent = $Indent * $Depth
+    $formattedTestDuration = $inputObject.Duration | Format-TimeSpan
+    $testStatusIcon = $statusIcon[$InputObject.Result]
+
+    Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
+    switch ($InputObject.GetType().Name) {
+        'Run' {
+            $testName = $testResults.Configuration.TestResult.TestSuiteName.Value
+
+            Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
+                $inputObject.Containers | Set-PesterReportTestsSummary -Depth ($Depth + 1)
+            }
+        }
+        'Container' {
+            $testName = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
+
+            Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
+                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth ($Depth + 1)
+            }
+        }
+        'Block' {
+            $testName = $InputObject.ExpandedName
+
+            Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
+                $inputObject.Order | Set-PesterReportTestsSummary -Depth ($Depth + 1)
+            }
+        }
+        'Test' {
+            $testName = $InputObject.ExpandedName
+
+            if ($InputObject.ErrorRecord) {
+                Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
+                    CodeBlock 'pwsh' {
+                        $InputObject.ErrorRecord
+                    } -Execute
                 }
-                $formattedDuration = $test.Duration | Format-TimeSpan
-                $markdown += @"
-<details><summary>$groupIndent$testStatusIcon - $testName ($formattedDuration)</summary>
-<p>
-
-"@
-                if ($test.Result -eq 'Failed' -and $test.ErrorRecord.Exception.Message) {
-                    $markdown += @"
-
-``````
-$($test.ErrorRecord.Exception.Message)
-``````
-
-"@
+            } else {
+                Paragraph {
+                    "$indent$itemIndent$testStatusIcon - $testName ($formattedTestDuration)"
                 }
-                $markdown += @'
-</p>
-</details>
+            }
+        }
+        default {
+            Write-Error "Unknown object type: [$($InputObject.GetType().Name)]"
+        }
+    }
+}
 
-'@
+filter Set-PesterReportConfigurationSummary {
+    <#
+        .SYNOPSIS
+        Formats and sets a summary of the Pester configuration.
+
+        .DESCRIPTION
+        This function takes a Pester test results object and extracts its configuration settings.
+        The configuration is then converted into a formatted hashtable representation and displayed as a code block.
+        The function outputs a formatted string representation of the Pester configuration.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
+    [OutputType([string])]
+    [CmdletBinding()]
+    param(
+        # The Pester result object.
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [Pester.Run] $TestResults
+    )
+
+    $configurationHashtable = $TestResults.Configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable
+
+    Details 'Configuration' {
+        CodeBlock 'pwsh' {
+            $configurationHashtable
+        } -Execute
+    }
+}
+
+filter Set-PesterReportRunSummary {
+    <#
+        .SYNOPSIS
+        Filters and formats the output of a Pester test run summary.
+
+        .DESCRIPTION
+        Processes a Pester test result object and outputs a formatted summary excluding specified sections.
+        The function converts non-empty properties to JSON and structures them into a readable format.
+        Filters out 'Passed' and 'Failed' sections and outputs the remaining test result properties.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
+    [OutputType([string])]
+    [CmdletBinding()]
+    param(
+        # The Pester result object.
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [Pester.Run] $TestResults,
+
+        # The sections to exclude from the output.
+        [Parameter(Mandatory)]
+        [string[]] $Sections
+    )
+
+    foreach ($property in ($testResults.PSObject.Properties | Where-Object { $_.Name -notin $Sections })) {
+        Write-Verbose "Setting output for [$($property.Name)]"
+        $name = $property.Name
+        $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
+
+        Details "$indent - $name" {
+            CodeBlock 'json' {
+                $value
             }
         }
     }
-    return $markdown
 }
-
-$nbsp = [char]0x00A0
-$indent = "$nbsp" * 4
