@@ -38,10 +38,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
-
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
-          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
 
   ActionTest1SimpleFailure:
     name: Action-Test - [1-Simple-Failure]
@@ -65,10 +62,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
-
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
-          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
 
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
@@ -92,10 +86,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
-
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
-          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
 
   ActionTest3Advanced:
     name: Action-Test - [3-Advanced]
@@ -118,10 +109,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          # Set-GitHubOutput -Name "outcome" -Value '${{ steps.action-test.outcome }}'
-
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
-          # Set-GitHubOutput -Name "conclusion" -Value '${{ steps.action-test.conclusion }}'
 
   CatchJob:
     name: "Catch Job - Aggregate Status"
@@ -161,7 +149,6 @@ jobs:
           $ActionTest3AdvancedConclusion = "${{ needs.ActionTest3Advanced.outputs.conclusion }}"
           $ActionTest3AdvancedExpectedConclusion = "success"
           $ActionTest3AdvancedConclusionResult = $ActionTest3AdvancedConclusion -eq $ActionTest3AdvancedExpectedConclusion
-
 
           $jobs = @(
             [PSCustomObject]@{
@@ -217,6 +204,15 @@ jobs:
               $passed = $false
             }
           }
+
+          $icon = if ($passed) { '✅' } else { '❌' }
+          $status = Heading 1 "$icon - GitHub Actions Status" {
+              Table {
+                  $jobs
+              }
+          }
+
+          Set-GitHubStepSummary -Summary $status
 
           if (-not $passed) {
             Write-GithubError "One or more jobs failed"

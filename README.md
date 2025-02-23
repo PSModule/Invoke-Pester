@@ -29,7 +29,8 @@ highest-priority settings override lower-priority ones. The order of precedence 
 This **last-write-wins** strategy means you can set global defaults while retaining the flexibility to override them at the action level.
 
 ### 1. Default Configuration
-   The action defaults use the `PesterConfiguration` defaults.
+
+The action defaults use the `PesterConfiguration` defaults.
 
 <details>
 <summary>Default Configuration</summary>
@@ -108,12 +109,14 @@ This **last-write-wins** strategy means you can set global defaults while retain
 </details>
 
 ### 2. Test Suite Configuration
-   If your test suite contains a Pester config file (e.g., `MyTests.Configuration.psd1` or `Pester.Configuration.ps1`), the action loads and merges
-   those settings on top of the defaults.
+
+If your test suite contains a Pester config file (e.g., `MyTests.Configuration.psd1` or `Pester.Configuration.ps1`), the action loads and merges
+those settings on top of the defaults.
 
 ### 3. Direct Action Inputs
-   Finally, any inputs specified under the `with:` clause in your GitHub Action workflow override both the default and test suite config.
-   > *Example:* If you specify `CodeCoverage_Enabled: true` here, it will enable coverage even if the test suite config says otherwise.
+
+Finally, any inputs specified under the `with:` clause in your GitHub Action workflow override both the default and test suite config.
+If you specify `CodeCoverage_Enabled: true` here, it will enable coverage even if the test suite config says otherwise.
 
 ## How This Action Processes Your Tests
 
@@ -121,17 +124,17 @@ This **last-write-wins** strategy means you can set global defaults while retain
    - Installs required PowerShell modules if they're not present.
    - Imports the modules so the testing framework is ready to use.
 2. **Loading Inputs and Configuration**
-   - Loads a default pester configuration.
+   - Loads a default Pester configuration.
    - If `Path` points to a location with a Pester configuration file, merges that config.
    - Finally, merges any direct inputs provided in your workflow.
    - The result is a **final Pester configuration** that determines what tests to run and how to run them.
-3. **Add containers**
+3. **Add Containers**
    - If no containers are explicitly defined, it attempts to discover them automatically (files matching `*.Container.*`).
    - Adds these containers to the final configuration.
 4. **Running the Tests**
    - Calls [`Invoke-Pester`](https://pester.dev/docs/commands/Invoke-Pester) using that final configuration.
    - Finds test files/containers.
-   - Runs tests, logs pass/fail/skipped/inconclusive.
+   - Runs tests, logging pass/fail/skipped/inconclusive.
    - Aggregates outcomes into a final test object.
 5. **Generating Reports**
    - **Test Results** (e.g., NUnit/XML) if `TestResult_Enabled` is `true`. The file is saved to `TestResult_OutputPath`.
@@ -141,20 +144,71 @@ This **last-write-wins** strategy means you can set global defaults while retain
      - `<TestSuiteName>-CodeCoverage`
 
     > [!TIP]
-    > Use the `TestResult_TestSuiteName` to change the variable name of the artifact.
+    > Use the `TestResult_TestSuiteName` input to change the variable name of the artifact.
 6. **Summary in GitHub**
-   - A step summary is generated, showing how many tests passed/failed/skipped, plus coverage info.
+   - A step summary is generated, showing how many tests passed/failed/skipped along with coverage information.
    - If containers are in use, each container's results appear in a collapsible section.
 7. **Publishing Outputs**
-   - The action outputs a JSON string with a `Passed` key, indicating whether all tests passed.
-   - This can be accessed from other steps in your workflow using `${{ steps.<step-id>.outputs.Passed }}` in the workflow.
+   - The action sets several outputs for internal usage:
+     - `TestSuiteName`: Name assigned to the test suite.
+     - `TestResultEnabled`: Indicates if test-result output is enabled.
+     - `TestResultOutputPath`: Path to the test result report.
+     - `CodeCoverageEnabled`: Indicates if code coverage is enabled.
+     - `CodeCoverageOutputPath`: Path to the code coverage report.
 
-## Failure Handling
+## How to Determine a Test's Outcome
 
-- **No Immediate Fail on First Test Error**:
-  The entire suite runs, capturing all failures before deciding on pass/fail.
-- **Allowed Failures / Coverage Threshold**:
-  You can configure if any test failure leads to a fail, or whether certain coverage levels must be met.
+After running your tests, you can assess the overall result by checking:
+
+- **Outcome:**
+  The step's outcome will be `success` if all tests passed or `failure` if one or more tests failed.
+
+- **Conclusion:**
+  This value provides an overall summary (typically `success` or `failure`) of the test run.
+  Use this with the `continue-on-error` flag to run a separate step to gather results of parallel tests.
+
+These values are accessible in your workflow using the step's outputs, for example:
+
+```yaml
+- name: Status
+  shell: pwsh
+  env:
+    OUTCOME: ${{ steps.action-test.outcome }}
+    CONCLUSION: ${{ steps.action-test.conclusion }}
+  run: |
+    Write-Host "Outcome: [$env:OUTCOME]"
+    Write-Host "Conclusion: [$env:CONCLUSION]"
+```
+
+## Controlling Workflow Execution Based on Test Outcome/Conclusion
+
+You can use the test outcome and conclusion to control the flow of your GitHub workflow. For example:
+
+- **Using a Shell Step:**
+  You might include a step that checks the outcome and exits with a non-zero code if the tests did not pass:
+
+  ```yaml
+  - name: Status Check
+    shell: pwsh
+    run: |
+      $outcome = '${{ steps.action-test.outcome }}'
+      Write-Host "Outcome: [$outcome]"
+      if ($outcome -ne 'success') {
+        Write-Error "Tests did not pass. Aborting workflow."
+        exit 1
+      }
+  ```
+
+- **Conditional Steps in Workflow YAML:**
+  You can conditionally run steps based on the outcome and conclusion:
+  ```yaml
+  - name: Deploy
+    if: ${{ steps.action-test.outcome == 'success' && steps.action-test.conclusion == 'success' }}
+    run: |
+      # Deployment commands here
+  ```
+
+This approach provides full control over the execution flow of your workflow, ensuring that subsequent actions (like deployment) only run if the tests meet your success criteria.
 
 ## Usage
 
@@ -176,17 +230,26 @@ jobs:
 
       - name: Run Pester Tests
         uses: PSModule/Invoke-Pester@v2
+        id: action-test
+        continue-on-error: true
         with:
           TestResult_TestSuiteName: IntegrationTests
           Path: ./tests
           Run_Path: ./src
 
+      - name: Status
+        shell: pwsh
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: |
+          Write-Host "Outcome: [$env:OUTCOME]"
+          Write-Host "Conclusion: [$env:CONCLUSION]"
 ```
 
 ### Inputs
 
-All are **optional** unless otherwise noted. For more info on the configuration options, see the
-[Pester Configuration documentation](https://pester.dev/docs/usage/configuration).
+_All inputs are optional unless noted otherwise. For more details, refer to the [Pester Configuration documentation](https://pester.dev/docs/usage/configuration)._
 `Run.PassThru` is forced to `$true` to ensure the action can capture test results.
 
 | **Input**                            | **Description**                                                                                        | **Default**                     |
@@ -236,12 +299,10 @@ All are **optional** unless otherwise noted. For more info on the configuration 
 | `TestRegistry_Enabled`               | Enable `TestRegistry`.                                                                                 | *(none)*                        |
 | `Debug`                              | Enable debug mode (`true`/`false`). When `true`, uses `PSModule/Debug@v0`.                             | `false`                         |
 
-No secrets are directly required by this Action.
-
 ### Outputs
 
-No outputs are provided by this Action.
+No outputs are provided directly by this action. Instead, use the step's **outcome** and **conclusion** properties along with the published outputs
+listed above to control the subsequent flow of your workflow.
 
-## How to determine a test's outcome
-
-<fill out this>
+The provided example workflows demonstrate how you can use these outputs to control the flow. For instance, the **Status** steps in the test
+workflows print the `outcome` and `conclusion` values, and a later job aggregates these values to decide whether to continue or abort the workflow.
