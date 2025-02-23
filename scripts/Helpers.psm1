@@ -728,7 +728,7 @@ filter Set-PesterReportSummaryTable {
         NotRun       = $testResults.NotRunCount
     }
 
-    if ($testResults.Configuration.CodeCoverage.Enabled) {
+    if ($testResults.Configuration.CodeCoverage.Enabled.Value) {
         $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
         $coverageString = "$coverage%"
         $statusTable | Add-Member -MemberType NoteProperty -Name 'Coverage' -Value $coverageString
