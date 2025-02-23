@@ -772,27 +772,24 @@ filter Set-PesterReportTestsSummary {
     Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
     switch ($InputObject.GetType().Name) {
         'Run' {
-            $Depth++
             $testName = $testResults.Configuration.TestResult.TestSuiteName.Value
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Containers | Set-PesterReportTestsSummary -Depth $Depth
+                $inputObject.Containers | Set-PesterReportTestsSummary -Depth ($Depth + 1)
             }
         }
         'Container' {
-            $Depth++
             $testName = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth $Depth
+                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth ($Depth + 1)
             }
         }
         'Block' {
-            $Depth++
             $testName = $InputObject.ExpandedName
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Order | Set-PesterReportTestsSummary -Depth $Depth
+                $inputObject.Order | Set-PesterReportTestsSummary -Depth ($Depth + 1)
             }
         }
         'Test' {
