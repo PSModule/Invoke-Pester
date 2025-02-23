@@ -1,5 +1,11 @@
 ﻿$nbsp = [char]0x00A0
 $indent = "$nbsp" * 4
+$statusIcon = @{
+    Passed       = '✅'
+    Failed       = '❌'
+    Skipped      = '⚠️'
+    Inconclusive = '❓'
+}
 
 function Get-PesterContainer {
     <#
@@ -694,7 +700,7 @@ filter Set-PesterReportSummary {
     )
 
     $testSuitName = $TestResults.Configuration.TestResult.TestSuiteName.Value
-    $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
+    $testSuitStatusIcon = $statusIcon[$TestResults.Result]
     $formattedTestDuration = $testResults.Duration | Format-TimeSpan
 
     Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
@@ -779,12 +785,7 @@ filter Set-PesterReportTestsSummary {
 
     $itemIndent = $Indent * $Depth
     $formattedTestDuration = $inputObject.Duration | Format-TimeSpan
-    $testStatusIcon = switch ($InputObject.Result) {
-        'Passed' { '✅' }
-        'Failed' { '❌' }
-        'Skipped' { '⚠️' }
-        default { $InputObject.Result }
-    }
+    $testStatusIcon = $statusIcon[$InputObject.Result]
 
     Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
     switch ($InputObject.GetType().Name) {
