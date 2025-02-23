@@ -693,17 +693,17 @@ function Set-PesterReportSummary {
     $formattedTestDuration = $testResults.Duration | Format-TimeSpan
 
     Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
-        Set-PesterReportSummaryTable -TestResults $testResults
+        $testResults | Set-PesterReportSummaryTable
 
-        Set-PesterReportTestsSummary -TestResults $testResults
+        $testResults | Set-PesterReportTestsSummary
 
-        Set-PesterReportConfigurationSummary -TestResults $testResults
+        $testResults | Set-PesterReportConfigurationSummary
 
-        Set-PesterReportRunSummary -TestResults $testResults -Sections 'Containers'
+        $testResults | Set-PesterReportRunSummary -Sections 'Containers'
     }
 }
 
-function Set-PesterReportSummaryTable {
+filter Set-PesterReportSummaryTable {
     <#
 
     #>
@@ -715,8 +715,8 @@ function Set-PesterReportSummaryTable {
     [CmdletBinding()]
     param(
         # The Pester result object.
-        [Parameter(Mandatory)]
-        [PSCustomObject] $TestResults
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [Pester.Run] $TestResults
     )
 
     $totalTests = $testResults.TotalCount
@@ -759,10 +759,7 @@ filter Set-PesterReportTestsSummary {
     param (
         # Specifies the input object, which is expected to be an object in the Pester test result hierarchy.
         # Run, Container, Block, or Test objects are supported.
-        [Parameter(
-            Mandatory,
-            ValueFromPipeline
-        )]
+        [Parameter(Mandatory, ValueFromPipeline)]
         [object] $InputObject,
 
         # The indentation level for the current item.
@@ -826,7 +823,7 @@ filter Set-PesterReportTestsSummary {
     }
 }
 
-function Set-PesterReportConfigurationSummary {
+filter Set-PesterReportConfigurationSummary {
     <#
 
     #>
@@ -838,8 +835,8 @@ function Set-PesterReportConfigurationSummary {
     [CmdletBinding()]
     param(
         # The Pester result object.
-        [Parameter(Mandatory)]
-        [PSCustomObject] $TestResults
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [Pester.Run] $TestResults
     )
 
     $configurationHashtable = $testResults.Configuration | Convert-PesterConfigurationToHashtable
@@ -851,7 +848,7 @@ function Set-PesterReportConfigurationSummary {
     }
 }
 
-function Set-PesterReportRunSummary {
+filter Set-PesterReportRunSummary {
     <#
 
     #>
@@ -863,8 +860,8 @@ function Set-PesterReportRunSummary {
     [CmdletBinding()]
     param(
         # The Pester result object.
-        [Parameter(Mandatory)]
-        [PSCustomObject] $TestResults,
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [Pester.Run] $TestResults,
 
         [Parameter(Mandatory)]
         [string[]] $Sections
