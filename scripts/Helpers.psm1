@@ -695,7 +695,7 @@ function Set-PesterReportSummary {
     Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
         $testResults | Set-PesterReportSummaryTable
 
-        $testResults | Set-PesterReportTestsSummary
+        $testResults.Containers | Set-PesterReportTestsSummary
 
         # $testResults | Set-PesterReportConfigurationSummary
 
@@ -760,34 +760,32 @@ filter Set-PesterReportTestsSummary {
         [int] $Depth = 0
     )
 
+    $itemIndent = $Indent * $Depth
     $formattedTestDuration = $inputObject.Duration | Format-TimeSpan
-    $testStatusIcon = switch ($Item.Result) {
+    $testStatusIcon = switch ($InputObject.Result) {
         'Passed' { '✅' }
         'Failed' { '❌' }
         'Skipped' { '⚠️' }
-        default { $Item.Result }
+        default { $InputObject.Result }
     }
 
     Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
     switch ($InputObject.GetType().Name) {
         'Run' {
-            $itemIndent = $Indent * $Depth
             $testName = $testResults.Configuration.TestResult.TestSuiteName.Value
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Containers | Set-PesterReportTestsSummary -Depth ($Depth++)
+                $inputObject.Containers | Set-PesterReportTestsSummary -Depth $($Depth++)
             }
         }
         'Container' {
-            $itemIndent = $Indent * $Depth
             $testName = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth ($Depth++)
+                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth $($Depth++)
             }
         }
         'Block' {
-            $itemIndent = $Indent * $Depth
             $testName = $InputObject.ExpandedName
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
@@ -795,13 +793,12 @@ filter Set-PesterReportTestsSummary {
             }
         }
         'Test' {
-            $itemIndent = $Indent * $Depth
             $testName = $InputObject.ExpandedName
 
-            if ($Item.ErrorRecord) {
+            if ($InputObject.ErrorRecord) {
                 Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
                     CodeBlock 'pwsh' {
-                        $Item.ErrorRecord
+                        $InputObject.ErrorRecord
                     }
                 }
             } else {
