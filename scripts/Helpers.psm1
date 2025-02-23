@@ -833,7 +833,7 @@ filter Set-PesterReportConfigurationSummary {
 
     Details 'Configuration' {
         CodeBlock 'pwsh' {
-            $configurationHashtable
+            $($configurationHashtable)
         }
     }
 }
