@@ -120,23 +120,19 @@ This **last-write-wins** strategy means you can set global defaults while retain
 1. **Prerequisite Setup**
    - Installs required PowerShell modules if they're not present.
    - Imports the modules so the testing framework is ready to use.
-
 2. **Loading Inputs and Configuration**
    - Loads a default pester configuration.
    - If `Path` points to a location with a Pester configuration file, merges that config.
    - Finally, merges any direct inputs provided in your workflow.
    - The result is a **final Pester configuration** that determines what tests to run and how to run them.
-
 3. **Add containers**
    - If no containers are explicitly defined, it attempts to discover them automatically (files matching `*.Container.*`).
    - Adds these containers to the final configuration.
-
 4. **Running the Tests**
    - Calls [`Invoke-Pester`](https://pester.dev/docs/commands/Invoke-Pester) using that final configuration.
    - Finds test files/containers.
    - Runs tests, logs pass/fail/skipped/inconclusive.
    - Aggregates outcomes into a final test object.
-
 5. **Generating Reports**
    - **Test Results** (e.g., NUnit/XML) if `TestResult_Enabled` is `true`. The file is saved to `TestResult_OutputPath`.
    - **Code Coverage** if `CodeCoverage_Enabled` is `true`. Saves coverage data (Cobertura, JaCoCo, etc.) to `CodeCoverage_OutputPath`.
@@ -144,12 +140,11 @@ This **last-write-wins** strategy means you can set global defaults while retain
      - `<TestSuiteName>-TestResults`
      - `<TestSuiteName>-CodeCoverage`
 
-    > [!TIP] Use the `TestResult_TestSuiteName` to change the variable name of the artifact.
-
+    > [!TIP]
+    > Use the `TestResult_TestSuiteName` to change the variable name of the artifact.
 6. **Summary in GitHub**
    - A step summary is generated, showing how many tests passed/failed/skipped, plus coverage info.
    - If containers are in use, each container's results appear in a collapsible section.
-
 7. **Publishing Outputs**
    - The action outputs a JSON string with a `Passed` key, indicating whether all tests passed.
    - This can be accessed from other steps in your workflow using `${{ steps.<step-id>.outputs.Passed }}` in the workflow.
@@ -245,8 +240,8 @@ No secrets are directly required by this Action.
 
 ### Outputs
 
-After the test run completes, these outputs become available. They are all JSON-encoded strings, so you can parse them in subsequent steps if needed:
+No outputs are provided by this Action.
 
-| **Output** | **Description**     |
-|------------|---------------------|
-| `Passed`   | Did all tests pass? |
+## How to determine a test's outcome
+
+<fill out this>
