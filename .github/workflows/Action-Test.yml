@@ -124,6 +124,8 @@ jobs:
       - name: "Display Aggregated Results as a Table"
         shell: pwsh
         run: |
+          Install-PSResource -Name Markdown -Repository PSGallery -TrustRepository
+          
           # Build an array of objects for each job
           $ActionTest1SimpleOutcome = "${{ needs.ActionTest1Simple.outputs.outcome }}"
           $ActionTest1SimpleExpectedOutcome = "success"
