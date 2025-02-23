@@ -609,8 +609,9 @@ filter Get-PesterTestTree {
         ```powershell
         Depth Name              ItemType   Result   Duration ErrorRecord
         ----- ----              --------   ------   -------- -----------
-            0 Failure.Tests     Container Passed   0.012s
-            1 Describe Block 1  Block     Failed   0.003s    System.Exception: Failure message
+            0 Failure.Tests     TestSuite Passed   0.015s
+            1 Failure.Tests     Container Passed   0.012s
+            2 Describe Block 1  Block     Failed   0.003s    System.Exception: Failure message
         ```
 
         Retrieves and formats Pester test results into a hierarchical tree structure.
@@ -683,6 +684,37 @@ function Set-PesterReportSummary {
     param(
         # The Pester result object.
         [Parameter(Mandatory)]
+        [Pester.Run] $TestResults
+    )
+
+    $testSuitName = $($configuration.TestResult.TestSuiteName.Value)
+    $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
+    $formattedTestDuration = $testResults.Duration | Format-TimeSpan
+
+    Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
+        Set-PesterReportSummaryTable -TestResults $testResults
+
+        Set-PesterReportTestsSummary -TestResults $testResults
+
+        Set-PesterReportConfigurationSummary -TestResults $testResults
+
+        Set-PesterReportRunSummary -TestResults $testResults -Sections 'Containers'
+    }
+}
+
+function Set-PesterReportSummaryTable {
+    <#
+
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
+    [OutputType([string])]
+    [CmdletBinding()]
+    param(
+        # The Pester result object.
+        [Parameter(Mandatory)]
         [PSCustomObject] $TestResults
     )
 
@@ -693,26 +725,158 @@ function Set-PesterReportSummary {
     $inconclusiveTests = $testResults.InconclusiveCount
     $notRunTests = $testResults.NotRunCount
 
-    $coverageString = 'N/A'
+    $statusTable = [pscustomobject]@{
+        Total        = $totalTests
+        Passed       = $passedTests
+        Failed       = $failedTests
+        Skipped      = $skippedTests
+        Inconclusive = $inconclusiveTests
+        NotRun       = $notRunTests
+    }
+
     if ($configuration.CodeCoverage.Enabled) {
         $coverage = [System.Math]::Round(($testResults.CodeCoverage.CoveragePercent), 2)
         $coverageString = "$coverage%"
+        $statusTable | Add-Member -MemberType NoteProperty -Name 'Coverage' -Value $coverageString
     }
 
-    $testSuitName = $($configuration.TestResult.TestSuiteName.Value)
-    $testSuitStatusIcon = if ($failedTests -gt 0) { '❌' } else { '✅' }
-    $formattedTestDuration = $testResults.Duration | Format-TimeSpan
+    Table {
+        $statusTable
+    }
+}
 
-    Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
-        Table {
-            [pscustomobject]@{
-                Total        = $totalTests
-                Passed       = $passedTests
-                Failed       = $failedTests
-                Skipped      = $skippedTests
-                Inconclusive = $inconclusiveTests
-                NotRun       = $notRunTests
-                Coverage     = $coverageString
+function Set-PesterReportTestsSummary {
+    <#
+
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
+    [OutputType([string])]
+    [CmdletBinding()]
+    param(
+        # The Pester result object.
+        [Parameter(Mandatory)]
+        [PSCustomObject] $TestResults
+    )
+
+    Write-Verbose "Processing containers [$($testResults.Containers.Count)]" -Verbose
+
+    $hierarchy = $TestResults | Get-PesterTestTree
+
+    foreach ($container in $testResults.Containers) {
+        $containerPath = $container.Item.FullName
+        Write-Verbose "Processing container [$containerPath]" -Verbose
+        $containerName = (Split-Path $container.Name -Leaf) -replace '.Tests.ps1'
+        Write-Verbose "Container name: [$containerName]" -Verbose
+        $containerStatusIcon = switch ($container.Result) {
+            'Passed' { '✅' }
+            'Failed' { '❌' }
+            'Skipped' { '⚠️' }
+            default { $container.Result }
+        }
+        $formattedContainerDuration = $container.Duration | Format-TimeSpan
+
+
+
+
+        Details "$Indent$containerStatusIcon - $containerName ($formattedContainerDuration)" {
+
+
+        }
+    }
+}
+
+function Set-PesterReportTestsSummertItem {
+    <#
+
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
+    [OutputType([string])]
+    [CmdletBinding()]
+    param(
+        # The Pester result object.
+        [Parameter(Mandatory)]
+        [PSCustomObject] $Item
+    )
+
+    $testName = $Item.Name
+    $testStatusIcon = switch ($Item.Result) {
+        'Passed' { '✅' }
+        'Failed' { '❌' }
+        'Skipped' { '⚠️' }
+        default { $Item.Result }
+    }
+    $formattedTestDuration = $Item.Duration | Format-TimeSpan
+
+    Details "$Indent$Indent$testStatusIcon - $testName ($formattedTestDuration)" {
+        if ($Item.ErrorRecord) {
+            CodeBlock 'pwsh' {
+                $Item.ErrorRecord
+            }
+        }
+    }
+}
+
+function Set-PesterReportConfigurationSummary {
+    <#
+
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
+    [OutputType([string])]
+    [CmdletBinding()]
+    param(
+        # The Pester result object.
+        [Parameter(Mandatory)]
+        [PSCustomObject] $TestResults
+    )
+
+    $configurationHashtable = $testResults.Configuration | Convert-PesterConfigurationToHashtable
+
+    Details 'Configuration' {
+        CodeBlock 'pwsh' {
+            $configurationHashtable
+        }
+    }
+}
+
+function Set-PesterReportRunSummary {
+    <#
+
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Sets text in memory'
+    )]
+    [OutputType([string])]
+    [CmdletBinding()]
+    param(
+        # The Pester result object.
+        [Parameter(Mandatory)]
+        [PSCustomObject] $TestResults,
+
+        [Parameter(Mandatory)]
+        [string[]] $Sections
+    )
+
+    foreach ($property in $testResults.PSObject.Properties) {
+        Write-Verbose "Setting output for [$($property.Name)]"
+        if ($property.Name -notin $Sections) {
+            continue
+        }
+        $name = $property.Name
+        $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
+
+        Details "$indent - $name" {
+            CodeBlock 'json' {
+                $value
             }
         }
     }
