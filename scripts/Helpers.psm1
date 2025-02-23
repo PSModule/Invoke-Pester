@@ -761,7 +761,6 @@ filter Set-PesterReportTestsSummary {
     )
 
     $itemIndent = $Indent * $Depth
-    $Depth++
     $formattedTestDuration = $inputObject.Duration | Format-TimeSpan
     $testStatusIcon = switch ($InputObject.Result) {
         'Passed' { '✅' }
@@ -773,6 +772,7 @@ filter Set-PesterReportTestsSummary {
     Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
     switch ($InputObject.GetType().Name) {
         'Run' {
+            $Depth++
             $testName = $testResults.Configuration.TestResult.TestSuiteName.Value
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
@@ -780,6 +780,7 @@ filter Set-PesterReportTestsSummary {
             }
         }
         'Container' {
+            $Depth++
             $testName = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
@@ -787,6 +788,7 @@ filter Set-PesterReportTestsSummary {
             }
         }
         'Block' {
+            $Depth++
             $testName = $InputObject.ExpandedName
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
