@@ -829,12 +829,10 @@ filter Set-PesterReportConfigurationSummary {
         [Pester.Run] $TestResults
     )
 
-    $configurationHashtable = $testResults.Configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable
-
     Details 'Configuration' {
         CodeBlock 'pwsh' {
-            $($configurationHashtable)
-        }
+            $testResults.Configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable
+        } -Execute
     }
 }
 
