@@ -735,8 +735,8 @@ filter Set-PesterReportSummaryTable {
         Failed       = $testResults.FailedCount
         Skipped      = $testResults.SkippedCount
         Inconclusive = $testResults.InconclusiveCount
-        Total        = $testResults.TotalCount
         NotRun       = $testResults.NotRunCount
+        Total        = $testResults.TotalCount
     }
 
     if ($testResults.Configuration.CodeCoverage.Enabled.Value) {
