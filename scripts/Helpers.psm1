@@ -695,7 +695,7 @@ function Set-PesterReportSummary {
     Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
         $testResults | Set-PesterReportSummaryTable
 
-        # $testResults | Set-PesterReportTestsSummary
+        $testResults | Set-PesterReportTestsSummary
 
         # $testResults | Set-PesterReportConfigurationSummary
 
@@ -720,11 +720,11 @@ filter Set-PesterReportSummaryTable {
     )
 
     $statusTable = [pscustomobject]@{
-        Total        = $testResults.TotalCount
         Passed       = $testResults.PassedCount
         Failed       = $testResults.FailedCount
         Skipped      = $testResults.SkippedCount
         Inconclusive = $testResults.InconclusiveCount
+        Total        = $testResults.TotalCount
         NotRun       = $testResults.NotRunCount
     }
 
