@@ -697,9 +697,9 @@ function Set-PesterReportSummary {
 
         $testResults.Containers | Set-PesterReportTestsSummary
 
-        $testResults | Set-PesterReportConfigurationSummary
+        "----"
 
-        # $testResults | Set-PesterReportRunSummary -Sections 'Containers'
+        $testResults | Set-PesterReportConfigurationSummary
     }
 }
 
