@@ -795,73 +795,76 @@ filter Set-PesterReportTestsSummary {
         'Test' {
             $testName = $InputObject.ExpandedName
 
-            Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                if ($InputObject.ErrorRecord) {
+            if ($InputObject.ErrorRecord) {
+                Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
                     CodeBlock 'pwsh' {
                         $InputObject.ErrorRecord
                     }
                 }
+            } else {
+                Paragraph {
+                    "$indent$itemIndent$testStatusIcon - $testName ($formattedTestDuration)"
+                }
             }
-        }
-        default {
-            Write-Error "Unknown object type: [$($InputObject.GetType().Name)]"
-        }
-    }
-}
-
-filter Set-PesterReportConfigurationSummary {
-    <#
-
-    #>
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        'PSUseShouldProcessForStateChangingFunctions', '',
-        Justification = 'Sets text in memory'
-    )]
-    [OutputType([string])]
-    [CmdletBinding()]
-    param(
-        # The Pester result object.
-        [Parameter(Mandatory, ValueFromPipeline)]
-        [Pester.Run] $TestResults
-    )
-
-    $configurationHashtable = $testResults.Configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable
-
-    Details 'Configuration' {
-        CodeBlock 'pwsh' {
-            $configurationHashtable
-        }
-    }
-}
-
-filter Set-PesterReportRunSummary {
-    <#
-
-    #>
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        'PSUseShouldProcessForStateChangingFunctions', '',
-        Justification = 'Sets text in memory'
-    )]
-    [OutputType([string])]
-    [CmdletBinding()]
-    param(
-        # The Pester result object.
-        [Parameter(Mandatory, ValueFromPipeline)]
-        [Pester.Run] $TestResults,
-
-        [Parameter(Mandatory)]
-        [string[]] $Sections
-    )
-
-    foreach ($property in ($testResults.PSObject.Properties | Where-Object { $_.Name -notin $Sections })) {
-        Write-Verbose "Setting output for [$($property.Name)]"
-        $name = $property.Name
-        $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
-
-        Details "$indent - $name" {
-            CodeBlock 'json' {
-                $value
+            default {
+                Write-Error "Unknown object type: [$($InputObject.GetType().Name)]"
             }
         }
     }
-}
+
+    filter Set-PesterReportConfigurationSummary {
+        <#
+
+    #>
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+            'PSUseShouldProcessForStateChangingFunctions', '',
+            Justification = 'Sets text in memory'
+        )]
+        [OutputType([string])]
+        [CmdletBinding()]
+        param(
+            # The Pester result object.
+            [Parameter(Mandatory, ValueFromPipeline)]
+            [Pester.Run] $TestResults
+        )
+
+        $configurationHashtable = $testResults.Configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable
+
+        Details 'Configuration' {
+            CodeBlock 'pwsh' {
+                $configurationHashtable
+            }
+        }
+    }
+
+    filter Set-PesterReportRunSummary {
+        <#
+
+    #>
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+            'PSUseShouldProcessForStateChangingFunctions', '',
+            Justification = 'Sets text in memory'
+        )]
+        [OutputType([string])]
+        [CmdletBinding()]
+        param(
+            # The Pester result object.
+            [Parameter(Mandatory, ValueFromPipeline)]
+            [Pester.Run] $TestResults,
+
+            [Parameter(Mandatory)]
+            [string[]] $Sections
+        )
+
+        foreach ($property in ($testResults.PSObject.Properties | Where-Object { $_.Name -notin $Sections })) {
+            Write-Verbose "Setting output for [$($property.Name)]"
+            $name = $property.Name
+            $value = -not [string]::IsNullOrEmpty($property.Value) ? ($property.Value | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue) : ''
+
+            Details "$indent - $name" {
+                CodeBlock 'json' {
+                    $value
+                }
+            }
+        }
+    }
