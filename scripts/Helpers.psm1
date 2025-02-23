@@ -761,6 +761,7 @@ filter Set-PesterReportTestsSummary {
     )
 
     $itemIndent = $Indent * $Depth
+    $Depth++
     $formattedTestDuration = $inputObject.Duration | Format-TimeSpan
     $testStatusIcon = switch ($InputObject.Result) {
         'Passed' { '✅' }
@@ -775,21 +776,21 @@ filter Set-PesterReportTestsSummary {
             $testName = $testResults.Configuration.TestResult.TestSuiteName.Value
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Containers | Set-PesterReportTestsSummary -Depth $($Depth++)
+                $inputObject.Containers | Set-PesterReportTestsSummary -Depth $Depth
             }
         }
         'Container' {
             $testName = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth $($Depth++)
+                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth $Depth
             }
         }
         'Block' {
             $testName = $InputObject.ExpandedName
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Order | Set-PesterReportTestsSummary -Depth ($Depth++)
+                $inputObject.Order | Set-PesterReportTestsSummary -Depth $Depth
             }
         }
         'Test' {
@@ -802,7 +803,9 @@ filter Set-PesterReportTestsSummary {
                     }
                 }
             } else {
-                "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)"
+                Paragraph {
+                    "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)"
+                }
             }
         }
         default {
