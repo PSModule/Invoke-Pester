@@ -7,7 +7,6 @@ param()
     Import-Module -Name $_
 }
 Import-Module "$PSScriptRoot/Helpers.psm1"
-Get-Module
 '::endgroup::'
 
 '::group::Exec - Get test kit versions'
@@ -34,7 +33,7 @@ $configuration.Run.Container | ConvertTo-Json
 '::endgroup::'
 
 $configuration = New-PesterConfiguration -Hashtable $configuration
-
+Get-Module | Format-Table -AutoSize
 $testResults = Invoke-Pester -Configuration $configuration
 
 LogGroup 'Eval - Setup prerequisites' {
