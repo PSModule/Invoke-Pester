@@ -3,7 +3,7 @@ param()
 
 LogGroup 'Init - Setup prerequisites' {
     'Pester', 'Hashtable', 'TimeSpan', 'Markdown' | ForEach-Object {
-        Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery -Prerelease
+        Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
         Import-Module -Name $_
     }
     Import-Module "$PSScriptRoot/Helpers.psm1"

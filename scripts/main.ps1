@@ -4,8 +4,8 @@ param()
 LogGroup 'Exec - Setup prerequisites' {
     $PSModuleAutoLoadingPreference = 'None'
     'Pester' | ForEach-Object {
-        Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
-        Import-Module -Name $_ -Verbose:$false
+        Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+        Import-Module -Name $_
     }
     Import-Module "$PSScriptRoot/Helpers.psm1"
 }
