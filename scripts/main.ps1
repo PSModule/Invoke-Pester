@@ -32,8 +32,11 @@ foreach ($containerFile in $containerFiles) {
 $configuration.Run.Container | ConvertTo-Json
 '::endgroup::'
 
-$configuration = New-PesterConfiguration -Hashtable $configuration
+'::group::Exec - Available modules'
 Get-Module | Format-Table -AutoSize
+'::endgroup::'
+
+$configuration = New-PesterConfiguration -Hashtable $configuration
 $testResults = Invoke-Pester -Configuration $configuration
 
 LogGroup 'Eval - Setup prerequisites' {
