@@ -262,17 +262,8 @@ runs:
           ${{ github.action_path }}\scripts\pre.ps1
 
     - name: Invoke-Pester
-      shell: bash
-      run: |
-        # Run PowerShell with:
-        # - Disabled module autoloading
-        pwsh -NoProfile -Command "
-          # Disable module autoloading for this session
-          \$PSModuleAutoLoadingPreference = 'None'
-          Write-Host 'Module autoloading is [\$PSModuleAutoLoadingPreference]'
-
-          ${{ github.action_path }}\scripts\main.ps1
-        "
+      shell: pwsh
+      run: ${{ github.action_path }}\scripts\main.ps1
 
     # - name: Invoke-Pester (post)
     #   uses: PSModule/GitHub-Script@v1
