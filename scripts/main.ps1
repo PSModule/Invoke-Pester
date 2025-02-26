@@ -1,7 +1,7 @@
 ﻿[CmdletBinding()]
 param()
 
-LogGroup 'Setup prerequisites' {
+LogGroup 'Exec - Setup prerequisites' {
     $PSModuleAutoLoadingPreference = 'None'
     'Pester' | ForEach-Object {
         Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
@@ -10,7 +10,7 @@ LogGroup 'Setup prerequisites' {
     Import-Module "$PSScriptRoot/Helpers.psm1"
 }
 
-LogGroup 'Get test kit versions' {
+LogGroup 'Exec - Get test kit versions' {
     $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
 
     [PSCustomObject]@{
@@ -19,9 +19,19 @@ LogGroup 'Get test kit versions' {
     } | Format-List
 }
 
-$configuration = Import-Hashtable -Path "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
+LogGroup 'Exec - Import Configuration' {
+    $configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
+    $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
+    $configuration.Run.Container = @()
+    foreach ($containerFile in $containerFiles) {
+        $container = & $containerFile.FullName
+        Write-Verbose "Processing container [$container]" -Verbose
+        Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
+        $configuration.Run.Container += New-PesterContainer @container
+    }
+}
+
 $configuration = New-PesterConfiguration -Hashtable $configuration
-$configurationHashtable = $configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String
-Write-Output $configurationHashtable
 
 $testResults = Invoke-Pester -Configuration $configuration
+$testResults

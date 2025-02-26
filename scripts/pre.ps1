@@ -1,7 +1,7 @@
 ﻿[CmdletBinding()]
 param()
 
-LogGroup 'Setup prerequisites' {
+LogGroup 'Init - Setup prerequisites' {
     'Pester', 'Hashtable', 'TimeSpan', 'Markdown' | ForEach-Object {
         Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
         Import-Module -Name $_ -Verbose:$false
@@ -9,7 +9,7 @@ LogGroup 'Setup prerequisites' {
     Import-Module "$PSScriptRoot/Helpers.psm1"
 }
 
-LogGroup 'Get test kit versions' {
+LogGroup 'Init - Get test kit versions' {
     $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
 
     [PSCustomObject]@{
@@ -18,7 +18,7 @@ LogGroup 'Get test kit versions' {
     } | Format-List
 }
 
-LogGroup 'Load inputs' {
+LogGroup 'Init - Load inputs' {
     $providedItem = Resolve-Path -Path $env:GITHUB_ACTION_INPUT_Path | Select-Object -ExpandProperty Path | Get-Item
     if ($providedItem -is [System.IO.DirectoryInfo]) {
         $providedPath = $providedItem.FullName
@@ -86,16 +86,16 @@ LogGroup 'Load inputs' {
     [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List
 }
 
-LogGroup 'Load configuration - Defaults' {
+LogGroup 'Init - Load configuration - Defaults' {
     Write-Output (New-PesterConfigurationHashtable -Default | Format-Hashtable | Out-String)
 }
 
-LogGroup 'Load configuration - Custom settings file' {
+LogGroup 'Init - Load configuration - Custom settings file' {
     $customConfig = Get-PesterConfiguration -Path $inputs.Path
     Write-Output ($customConfig | Format-Hashtable | Out-String)
 }
 
-LogGroup 'Load configuration - Action overrides' {
+LogGroup 'Init - Load configuration - Action overrides' {
     $customConfigInputMap = @{
         Run          = @{
             Path                   = $inputs.Run_Path
@@ -163,7 +163,7 @@ LogGroup 'Load configuration - Action overrides' {
     Write-Output ($customInputs | Format-Hashtable | Out-String)
 }
 
-LogGroup 'Merge configuration' {
+LogGroup 'Init - Merge configuration' {
     $defaults = New-PesterConfigurationHashtable
     $configuration = Merge-PesterConfiguration -BaseConfiguration $defaults -AdditionalConfiguration $customConfig, $customInputs
 
@@ -173,7 +173,7 @@ LogGroup 'Merge configuration' {
     Write-Output ($configuration | Format-Hashtable | Out-String)
 }
 
-LogGroup 'Find containers' {
+LogGroup 'Init - Find containers' {
     $containers = @()
     $existingContainers = $configuration.Run.Container
     if ($existingContainers.Count -gt 0) {
@@ -200,13 +200,7 @@ LogGroup 'Find containers' {
     Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
 }
 
-LogGroup 'Set Configuration - Result' {
-    $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
-    $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
-    $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
-    $configuration.Run.PassThru = $true
-
-    # If any containers are defined as hashtables, convert them to PesterContainer objects
+LogGroup 'Init - Export containers' {
     $configuration.Run.Container = @()
     foreach ($container in $containers) {
         Write-Verbose "Processing container [$($container.Path)]" -Verbose
@@ -219,7 +213,12 @@ LogGroup 'Set Configuration - Result' {
     }
 }
 
-LogGroup 'Export configuration' {
+LogGroup 'Init - Export configuration' {
+    $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
+    $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
+    $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
+    $configuration.Run.PassThru = $true
+
     Format-Hashtable -Hashtable $configuration
     Export-Hashtable -Hashtable $configuration -Path "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
 }
