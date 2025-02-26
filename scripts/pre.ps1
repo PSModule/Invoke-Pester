@@ -207,7 +207,7 @@ LogGroup 'Init - Export containers' {
         LogGroup "Init - Export containers - $containerFileName" {
             Write-Verbose "Processing container [$($container.Path)]" -Verbose
             Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
-            Format-Hashtable -Hashtable $configuration
+            Format-Hashtable -Hashtable $container
             Export-Hashtable -Hashtable $container -Path "$PSScriptRoot/$containerFileName"
         }
     }
