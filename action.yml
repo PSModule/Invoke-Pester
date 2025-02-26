@@ -264,7 +264,7 @@ runs:
       shell: pwsh
       continue-on-error: true
       id: test
-      run: ${{ github.action_path }}\scripts\main.ps1
+      run: ${{ github.action_path }}/scripts/main.ps1
 
     - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults]
       uses: actions/upload-artifact@v4
