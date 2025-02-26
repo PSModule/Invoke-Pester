@@ -173,9 +173,10 @@ LogGroup 'Init - Merge configuration' {
     Write-Output ($configuration | Format-Hashtable | Out-String)
 }
 
-LogGroup 'Init - Find containers' {
+LogGroup 'Init - Export containers' {
     $containers = @()
     $existingContainers = $configuration.Run.Container
+    $configuration.Run.Container = @()
     if ($existingContainers.Count -gt 0) {
         Write-Output "Containers from configuration: [$($existingContainers.Count)]"
         foreach ($existingContainer in $existingContainers) {
@@ -190,25 +191,13 @@ LogGroup 'Init - Find containers' {
         $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
         Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
         foreach ($containerFile in $containerFiles) {
-            Write-Output "Processing container file [$containerFile]"
-            $containers += Import-Hashtable $containerFile
-        }
-    }
-
-    Write-Output "Containers found: [$($containers.Count)]"
-    Write-Output ($containers | Format-Hashtable)
-}
-
-LogGroup 'Init - Export containers' {
-    $configuration.Run.Container = @()
-    foreach ($container in $containers) {
-        $containerFileName = ($container.Path | Split-Path -Leaf)
-        LogGroup "Init - Export containers - $containerFileName" {
-            $container
-            Write-Verbose "Processing container [$($container.Path)]" -Verbose
-            Format-Hashtable -Hashtable $container
-            Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
-            Export-Hashtable -Hashtable $container -Path "$PSScriptRoot/$containerFileName"
+            $container = Import-Hashtable $containerFile
+            $containerFileName = $containerFile | Split-Path -Leaf
+            LogGroup "Init - Export containers - $containerFileName" {
+                Format-Hashtable -Hashtable $container
+                Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
+                Export-Hashtable -Hashtable $container -Path "$PSScriptRoot/$containerFileName"
+            }
         }
     }
 }
