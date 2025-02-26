@@ -184,20 +184,19 @@ LogGroup 'Init - Find containers' {
         }
     }
     Write-Output "Containers from configuration: [$($containers.Count)]"
-    if ($containers.Count -eq 0) {
-        # If no containers are specified, search for "*.Container.*" files in each Run.Path directory
-        Write-Output 'Searching for containers in same location as config.'
-        foreach ($testDir in $inputs.Path) {
-            $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
-            Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
-            foreach ($containerFile in $containerFiles) {
-                Write-Output "Processing container file [$containerFile]"
-                $containers += Import-Hashtable $containerFile
-            }
+    # Search for "*.Container.*" files in each Run.Path directory
+    Write-Output 'Searching for containers in same location as config.'
+    foreach ($testDir in $inputs.Path) {
+        $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
+        Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
+        foreach ($containerFile in $containerFiles) {
+            Write-Output "Processing container file [$containerFile]"
+            $containers += Import-Hashtable $containerFile
         }
     }
+
     Write-Output "Containers found: [$($containers.Count)]"
-    Write-Output ($containers | ConvertTo-Json -Depth 2 -WarningAction SilentlyContinue)
+    Write-Output ($containers | Format-Hashtable)
 }
 
 LogGroup 'Init - Export containers' {

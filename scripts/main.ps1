@@ -22,15 +22,15 @@ LogGroup 'Exec - Get test kit versions' {
 LogGroup 'Exec - Import Configuration' {
     $configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
     $configuration
-    $containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse
     $configuration.Run.Container = @()
+    $containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse
     foreach ($containerFile in $containerFiles) {
-        $container = & $containerFile.FullName
+        $container = & $($containerFile.FullName)
         Write-Verbose "Processing container [$container]" -Verbose
         Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
         $configuration.Run.Container += New-PesterContainer @container
     }
-    $configuration.Run.Container
+    $configuration.Run.Container | ConvertTo-Json
 }
 
 $configuration = New-PesterConfiguration -Hashtable $configuration
