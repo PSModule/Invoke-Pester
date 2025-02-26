@@ -266,23 +266,24 @@ runs:
       id: test
       run: ${{ github.action_path }}/scripts/main.ps1
 
-    - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults]
+    - name: Upload test results - [${{ steps.test.outputs.TestSuiteName }}-TestResults]
       uses: actions/upload-artifact@v4
-      if: ${{ fromJSON(steps.test.outputs.result).TestResultEnabled && (success() || failure()) }}
+      if: ${{ steps.test.outputs.TestResultEnabled && (success() || failure()) }}
       with:
-        name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults
-        path: ${{ fromJSON(steps.test.outputs.result).TestResultOutputPath }}
+        name: ${{ steps.test.outputs.TestSuiteName }}-TestResults
+        path: ${{ steps.test.outputs.TestResultOutputPath }}
 
-    - name: Upload code coverage report - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage]
+    - name: Upload code coverage report - [${{ steps.test.outputs.TestSuiteName }}-CodeCoverage]
       uses: actions/upload-artifact@v4
-      if: ${{ fromJSON(steps.test.outputs.result).CodeCoverageEnabled && (success() || failure()) }}
+      if: ${{ steps.test.outputs.CodeCoverageEnabled && (success() || failure()) }}
       with:
-        name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage
-        path: ${{ fromJSON(steps.test.outputs.result).CodeCoverageOutputPath }}
+        name: ${{ steps.test.outputs.TestSuiteName }}-CodeCoverage
+        path: ${{ steps.test.outputs.CodeCoverageOutputPath }}
 
     - name: Status
       shell: pwsh
       run: |
+        $outcome = '${{ steps.test.outcome }}'
         Write-Host "outcome: [$outcome]"
         if ($outcome -ne 'success') {
           exit 1
