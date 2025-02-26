@@ -202,10 +202,9 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Invoke-Pester
+    - name: Invoke-Pester (pre)
       uses: PSModule/GitHub-Script@v1
-      id: test
-      continue-on-error: true
+      id: pre
       env:
         GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
         GITHUB_ACTION_INPUT_Run_Path: ${{ inputs.Run_Path }}
@@ -258,22 +257,28 @@ runs:
         Verbose: ${{ inputs.Verbose }}
         Version: ${{ inputs.Version }}
         Script: |
-          # Invoke-Pester
-          ${{ github.action_path }}\scripts\main.ps1
+          # Invoke-Pester (pre)
+          ${{ github.action_path }}\scripts\pre.ps1
 
-    - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults]
-      uses: actions/upload-artifact@v4
-      if: ${{ fromJSON(steps.test.outputs.result).TestResultEnabled && (success() || failure()) }}
-      with:
-        name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults
-        path: ${{ fromJSON(steps.test.outputs.result).TestResultOutputPath }}
+    - name: Invoke-Pester
+      shell: pwsh
+      continue-on-error: true
+      id: test
+      run: ${{ github.action_path }}/scripts/main.ps1
 
-    - name: Upload code coverage report - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage]
+    - name: Upload test results - [${{ steps.test.outputs.TestSuiteName }}-TestResults]
       uses: actions/upload-artifact@v4
-      if: ${{ fromJSON(steps.test.outputs.result).CodeCoverageEnabled && (success() || failure()) }}
+      if: ${{ steps.test.outputs.TestResultEnabled && (success() || failure()) }}
       with:
-        name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage
-        path: ${{ fromJSON(steps.test.outputs.result).CodeCoverageOutputPath }}
+        name: ${{ steps.test.outputs.TestSuiteName }}-TestResults
+        path: ${{ steps.test.outputs.TestResultOutputPath }}
+
+    - name: Upload code coverage report - [${{ steps.test.outputs.TestSuiteName }}-CodeCoverage]
+      uses: actions/upload-artifact@v4
+      if: ${{ steps.test.outputs.CodeCoverageEnabled && (success() || failure()) }}
+      with:
+        name: ${{ steps.test.outputs.TestSuiteName }}-CodeCoverage
+        path: ${{ steps.test.outputs.CodeCoverageOutputPath }}
 
     - name: Status
       shell: pwsh
