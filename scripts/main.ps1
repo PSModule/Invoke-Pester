@@ -23,7 +23,7 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 $configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
 $configuration
 $configuration.Run.Container = @()
-$containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse
+$containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse | Sort-Object FullName
 foreach ($containerFile in $containerFiles) {
     $container = & $($containerFile.FullName)
     Write-Verbose "Processing container [$container]" -Verbose
