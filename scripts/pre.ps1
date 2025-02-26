@@ -209,9 +209,13 @@ LogGroup 'Set Configuration - Result' {
     # If any containers are defined as hashtables, convert them to PesterContainer objects
     $configuration.Run.Container = @()
     foreach ($container in $containers) {
-        Write-Verbose "Processing container [$container]" -Verbose
+        Write-Verbose "Processing container [$($container.Path)]" -Verbose
         Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
-        $configuration.Run.Container += New-PesterContainer @container
+        $containerFileName = ($container.Path | Split-Path -Leaf)
+        LogGroup "Set Configuration - Result - $containerFileName" {
+            Format-Hashtable -Hashtable $configuration
+            Export-Hashtable -Hashtable $container -Path "$PSScriptRoot/$containerFileName"
+        }
     }
 }
 
