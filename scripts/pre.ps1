@@ -213,10 +213,9 @@ LogGroup 'Set Configuration - Result' {
         Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
         $configuration.Run.Container += New-PesterContainer @container
     }
-
-    $configuration = New-PesterConfiguration -Hashtable $configuration
-    $configurationHashtable = $configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String
-    Write-Output $configurationHashtable
 }
 
-Export-Hashtable -Hashtable $configuration -Path "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
+LogGroup 'Export configuration' {
+    Format-Hashtable -Hashtable $configuration
+    Export-Hashtable -Hashtable $configuration -Path "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
+}

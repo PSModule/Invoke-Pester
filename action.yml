@@ -274,84 +274,84 @@ runs:
           ${{ github.action_path }}\scripts\main.ps1
         "
 
-    - name: Invoke-Pester (post)
-      uses: PSModule/GitHub-Script@v1
-      id: post
-      continue-on-error: true
-      env:
-        GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
-        GITHUB_ACTION_INPUT_Run_Path: ${{ inputs.Run_Path }}
-        GITHUB_ACTION_INPUT_Run_ExcludePath: ${{ inputs.Run_ExcludePath }}
-        GITHUB_ACTION_INPUT_Run_ScriptBlock: ${{ inputs.Run_ScriptBlock }}
-        GITHUB_ACTION_INPUT_Run_Container: ${{ inputs.Run_Container }}
-        GITHUB_ACTION_INPUT_Run_TestExtension: ${{ inputs.Run_TestExtension }}
-        GITHUB_ACTION_INPUT_Run_Exit: ${{ inputs.Run_Exit }}
-        GITHUB_ACTION_INPUT_Run_Throw: ${{ inputs.Run_Throw }}
-        GITHUB_ACTION_INPUT_Run_SkipRun: ${{ inputs.Run_SkipRun }}
-        GITHUB_ACTION_INPUT_Run_SkipRemainingOnFailure: ${{ inputs.Run_SkipRemainingOnFailure }}
-        GITHUB_ACTION_INPUT_Filter_Tag: ${{ inputs.Filter_Tag }}
-        GITHUB_ACTION_INPUT_Filter_ExcludeTag: ${{ inputs.Filter_ExcludeTag }}
-        GITHUB_ACTION_INPUT_Filter_Line: ${{ inputs.Filter_Line }}
-        GITHUB_ACTION_INPUT_Filter_ExcludeLine: ${{ inputs.Filter_ExcludeLine }}
-        GITHUB_ACTION_INPUT_Filter_FullName: ${{ inputs.Filter_FullName }}
-        GITHUB_ACTION_INPUT_CodeCoverage_Enabled: ${{ inputs.CodeCoverage_Enabled }}
-        GITHUB_ACTION_INPUT_CodeCoverage_OutputFormat: ${{ inputs.CodeCoverage_OutputFormat }}
-        GITHUB_ACTION_INPUT_CodeCoverage_OutputPath: ${{ inputs.CodeCoverage_OutputPath }}
-        GITHUB_ACTION_INPUT_CodeCoverage_OutputEncoding: ${{ inputs.CodeCoverage_OutputEncoding }}
-        GITHUB_ACTION_INPUT_CodeCoverage_Path: ${{ inputs.CodeCoverage_Path }}
-        GITHUB_ACTION_INPUT_CodeCoverage_ExcludeTests: ${{ inputs.CodeCoverage_ExcludeTests }}
-        GITHUB_ACTION_INPUT_CodeCoverage_RecursePaths: ${{ inputs.CodeCoverage_RecursePaths }}
-        GITHUB_ACTION_INPUT_CodeCoverage_CoveragePercentTarget: ${{ inputs.CodeCoverage_CoveragePercentTarget }}
-        GITHUB_ACTION_INPUT_CodeCoverage_UseBreakpoints: ${{ inputs.CodeCoverage_UseBreakpoints }}
-        GITHUB_ACTION_INPUT_CodeCoverage_SingleHitBreakpoints: ${{ inputs.CodeCoverage_SingleHitBreakpoints }}
-        GITHUB_ACTION_INPUT_TestResult_Enabled: ${{ inputs.TestResult_Enabled }}
-        GITHUB_ACTION_INPUT_TestResult_OutputFormat: ${{ inputs.TestResult_OutputFormat }}
-        GITHUB_ACTION_INPUT_TestResult_OutputPath: ${{ inputs.TestResult_OutputPath }}
-        GITHUB_ACTION_INPUT_TestResult_OutputEncoding: ${{ inputs.TestResult_OutputEncoding }}
-        GITHUB_ACTION_INPUT_TestResult_TestSuiteName: ${{ inputs.TestResult_TestSuiteName }}
-        GITHUB_ACTION_INPUT_Should_ErrorAction: ${{ inputs.Should_ErrorAction }}
-        GITHUB_ACTION_INPUT_Debug_ShowFullErrors: ${{ inputs.Debug_ShowFullErrors }}
-        GITHUB_ACTION_INPUT_Debug_WriteDebugMessages: ${{ inputs.Debug_WriteDebugMessages }}
-        GITHUB_ACTION_INPUT_Debug_WriteDebugMessagesFrom: ${{ inputs.Debug_WriteDebugMessagesFrom }}
-        GITHUB_ACTION_INPUT_Debug_ShowNavigationMarkers: ${{ inputs.Debug_ShowNavigationMarkers }}
-        GITHUB_ACTION_INPUT_Debug_ReturnRawResultObject: ${{ inputs.Debug_ReturnRawResultObject }}
-        GITHUB_ACTION_INPUT_Output_Verbosity: ${{ inputs.Output_Verbosity }}
-        GITHUB_ACTION_INPUT_Output_StackTraceVerbosity: ${{ inputs.Output_StackTraceVerbosity }}
-        GITHUB_ACTION_INPUT_Output_CIFormat: ${{ inputs.Output_CIFormat }}
-        GITHUB_ACTION_INPUT_Output_CILogLevel: ${{ inputs.Output_CILogLevel }}
-        GITHUB_ACTION_INPUT_Output_RenderMode: ${{ inputs.Output_RenderMode }}
-        GITHUB_ACTION_INPUT_TestDrive_Enabled: ${{ inputs.TestDrive_Enabled }}
-        GITHUB_ACTION_INPUT_TestRegistry_Enabled: ${{ inputs.TestRegistry_Enabled }}
-      with:
-        ShowInfo: false
-        ShowOutput: true
-        Debug: ${{ inputs.Debug }}
-        Prerelease: ${{ inputs.Prerelease }}
-        Verbose: ${{ inputs.Verbose }}
-        Version: ${{ inputs.Version }}
-        Script: |
-          # Invoke-Pester (post)
-          ${{ github.action_path }}\scripts\post.ps1
+    # - name: Invoke-Pester (post)
+    #   uses: PSModule/GitHub-Script@v1
+    #   id: post
+    #   continue-on-error: true
+    #   env:
+    #     GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
+    #     GITHUB_ACTION_INPUT_Run_Path: ${{ inputs.Run_Path }}
+    #     GITHUB_ACTION_INPUT_Run_ExcludePath: ${{ inputs.Run_ExcludePath }}
+    #     GITHUB_ACTION_INPUT_Run_ScriptBlock: ${{ inputs.Run_ScriptBlock }}
+    #     GITHUB_ACTION_INPUT_Run_Container: ${{ inputs.Run_Container }}
+    #     GITHUB_ACTION_INPUT_Run_TestExtension: ${{ inputs.Run_TestExtension }}
+    #     GITHUB_ACTION_INPUT_Run_Exit: ${{ inputs.Run_Exit }}
+    #     GITHUB_ACTION_INPUT_Run_Throw: ${{ inputs.Run_Throw }}
+    #     GITHUB_ACTION_INPUT_Run_SkipRun: ${{ inputs.Run_SkipRun }}
+    #     GITHUB_ACTION_INPUT_Run_SkipRemainingOnFailure: ${{ inputs.Run_SkipRemainingOnFailure }}
+    #     GITHUB_ACTION_INPUT_Filter_Tag: ${{ inputs.Filter_Tag }}
+    #     GITHUB_ACTION_INPUT_Filter_ExcludeTag: ${{ inputs.Filter_ExcludeTag }}
+    #     GITHUB_ACTION_INPUT_Filter_Line: ${{ inputs.Filter_Line }}
+    #     GITHUB_ACTION_INPUT_Filter_ExcludeLine: ${{ inputs.Filter_ExcludeLine }}
+    #     GITHUB_ACTION_INPUT_Filter_FullName: ${{ inputs.Filter_FullName }}
+    #     GITHUB_ACTION_INPUT_CodeCoverage_Enabled: ${{ inputs.CodeCoverage_Enabled }}
+    #     GITHUB_ACTION_INPUT_CodeCoverage_OutputFormat: ${{ inputs.CodeCoverage_OutputFormat }}
+    #     GITHUB_ACTION_INPUT_CodeCoverage_OutputPath: ${{ inputs.CodeCoverage_OutputPath }}
+    #     GITHUB_ACTION_INPUT_CodeCoverage_OutputEncoding: ${{ inputs.CodeCoverage_OutputEncoding }}
+    #     GITHUB_ACTION_INPUT_CodeCoverage_Path: ${{ inputs.CodeCoverage_Path }}
+    #     GITHUB_ACTION_INPUT_CodeCoverage_ExcludeTests: ${{ inputs.CodeCoverage_ExcludeTests }}
+    #     GITHUB_ACTION_INPUT_CodeCoverage_RecursePaths: ${{ inputs.CodeCoverage_RecursePaths }}
+    #     GITHUB_ACTION_INPUT_CodeCoverage_CoveragePercentTarget: ${{ inputs.CodeCoverage_CoveragePercentTarget }}
+    #     GITHUB_ACTION_INPUT_CodeCoverage_UseBreakpoints: ${{ inputs.CodeCoverage_UseBreakpoints }}
+    #     GITHUB_ACTION_INPUT_CodeCoverage_SingleHitBreakpoints: ${{ inputs.CodeCoverage_SingleHitBreakpoints }}
+    #     GITHUB_ACTION_INPUT_TestResult_Enabled: ${{ inputs.TestResult_Enabled }}
+    #     GITHUB_ACTION_INPUT_TestResult_OutputFormat: ${{ inputs.TestResult_OutputFormat }}
+    #     GITHUB_ACTION_INPUT_TestResult_OutputPath: ${{ inputs.TestResult_OutputPath }}
+    #     GITHUB_ACTION_INPUT_TestResult_OutputEncoding: ${{ inputs.TestResult_OutputEncoding }}
+    #     GITHUB_ACTION_INPUT_TestResult_TestSuiteName: ${{ inputs.TestResult_TestSuiteName }}
+    #     GITHUB_ACTION_INPUT_Should_ErrorAction: ${{ inputs.Should_ErrorAction }}
+    #     GITHUB_ACTION_INPUT_Debug_ShowFullErrors: ${{ inputs.Debug_ShowFullErrors }}
+    #     GITHUB_ACTION_INPUT_Debug_WriteDebugMessages: ${{ inputs.Debug_WriteDebugMessages }}
+    #     GITHUB_ACTION_INPUT_Debug_WriteDebugMessagesFrom: ${{ inputs.Debug_WriteDebugMessagesFrom }}
+    #     GITHUB_ACTION_INPUT_Debug_ShowNavigationMarkers: ${{ inputs.Debug_ShowNavigationMarkers }}
+    #     GITHUB_ACTION_INPUT_Debug_ReturnRawResultObject: ${{ inputs.Debug_ReturnRawResultObject }}
+    #     GITHUB_ACTION_INPUT_Output_Verbosity: ${{ inputs.Output_Verbosity }}
+    #     GITHUB_ACTION_INPUT_Output_StackTraceVerbosity: ${{ inputs.Output_StackTraceVerbosity }}
+    #     GITHUB_ACTION_INPUT_Output_CIFormat: ${{ inputs.Output_CIFormat }}
+    #     GITHUB_ACTION_INPUT_Output_CILogLevel: ${{ inputs.Output_CILogLevel }}
+    #     GITHUB_ACTION_INPUT_Output_RenderMode: ${{ inputs.Output_RenderMode }}
+    #     GITHUB_ACTION_INPUT_TestDrive_Enabled: ${{ inputs.TestDrive_Enabled }}
+    #     GITHUB_ACTION_INPUT_TestRegistry_Enabled: ${{ inputs.TestRegistry_Enabled }}
+    #   with:
+    #     ShowInfo: false
+    #     ShowOutput: true
+    #     Debug: ${{ inputs.Debug }}
+    #     Prerelease: ${{ inputs.Prerelease }}
+    #     Verbose: ${{ inputs.Verbose }}
+    #     Version: ${{ inputs.Version }}
+    #     Script: |
+    #       # Invoke-Pester (post)
+    #       ${{ github.action_path }}\scripts\post.ps1
 
-    - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults]
-      uses: actions/upload-artifact@v4
-      if: ${{ fromJSON(steps.test.outputs.result).TestResultEnabled && (success() || failure()) }}
-      with:
-        name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults
-        path: ${{ fromJSON(steps.test.outputs.result).TestResultOutputPath }}
+    # - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults]
+    #   uses: actions/upload-artifact@v4
+    #   if: ${{ fromJSON(steps.test.outputs.result).TestResultEnabled && (success() || failure()) }}
+    #   with:
+    #     name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults
+    #     path: ${{ fromJSON(steps.test.outputs.result).TestResultOutputPath }}
 
-    - name: Upload code coverage report - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage]
-      uses: actions/upload-artifact@v4
-      if: ${{ fromJSON(steps.test.outputs.result).CodeCoverageEnabled && (success() || failure()) }}
-      with:
-        name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage
-        path: ${{ fromJSON(steps.test.outputs.result).CodeCoverageOutputPath }}
+    # - name: Upload code coverage report - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage]
+    #   uses: actions/upload-artifact@v4
+    #   if: ${{ fromJSON(steps.test.outputs.result).CodeCoverageEnabled && (success() || failure()) }}
+    #   with:
+    #     name: ${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-CodeCoverage
+    #     path: ${{ fromJSON(steps.test.outputs.result).CodeCoverageOutputPath }}
 
-    - name: Status
-      shell: pwsh
-      run: |
-        $outcome = '${{ steps.test.outcome }}'
-        Write-Host "outcome: [$outcome]"
-        if ($outcome -ne 'success') {
-          exit 1
-        }
+    # - name: Status
+    #   shell: pwsh
+    #   run: |
+    #     $outcome = '${{ steps.test.outcome }}'
+    #     Write-Host "outcome: [$outcome]"
+    #     if ($outcome -ne 'success') {
+    #       exit 1
+    #     }

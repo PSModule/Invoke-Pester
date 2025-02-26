@@ -19,5 +19,9 @@ LogGroup 'Get test kit versions' {
 }
 
 $configuration = Import-Hashtable -Path "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
+    $configuration = New-PesterConfiguration -Hashtable $configuration
+    $configurationHashtable = $configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String
+    Write-Output $configurationHashtable
 
+    
 $testResults = Invoke-Pester -Configuration $configuration
