@@ -205,9 +205,10 @@ LogGroup 'Init - Export containers' {
     foreach ($container in $containers) {
         $containerFileName = ($container.Path | Split-Path -Leaf)
         LogGroup "Init - Export containers - $containerFileName" {
+            $container
             Write-Verbose "Processing container [$($container.Path)]" -Verbose
-            Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
             Format-Hashtable -Hashtable $container
+            Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
             Export-Hashtable -Hashtable $container -Path "$PSScriptRoot/$containerFileName"
         }
     }
