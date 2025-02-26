@@ -1,37 +1,37 @@
 ﻿[CmdletBinding()]
 param()
 
-LogGroup 'Exec - Setup prerequisites' {
-    $PSModuleAutoLoadingPreference = 'None'
-    'Pester' | ForEach-Object {
-        Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
-        Import-Module -Name $_
-    }
-    Import-Module "$PSScriptRoot/Helpers.psm1"
+'::group::Exec - Setup prerequisites'
+'Pester' | ForEach-Object {
+    Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+    Import-Module -Name $_
 }
+Import-Module "$PSScriptRoot/Helpers.psm1"
+Get-Module
+'::endgroup::'
 
-LogGroup 'Exec - Get test kit versions' {
-    $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
+'::group::Exec - Get test kit versions'
+$pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
 
-    [PSCustomObject]@{
-        PowerShell = $PSVersionTable.PSVersion.ToString()
-        Pester     = $pesterModule.Version
-    } | Format-List
+[PSCustomObject]@{
+    PowerShell = $PSVersionTable.PSVersion.ToString()
+    Pester     = $pesterModule.Version
+} | Format-List
+'::endgroup::'
+
+'::group::Exec - Import Configuration'
+$configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
+$configuration
+$configuration.Run.Container = @()
+$containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse
+foreach ($containerFile in $containerFiles) {
+    $container = & $($containerFile.FullName)
+    Write-Verbose "Processing container [$container]" -Verbose
+    Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
+    $configuration.Run.Container += New-PesterContainer @container
 }
-
-LogGroup 'Exec - Import Configuration' {
-    $configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
-    $configuration
-    $configuration.Run.Container = @()
-    $containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse
-    foreach ($containerFile in $containerFiles) {
-        $container = & $($containerFile.FullName)
-        Write-Verbose "Processing container [$container]" -Verbose
-        Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
-        $configuration.Run.Container += New-PesterContainer @container
-    }
-    $configuration.Run.Container | ConvertTo-Json
-}
+$configuration.Run.Container | ConvertTo-Json
+'::endgroup::'
 
 $configuration = New-PesterConfiguration -Hashtable $configuration
 

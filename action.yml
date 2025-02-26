@@ -263,6 +263,7 @@ runs:
 
     - name: Invoke-Pester
       shell: pwsh
+      
       run: ${{ github.action_path }}\scripts\main.ps1
 
     - name: Upload test results - [${{ fromJSON(steps.test.outputs.result).TestSuiteName }}-TestResults]
