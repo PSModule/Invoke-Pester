@@ -258,7 +258,7 @@ runs:
         Version: ${{ inputs.Version }}
         Script: |
           # Invoke-Pester (pre)
-          ${{ github.action_path }}\scripts\pre.ps1
+          ${{ github.action_path }}/scripts/pre.ps1
 
     - name: Invoke-Pester
       shell: pwsh
