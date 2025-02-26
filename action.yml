@@ -205,7 +205,6 @@ runs:
     - name: Invoke-Pester (pre)
       uses: PSModule/GitHub-Script@v1
       id: pre
-      continue-on-error: true
       env:
         GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
         GITHUB_ACTION_INPUT_Run_Path: ${{ inputs.Run_Path }}
