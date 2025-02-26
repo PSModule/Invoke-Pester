@@ -21,7 +21,7 @@ LogGroup 'Exec - Get test kit versions' {
 
 LogGroup 'Exec - Import Configuration' {
     $configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
-    $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
+    $containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse
     $configuration.Run.Container = @()
     foreach ($containerFile in $containerFiles) {
         $container = & $containerFile.FullName
@@ -34,4 +34,5 @@ LogGroup 'Exec - Import Configuration' {
 $configuration = New-PesterConfiguration -Hashtable $configuration
 
 $testResults = Invoke-Pester -Configuration $configuration
+
 $testResults
