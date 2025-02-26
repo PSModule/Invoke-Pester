@@ -163,7 +163,7 @@ LogGroup 'Init - Load configuration - Action overrides' {
     Write-Output ($customInputs | Format-Hashtable | Out-String)
 }
 
-LogGroup 'Init - Merge configuration' {
+LogGroup 'Init - Load configuration' {
     $defaults = New-PesterConfigurationHashtable
     $configuration = Merge-PesterConfiguration -BaseConfiguration $defaults -AdditionalConfiguration $customConfig, $customInputs
 
