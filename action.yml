@@ -283,7 +283,6 @@ runs:
     - name: Status
       shell: pwsh
       run: |
-        $outcome = '${{ steps.test.outcome }}'
         Write-Host "outcome: [$outcome]"
         if ($outcome -ne 'success') {
           exit 1
