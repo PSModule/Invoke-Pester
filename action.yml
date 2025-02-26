@@ -263,6 +263,7 @@ runs:
 
     - name: Invoke-Pester
       shell: pwsh
+      continue-on-error: true
       id: test
       run: ${{ github.action_path }}\scripts\main.ps1
 
