@@ -170,10 +170,6 @@ function Merge-PesterConfiguration {
         foreach ($config in $AdditionalConfiguration) {
             foreach ($category in $config.Keys) {
                 Write-Verbose "Merging category: [$category]"
-                if (-not $mergedConfiguration.ContainsKey($category)) {
-                    $mergedConfiguration[$category] = $config[$category]
-                    continue
-                }
                 $mergedConfiguration[$category] = Merge-Hashtable -Main $mergedConfiguration[$category] -Overrides $config[$category]
             }
         }
