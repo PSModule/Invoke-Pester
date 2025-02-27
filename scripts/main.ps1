@@ -81,7 +81,7 @@ LogGroup 'Eval - Set outputs' {
         TestResultOutputPath   = $testResults.Configuration.TestResult.OutputPath.Value
         CodeCoverageEnabled    = $testResults.Configuration.CodeCoverage.Enabled.Value
         CodeCoverageOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value
-    } | Format-Table -AutoSize
+    } | Format-List
 }
 
 LogGroup 'Exit' {
