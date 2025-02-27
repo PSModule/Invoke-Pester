@@ -176,7 +176,6 @@ LogGroup 'Init - Load configuration' {
 LogGroup 'Init - Export containers' {
     $containers = @()
     $existingContainers = $configuration.Run.Container
-    $configuration.Run.Container = @()
     if ($existingContainers.Count -gt 0) {
         Write-Output "Containers from configuration: [$($existingContainers.Count)]"
         foreach ($existingContainer in $existingContainers) {
@@ -200,6 +199,7 @@ LogGroup 'Init - Export containers' {
             }
         }
     }
+    $configuration.Run.Container = @()
 }
 
 LogGroup 'Init - Export configuration' {

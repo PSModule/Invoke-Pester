@@ -10,7 +10,6 @@ inputs:
     description: |
       Path to where tests are located or a configuration file.
     required: false
-    default: tests
   Run_Path:
     description: |
       Directories to be searched for tests, paths directly to test files, or combination of both.
