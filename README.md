@@ -301,6 +301,7 @@ jobs:
 | `Verbose`                            | Enable verbose output.                                                                                 | `'false'`                       |
 | `Version`                            | Specifies the exact version of the GitHub module to install.                                           |                                 |
 | `Prerelease`                         | Allow prerelease versions if available.                                                                | `'false'`                       |
+| `WorkingDirectory`                   | The working directory where the script runs.                                                           | `${{ github.workspace }}`       |
 
 ### Outputs
 
