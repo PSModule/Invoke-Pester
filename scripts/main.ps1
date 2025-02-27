@@ -75,6 +75,13 @@ LogGroup 'Eval - Set outputs' {
     Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResults.Configuration.TestResult.OutputPath.Value
     Set-GitHubOutput -Name 'CodeCoverageEnabled' -Value $testResults.Configuration.CodeCoverage.Enabled.Value
     Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $testResults.Configuration.CodeCoverage.OutputPath.Value
+    [pscustomobject]@{
+        TestSuiteName          = $testResults.Configuration.TestResult.TestSuiteName.Value
+        TestResultEnabled      = $testResults.Configuration.TestResult.Enabled.Value
+        TestResultOutputPath   = $testResults.Configuration.TestResult.OutputPath.Value
+        CodeCoverageEnabled    = $testResults.Configuration.CodeCoverage.Enabled.Value
+        CodeCoverageOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value
+    } | Format-Table -AutoSize
 }
 
 LogGroup 'Exit' {

@@ -202,9 +202,8 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Invoke-Pester (pre)
+    - name: Invoke-Pester (init)
       uses: PSModule/GitHub-Script@v1
-      id: pre
       env:
         GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
         GITHUB_ACTION_INPUT_Run_Path: ${{ inputs.Run_Path }}
@@ -257,8 +256,8 @@ runs:
         Verbose: ${{ inputs.Verbose }}
         Version: ${{ inputs.Version }}
         Script: |
-          # Invoke-Pester (pre)
-          ${{ github.action_path }}/scripts/pre.ps1
+          # Invoke-Pester (init)
+          ${{ github.action_path }}/scripts/init.ps1
 
     - name: Invoke-Pester
       shell: pwsh
