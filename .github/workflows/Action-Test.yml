@@ -32,7 +32,7 @@ jobs:
         uses: ./
         id: action-test
         with:
-          Path: tests/1-Simple
+          WorkingDirectory: tests/1-Simple
 
       - name: Status
         shell: pwsh
