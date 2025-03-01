@@ -84,7 +84,7 @@ LogGroup 'Init - Load inputs' {
         TestRegistry_Enabled               = $env:PSMODULE_INVOKE_PESTER_INPUT_TestRegistry_Enabled
     }
 
-    Show-Inputs -Inputs $inputs
+    Show-Input -Inputs $inputs
 }
 
 LogGroup 'Init - Load configuration - Defaults' {
