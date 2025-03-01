@@ -20,7 +20,7 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 
 '::group::Exec - Import Configuration'
 $configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
-$configuration
+$configuration | Out-String
 $configuration.Run.Container = @()
 $containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse | Sort-Object FullName
 foreach ($containerFile in $containerFiles) {
@@ -33,7 +33,7 @@ $configuration.Run.Container | ConvertTo-Json
 '::endgroup::'
 
 '::group::Exec - Available modules'
-Get-Module | Format-Table -AutoSize
+Get-Module | Format-Table -AutoSize | Out-String
 '::endgroup::'
 
 $configuration = New-PesterConfiguration -Hashtable $configuration
@@ -62,7 +62,7 @@ LogGroup 'Eval - Test results' {
         exit 1
     }
 
-    $testResults | Format-List
+    $testResults | Format-List | Out-String
 }
 
 LogGroup 'Eval - Test results summary' {
@@ -81,7 +81,7 @@ LogGroup 'Eval - Set outputs' {
         TestResultOutputPath   = $testResults.Configuration.TestResult.OutputPath.Value
         CodeCoverageEnabled    = $testResults.Configuration.CodeCoverage.Enabled.Value
         CodeCoverageOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value
-    } | Format-List
+    } | Format-List | Out-String
 }
 
 LogGroup 'Exit' {

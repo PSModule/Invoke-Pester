@@ -84,11 +84,11 @@ LogGroup 'Init - Load inputs' {
         TestRegistry_Enabled               = $env:PSMODULE_INVOKE_PESTER_INPUT_TestRegistry_Enabled
     }
 
-    [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List
+    [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List | Out-String
 }
 
 LogGroup 'Init - Load configuration - Defaults' {
-    Write-Output (New-PesterConfigurationHashtable -Default | Format-Hashtable | Out-String)
+    New-PesterConfigurationHashtable -Default | Format-Hashtable | Out-String
 }
 
 LogGroup 'Init - Load configuration - Custom settings file' {
