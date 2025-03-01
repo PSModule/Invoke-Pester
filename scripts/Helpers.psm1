@@ -900,3 +900,40 @@ filter Set-PesterReportRunSummary {
         }
     }
 }
+
+filter Show-Input {
+    <#
+        .SYNOPSIS
+        Displays a formatted representation of a hashtable.
+
+        .DESCRIPTION
+        This function takes a hashtable as input and formats it into a structured output.
+
+        .EXAMPLE
+        Show-Input -Inputs @{ Key1 = 'Value1'; Key2 = 'Value2' }
+
+        .OUTPUTS
+        string
+
+        .NOTES
+        Returns a formatted string representation of the input hashtable.
+    #>
+    [outputType([string])]
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [hashtable] $Inputs
+    )
+
+    $new = [pscustomobject]@{}
+    $Inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) } | ForEach-Object {
+        $name = $_.Key
+        $value = $_.Value
+        if ($value -is [string]) {
+            $new | Add-Member -MemberType NoteProperty -Name $name -Value $value
+        } elseif ($value -is [array]) {
+            $new | Add-Member -MemberType NoteProperty -Name $name -Value ($value -join ', ')
+        }
+    }
+    [pscustomobject]$new | Format-List | Out-String
+}

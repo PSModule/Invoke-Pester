@@ -15,7 +15,7 @@ LogGroup 'Init - Get test kit versions' {
     [PSCustomObject]@{
         PowerShell = $PSVersionTable.PSVersion.ToString()
         Pester     = $pesterModule.Version
-    } | Format-List
+    } | Format-List | Out-String
 }
 
 LogGroup 'Init - Load inputs' {
@@ -84,7 +84,7 @@ LogGroup 'Init - Load inputs' {
         TestRegistry_Enabled               = $env:PSMODULE_INVOKE_PESTER_INPUT_TestRegistry_Enabled
     }
 
-    [pscustomobject]($inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) }) | Format-List | Out-String
+    Show-Input -Inputs $inputs
 }
 
 LogGroup 'Init - Load configuration - Defaults' {
