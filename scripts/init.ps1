@@ -19,7 +19,8 @@ LogGroup 'Init - Get test kit versions' {
 }
 
 LogGroup 'Init - Load inputs' {
-    $providedItem = Resolve-Path -Path "./$env:PSMODULE_INVOKE_PESTER_INPUT_Path" | Select-Object -ExpandProperty Path | Get-Item
+    $path = [string]::IsNullOrEmpty($env:PSMODULE_INVOKE_PESTER_INPUT_Path) ? '.' : $env:PSMODULE_INVOKE_PESTER_INPUT_Path
+    $providedItem = Resolve-Path -Path $path | Select-Object -ExpandProperty Path | Get-Item
     if ($providedItem -is [System.IO.DirectoryInfo]) {
         $providedPath = $providedItem.FullName
     } elseif ($providedItem -is [System.IO.FileInfo]) {
