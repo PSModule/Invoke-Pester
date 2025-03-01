@@ -27,8 +27,8 @@ $configuration.Run.Container = @()
 $containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse | Sort-Object FullName
 foreach ($containerFile in $containerFiles) {
     $container = & $($containerFile.FullName)
-    Write-Verbose "Processing container [$container]" -Verbose
-    Write-Verbose 'Converting hashtable to PesterContainer' -Verbose
+    Write-Verbose "Processing container [$container]"
+    Write-Verbose 'Converting hashtable to PesterContainer'
     $configuration.Run.Container += New-PesterContainer @container
 }
 $configuration.Run.Container | ConvertTo-Json
