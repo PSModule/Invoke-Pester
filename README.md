@@ -254,7 +254,7 @@ jobs:
 
 | **Input**                            | **Description**                                                                                        | **Default**                     |
 |--------------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------------|
-| `Path`                               | Path to where tests are located or a configuration file.                                               | `${{ github.workspace }}/tests` |
+| `Path`                               | Path to where tests are located or a configuration file.                                               | *(none)*                        |
 | `Run_Path`                           | Directories/files to be searched for tests.                                                            | *(none)*                        |
 | `Run_ExcludePath`                    | Directories/files to exclude from the run.                                                             | *(none)*                        |
 | `Run_ScriptBlock`                    | ScriptBlocks containing tests to be executed.                                                          | *(none)*                        |
@@ -299,7 +299,7 @@ jobs:
 | `TestRegistry_Enabled`               | Enable `TestRegistry`.                                                                                 | *(none)*                        |
 | `Debug`                              | Enable debug output.                                                                                   | `'false'`                       |
 | `Verbose`                            | Enable verbose output.                                                                                 | `'false'`                       |
-| `Version`                            | Specifies the exact version of the GitHub module to install.                                           |                                 |
+| `Version`                            | Specifies the exact version of the GitHub module to install.                                           | *(none)*                        |
 | `Prerelease`                         | Allow prerelease versions if available.                                                                | `'false'`                       |
 | `WorkingDirectory`                   | The working directory where the script runs.                                                           | `${{ github.workspace }}`       |
 
