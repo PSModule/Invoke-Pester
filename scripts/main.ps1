@@ -26,9 +26,12 @@ Test-Path -Path $path
 Get-ChildItem -Path $path -Recurse | Sort-Object FullName | Format-Table -AutoSize | Out-String
 
 '::group::Exec - Import Configuration'
-Write-Output "Importing configuration from [$configPath]"
 $configPath = (Join-Path -Path $path -ChildPath 'Invoke-Pester.Configuration.ps1')
-Test-Path -Path $configPath
+Write-Output "Importing configuration from [$configPath]"
+if (-not (Test-Path -Path $configPath)) {
+    Write-Error "Configuration file [$configPath] not found."
+    exit 1
+}
 Get-Content -Path $configPath -Raw
 $configuration = . $configPath
 $configuration | ConvertTo-Json
