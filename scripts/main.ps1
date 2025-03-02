@@ -26,12 +26,12 @@ Test-Path -Path $path
 Get-ChildItem -Path $path -Recurse | Sort-Object FullName | Format-Table -AutoSize | Out-String
 
 '::group::Exec - Import Configuration'
+Write-Output "Importing configuration from [$configPath]"
 $configPath = (Join-Path -Path $path -ChildPath 'Invoke-Pester.Configuration.ps1')
 Test-Path -Path $configPath
 Get-Content -Path $configPath -Raw
-Write-Output "Importing configuration from [$configPath]"
 $configuration = . $configPath
-$configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String
+$configuration.Run | Out-String
 $configuration.Run.Container = @()
 $containerFiles = Get-ChildItem -Path $path -Filter *.Container.* -Recurse | Sort-Object FullName
 foreach ($containerFile in $containerFiles) {
