@@ -95,9 +95,9 @@ LogGroup 'Init - Load configuration - Action overrides' {
             ScriptBlock            = $inputs.Run_ScriptBlock
             Container              = $inputs.Run_Container
             TestExtension          = $inputs.Run_TestExtension
-            Exit                   = [string]::IsNullOrEmpty($inputs.Run_Exit) ? $inputs.Run_Exit -eq 'true' : $null
-            Throw                  = [string]::IsNullOrEmpty($inputs.Run_Throw) ? $inputs.Run_Throw -eq 'true' : $null
-            SkipRun                = [string]::IsNullOrEmpty($inputs.Run_SkipRun) ? $inputs.Run_SkipRun -eq 'true' : $null
+            Exit                   = [string]::IsNullOrEmpty($inputs.Run_Exit) ? $null : $inputs.Run_Exit -eq 'true'
+            Throw                  = [string]::IsNullOrEmpty($inputs.Run_Throw) ? $null : $inputs.Run_Throw -eq 'true'
+            SkipRun                = [string]::IsNullOrEmpty($inputs.Run_SkipRun) ? $null : $inputs.Run_SkipRun -eq 'true'
             SkipRemainingOnFailure = $inputs.Run_SkipRemainingOnFailure
         }
         Filter       = @{
@@ -108,21 +108,21 @@ LogGroup 'Init - Load configuration - Action overrides' {
             FullName    = $inputs.Filter_FullName
         }
         CodeCoverage = @{
-            Enabled               = [string]::IsNullOrEmpty($inputs.CodeCoverage_Enabled) ? $inputs.CodeCoverage_Enabled -eq 'true' : $null
+            Enabled               = [string]::IsNullOrEmpty($inputs.CodeCoverage_Enabled) ? $null : $inputs.CodeCoverage_Enabled -eq 'true'
             OutputFormat          = $inputs.CodeCoverage_OutputFormat
             OutputPath            = $inputs.CodeCoverage_OutputPath
             OutputEncoding        = $inputs.CodeCoverage_OutputEncoding
             Path                  = $inputs.CodeCoverage_Path
-            ExcludeTests          = [string]::IsNullOrEmpty($inputs.CodeCoverage_ExcludeTests) ? $inputs.CodeCoverage_ExcludeTests -eq 'true' : $null
-            RecursePaths          = [string]::IsNullOrEmpty($inputs.CodeCoverage_RecursePaths) ? $inputs.CodeCoverage_RecursePaths -eq 'true' : $null
+            ExcludeTests          = [string]::IsNullOrEmpty($inputs.CodeCoverage_ExcludeTests) ? $null : $inputs.CodeCoverage_ExcludeTests -eq 'true'
+            RecursePaths          = [string]::IsNullOrEmpty($inputs.CodeCoverage_RecursePaths) ? $null : $inputs.CodeCoverage_RecursePaths -eq 'true'
             CoveragePercentTarget = [decimal]$inputs.CodeCoverage_CoveragePercentTarget
             UseBreakpoints        = [string]::IsNullOrEmpty($inputs.CodeCoverage_UseBreakpoints) ?
-            $inputs.CodeCoverage_UseBreakpoints -eq 'true' : $null
+            $null : $inputs.CodeCoverage_UseBreakpoints -eq 'true'
             SingleHitBreakpoints  = [string]::IsNullOrEmpty($inputs.CodeCoverage_SingleHitBreakpoints) ?
-            $inputs.CodeCoverage_SingleHitBreakpoints -eq 'true' : $null
+            $null : $inputs.CodeCoverage_SingleHitBreakpoints -eq 'true'
         }
         TestResult   = @{
-            Enabled        = [string]::IsNullOrEmpty($inputs.TestResult_Enabled) ? $inputs.TestResult_Enabled -eq 'true' : $null
+            Enabled        = [string]::IsNullOrEmpty($inputs.TestResult_Enabled) ? $null : $inputs.TestResult_Enabled -eq 'true'
             OutputFormat   = $inputs.TestResult_OutputFormat
             OutputPath     = $inputs.TestResult_OutputPath
             OutputEncoding = $inputs.TestResult_OutputEncoding
@@ -132,13 +132,13 @@ LogGroup 'Init - Load configuration - Action overrides' {
             ErrorAction = $inputs.Should_ErrorAction
         }
         Debug        = @{
-            ShowFullErrors         = [string]::IsNullOrEmpty($inputs.Debug_ShowFullErrors) ? $inputs.Debug_ShowFullErrors -eq 'true' : $null
-            WriteDebugMessages     = [string]::IsNullOrEmpty($inputs.Debug_WriteDebugMessages) ? $inputs.Debug_WriteDebugMessages -eq 'true' : $null
+            ShowFullErrors         = [string]::IsNullOrEmpty($inputs.Debug_ShowFullErrors) ? $null : $inputs.Debug_ShowFullErrors -eq 'true'
+            WriteDebugMessages     = [string]::IsNullOrEmpty($inputs.Debug_WriteDebugMessages) ? $null : $inputs.Debug_WriteDebugMessages -eq 'true'
             WriteDebugMessagesFrom = $inputs.Debug_WriteDebugMessagesFrom
             ShowNavigationMarkers  = [string]::IsNullOrEmpty($inputs.Debug_ShowNavigationMarkers) ?
-            $inputs.Debug_ShowNavigationMarkers -eq 'true' : $null
+            $null : $inputs.Debug_ShowNavigationMarkers -eq 'true'
             ReturnRawResultObject  = [string]::IsNullOrEmpty($inputs.Debug_ReturnRawResultObject) ?
-            $inputs.Debug_ReturnRawResultObject -eq 'true' : $null
+            $null : $inputs.Debug_ReturnRawResultObject -eq 'true'
         }
         Output       = @{
             CIFormat            = $inputs.Output_CIFormat
@@ -148,10 +148,10 @@ LogGroup 'Init - Load configuration - Action overrides' {
             RenderMode          = $inputs.Output_RenderMode
         }
         TestDrive    = @{
-            Enabled = [string]::IsNullOrEmpty($inputs.TestDrive_Enabled) ? $inputs.TestDrive_Enabled -eq 'true' : $null
+            Enabled = [string]::IsNullOrEmpty($inputs.TestDrive_Enabled) ? $null : $inputs.TestDrive_Enabled -eq 'true'
         }
         TestRegistry = @{
-            Enabled = [string]::IsNullOrEmpty($inputs.TestRegistry_Enabled) ? $inputs.TestRegistry_Enabled -eq 'true' : $null
+            Enabled = [string]::IsNullOrEmpty($inputs.TestRegistry_Enabled) ? $null : $inputs.TestRegistry_Enabled -eq 'true'
         }
     }
 
