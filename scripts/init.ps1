@@ -188,6 +188,18 @@ LogGroup 'Init - Export containers' {
 
         $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
         Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
+        if ($containerFiles.Count -eq 0) {
+            # Look for test files and make a container for each test file.
+            $testFiles = Get-ChildItem -Path $testDir -Filter *.Tests.ps1 -Recurse
+            Write-Output "Test files found in [$testDir]: [$($testFiles.Count)]"
+            foreach ($testFile in $testFiles) {
+                $container = @{
+                    Path = $testFile.FullName
+                }
+                $containers += $container
+            }
+            Write-Output "Containers created from test files: [$($containers.Count)]"
+        }
         foreach ($containerFile in $containerFiles) {
             $container = Import-Hashtable $containerFile
             $containerFileName = $containerFile | Split-Path -Leaf
