@@ -20,18 +20,9 @@ LogGroup 'Init - Get test kit versions' {
 
 LogGroup 'Init - Load inputs' {
     $path = [string]::IsNullOrEmpty($env:PSMODULE_INVOKE_PESTER_INPUT_Path) ? '.' : $env:PSMODULE_INVOKE_PESTER_INPUT_Path
-    $providedItem = Resolve-Path -Path $path | Select-Object -ExpandProperty Path | Get-Item
-    if ($providedItem -is [System.IO.DirectoryInfo]) {
-        $providedPath = $providedItem.FullName
-    } elseif ($providedItem -is [System.IO.FileInfo]) {
-        $providedPath = $providedItem.Directory.FullName
-    } else {
-        Write-GitHubError "❌ Provided path [$providedItem] is not a valid directory or file."
-        exit 1
-    }
 
     $inputs = @{
-        Path                               = $providedPath
+        Path                               = $path
 
         Run_Path                           = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_Path
         Run_ExcludePath                    = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_ExcludePath
@@ -104,9 +95,9 @@ LogGroup 'Init - Load configuration - Action overrides' {
             ScriptBlock            = $inputs.Run_ScriptBlock
             Container              = $inputs.Run_Container
             TestExtension          = $inputs.Run_TestExtension
-            Exit                   = $inputs.Run_Exit
-            Throw                  = $inputs.Run_Throw
-            SkipRun                = $inputs.Run_SkipRun
+            Exit                   = $null -ne $inputs.Run_Exit ? $inputs.Run_Exit -eq 'true' : $null
+            Throw                  = $null -ne $inputs.Run_Throw ? $inputs.Run_Throw -eq 'true' : $null
+            SkipRun                = $null -ne $inputs.Run_SkipRun ? $inputs.Run_SkipRun -eq 'true' : $null
             SkipRemainingOnFailure = $inputs.Run_SkipRemainingOnFailure
         }
         Filter       = @{
@@ -117,19 +108,19 @@ LogGroup 'Init - Load configuration - Action overrides' {
             FullName    = $inputs.Filter_FullName
         }
         CodeCoverage = @{
-            Enabled               = $inputs.CodeCoverage_Enabled
+            Enabled               = $null -ne $inputs.CodeCoverage_Enabled ? $inputs.CodeCoverage_Enabled -eq 'true' : $null
             OutputFormat          = $inputs.CodeCoverage_OutputFormat
             OutputPath            = $inputs.CodeCoverage_OutputPath
             OutputEncoding        = $inputs.CodeCoverage_OutputEncoding
             Path                  = $inputs.CodeCoverage_Path
-            ExcludeTests          = $inputs.CodeCoverage_ExcludeTests
-            RecursePaths          = $inputs.CodeCoverage_RecursePaths
-            CoveragePercentTarget = $inputs.CodeCoverage_CoveragePercentTarget
-            UseBreakpoints        = $inputs.CodeCoverage_UseBreakpoints
-            SingleHitBreakpoints  = $inputs.CodeCoverage_SingleHitBreakpoints
+            ExcludeTests          = $null -ne $inputs.CodeCoverage_ExcludeTests ? $inputs.CodeCoverage_ExcludeTests -eq 'true' : $null
+            RecursePaths          = $null -ne $inputs.CodeCoverage_RecursePaths ? $inputs.CodeCoverage_RecursePaths -eq 'true' : $null
+            CoveragePercentTarget = [decimal]$inputs.CodeCoverage_CoveragePercentTarget
+            UseBreakpoints        = $null -ne $inputs.CodeCoverage_UseBreakpoints ? $inputs.CodeCoverage_UseBreakpoints -eq 'true' : $null
+            SingleHitBreakpoints  = $null -ne $inputs.CodeCoverage_SingleHitBreakpoints ? $inputs.CodeCoverage_SingleHitBreakpoints -eq 'true' : $null
         }
         TestResult   = @{
-            Enabled        = $inputs.TestResult_Enabled
+            Enabled        = $null -ne $inputs.TestResult_Enabled ? $inputs.TestResult_Enabled -eq 'true' : $null
             OutputFormat   = $inputs.TestResult_OutputFormat
             OutputPath     = $inputs.TestResult_OutputPath
             OutputEncoding = $inputs.TestResult_OutputEncoding
@@ -139,11 +130,11 @@ LogGroup 'Init - Load configuration - Action overrides' {
             ErrorAction = $inputs.Should_ErrorAction
         }
         Debug        = @{
-            ShowFullErrors         = $inputs.Debug_ShowFullErrors
-            WriteDebugMessages     = $inputs.Debug_WriteDebugMessages
+            ShowFullErrors         = $null -ne $inputs.Debug_ShowFullErrors ? $inputs.Debug_ShowFullErrors -eq 'true' : $null
+            WriteDebugMessages     = $null -ne $inputs.Debug_WriteDebugMessages ? $inputs.Debug_WriteDebugMessages -eq 'true' : $null
             WriteDebugMessagesFrom = $inputs.Debug_WriteDebugMessagesFrom
-            ShowNavigationMarkers  = $inputs.Debug_ShowNavigationMarkers
-            ReturnRawResultObject  = $inputs.Debug_ReturnRawResultObject
+            ShowNavigationMarkers  = $null -ne $inputs.Debug_ShowNavigationMarkers ? $inputs.Debug_ShowNavigationMarkers -eq 'true' : $null
+            ReturnRawResultObject  = $null -ne $inputs.Debug_ReturnRawResultObject ? $inputs.Debug_ReturnRawResultObject -eq 'true' : $null
         }
         Output       = @{
             CIFormat            = $inputs.Output_CIFormat
@@ -153,10 +144,10 @@ LogGroup 'Init - Load configuration - Action overrides' {
             RenderMode          = $inputs.Output_RenderMode
         }
         TestDrive    = @{
-            Enabled = $inputs.TestDrive_Enabled
+            Enabled = $null -ne $inputs.TestDrive_Enabled ? $inputs.TestDrive_Enabled -eq 'true' : $null
         }
         TestRegistry = @{
-            Enabled = $inputs.TestRegistry_Enabled
+            Enabled = $null -ne $inputs.TestRegistry_Enabled ? $inputs.TestRegistry_Enabled -eq 'true' : $null
         }
     }
 
@@ -165,13 +156,13 @@ LogGroup 'Init - Load configuration - Action overrides' {
 }
 
 LogGroup 'Init - Load configuration' {
-    $defaults = New-PesterConfigurationHashtable
+    $defaults = New-PesterConfigurationHashtable -Default
     $configuration = Merge-PesterConfiguration -BaseConfiguration $defaults -AdditionalConfiguration $customConfig, $customInputs
 
     if ([string]::IsNullOrEmpty($configuration.Run.Path)) {
         $configuration.Run.Path = $inputs.Path
     }
-    Write-Output ($configuration | Format-Hashtable | Out-String)
+    $configuration | Format-Hashtable | Out-String
 }
 
 LogGroup 'Init - Export containers' {
@@ -187,16 +178,39 @@ LogGroup 'Init - Export containers' {
     Write-Output "Containers from configuration: [$($containers.Count)]"
     # Search for "*.Container.*" files in each Run.Path directory
     Write-Output 'Searching for containers in same location as config.'
+    $path = New-Item -Path . -ItemType Directory -Name 'temp' -Force
     foreach ($testDir in $inputs.Path) {
+        #If testDir is a file, get the directory
+        $testItem = Get-Item -Path $testDir
+        if ($testItem.PSIsContainer -eq $false) {
+            $testDir = $testItem.DirectoryName
+        }
+
         $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
         Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
+        if ($containerFiles.Count -eq 0) {
+            # Look for test files and make a container for each test file.
+            $testFiles = Get-ChildItem -Path $testDir -Filter *.Tests.ps1 -Recurse
+            Write-Output "Test files found in [$testDir]: [$($testFiles.Count)]"
+            foreach ($testFile in $testFiles) {
+                $container = @{
+                    Path = $testFile.FullName
+                }
+                LogGroup "Init - Export containers - Generated - $containerFileName" {
+                    $containerFileName = ($testFile | Split-Path -Leaf).Replace('.Tests.ps1', '.Container.ps1')
+                    Write-Output "Exporting container [$path/$containerFileName]"
+                    Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
+                }
+                Write-Output "Containers created from test files: [$($containers.Count)]"
+            }
+        }
         foreach ($containerFile in $containerFiles) {
             $container = Import-Hashtable $containerFile
             $containerFileName = $containerFile | Split-Path -Leaf
             LogGroup "Init - Export containers - $containerFileName" {
                 Format-Hashtable -Hashtable $container
-                Write-Verbose 'Converting hashtable to PesterContainer'
-                Export-Hashtable -Hashtable $container -Path "$PSScriptRoot/$containerFileName"
+                Write-Output "Exporting container [$path/$containerFileName]"
+                Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
             }
         }
     }
@@ -210,5 +224,6 @@ LogGroup 'Init - Export configuration' {
     $configuration.Run.PassThru = $true
 
     Format-Hashtable -Hashtable $configuration
-    Export-Hashtable -Hashtable $configuration -Path "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
+    Write-Output "Exporting configuration [$path/Invoke-Pester.Configuration.ps1]"
+    Export-Hashtable -Hashtable $configuration -Path "$path/Invoke-Pester.Configuration.ps1"
 }

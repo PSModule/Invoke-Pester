@@ -56,7 +56,7 @@ jobs:
         id: action-test
         continue-on-error: true
         with:
-          Path: tests/1-Simple-Failure
+          WorkingDirectory: tests/1-Simple-Failure
 
       - name: Status
         shell: pwsh
@@ -79,7 +79,7 @@ jobs:
         uses: ./
         id: action-test
         with:
-          Path: tests/2-Standard
+          WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
 
       - name: Status
@@ -103,7 +103,8 @@ jobs:
         uses: ./
         id: action-test
         with:
-          Path: tests/3-Advanced/Pester.Configuration.ps1
+          Path: Pester.Configuration.ps1
+          WorkingDirectory: tests/3-Advanced
 
       - name: Status
         shell: pwsh

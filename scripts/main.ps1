@@ -20,18 +20,31 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 } | Format-List
 '::endgroup::'
 
+'::group::Exec - Info about environment'
+$path = Join-Path -Path $pwd.Path -ChildPath 'temp'
+Test-Path -Path $path
+Get-ChildItem -Path $path -Recurse | Sort-Object FullName | Format-Table -AutoSize | Out-String
+
 '::group::Exec - Import Configuration'
-$configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
-$configuration | Out-String
+$configPath = (Join-Path -Path $path -ChildPath 'Invoke-Pester.Configuration.ps1')
+Write-Output "Importing configuration from [$configPath]"
+if (-not (Test-Path -Path $configPath)) {
+    Write-Error "Configuration file [$configPath] not found."
+    exit 1
+}
+Get-Content -Path $configPath -Raw
+$configuration = . $configPath
 $configuration.Run.Container = @()
-$containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse | Sort-Object FullName
+$containerFiles = Get-ChildItem -Path $path -Filter *.Container.* -Recurse | Sort-Object FullName
 foreach ($containerFile in $containerFiles) {
     $container = & $($containerFile.FullName)
     Write-Verbose "Processing container [$container]"
     Write-Verbose 'Converting hashtable to PesterContainer'
     $configuration.Run.Container += New-PesterContainer @container
 }
-$configuration.Run.Container | ConvertTo-Json
+
+$configuration | ConvertTo-Json
+
 '::endgroup::'
 
 '::group::Exec - Available modules'

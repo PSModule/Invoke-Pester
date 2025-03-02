@@ -97,7 +97,7 @@ function Get-PesterConfiguration {
 
     if ($item.PSIsContainer) {
         Write-Verbose 'Path is a directory. Searching for configuration files...'
-        $file = Get-ChildItem -Path $Path -Filter *.Configuration.*
+        $file = Get-ChildItem -Path $Path -Filter *.Configuration.* -Recurse
         Write-Verbose "Found $($file.Count) configuration files."
         if ($file.Count -eq 0) {
             Write-Verbose "No configuration files found in path: [$Path]"
