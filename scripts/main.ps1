@@ -20,9 +20,15 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 } | Format-List
 '::endgroup::'
 
+'::group::Exec - Info about environment'
+[pscustomobject]@{
+    Path = $pwd.Path
+
+} | Format-List | Out-String
+
 '::group::Exec - Import Configuration'
 $configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
-$configuration | Out-String
+$configuration | Convert-PesterConfigurationToHashtable | Out-String
 $configuration.Run.Container = @()
 $containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse | Sort-Object FullName
 foreach ($containerFile in $containerFiles) {
