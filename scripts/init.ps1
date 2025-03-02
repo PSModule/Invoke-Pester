@@ -162,7 +162,7 @@ LogGroup 'Init - Load configuration' {
     if ([string]::IsNullOrEmpty($configuration.Run.Path)) {
         $configuration.Run.Path = $inputs.Path
     }
-    Write-Output ($configuration | Format-Hashtable | Out-String)
+    $configuration | Format-Hashtable | Out-String
 }
 
 LogGroup 'Init - Export containers' {
@@ -179,6 +179,12 @@ LogGroup 'Init - Export containers' {
     # Search for "*.Container.*" files in each Run.Path directory
     Write-Output 'Searching for containers in same location as config.'
     foreach ($testDir in $inputs.Path) {
+        #If testDir is a file, get the directory
+        $testItem = Get-Item -Path $testDir
+        if ($testItem.PSIsContainer -eq $false) {
+            $testDir = $testItem.DirectoryName
+        }
+
         $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
         Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
         foreach ($containerFile in $containerFiles) {
