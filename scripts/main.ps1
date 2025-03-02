@@ -23,10 +23,7 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 '::group::Exec - Info about environment'
 $path = Join-Path -Path $pwd.Path -ChildPath 'temp'
 Test-Path -Path $path
-Get-ChildItem -Path $path -Recurse | Sort-Object FullName
-[pscustomobject]@{
-    Path = $path
-} | Format-List | Out-String
+Get-ChildItem -Path $path -Recurse | Sort-Object FullName | Format-Table -AutoSize | Out-String
 
 '::group::Exec - Import Configuration'
 $configPath = (Join-Path -Path $path -ChildPath 'Invoke-Pester.Configuration.ps1')
