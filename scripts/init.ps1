@@ -178,7 +178,7 @@ LogGroup 'Init - Export containers' {
     Write-Output "Containers from configuration: [$($containers.Count)]"
     # Search for "*.Container.*" files in each Run.Path directory
     Write-Output 'Searching for containers in same location as config.'
-    $path = $pwd.Path
+    $path = New-Item -Path . -ItemType Directory -Name 'temp' -Force
     foreach ($testDir in $inputs.Path) {
         #If testDir is a file, get the directory
         $testItem = Get-Item -Path $testDir

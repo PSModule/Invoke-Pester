@@ -21,7 +21,9 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 '::endgroup::'
 
 '::group::Exec - Info about environment'
-$path = $pwd.Path
+$path = Join-Path -Path $pwd.Path -ChildPath 'temp'
+Test-Path -Path $path
+Get-ChildItem -Path $path -Recurse | Sort-Object FullName
 [pscustomobject]@{
     Path = $path
 } | Format-List | Out-String
