@@ -147,7 +147,7 @@ LogGroup 'Init - Load configuration - Action overrides' {
             Enabled = $null -ne $inputs.TestDrive_Enabled ? $inputs.TestDrive_Enabled -eq 'true' : $null
         }
         TestRegistry = @{
-            Enabled = $inputs.TestRegistry_Enabled -eq 'true'
+            Enabled = $null -ne $inputs.TestRegistry_Enabled ? $inputs.TestRegistry_Enabled -eq 'true' : $null
         }
     }
 
@@ -193,7 +193,7 @@ LogGroup 'Init - Export containers' {
             $containerFileName = $containerFile | Split-Path -Leaf
             LogGroup "Init - Export containers - $containerFileName" {
                 Format-Hashtable -Hashtable $container
-                Write-Verbose 'Converting hashtable to PesterContainer'
+                Write-Output "Exporting container [$path/$containerFileName]"
                 Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
             }
         }
@@ -208,5 +208,6 @@ LogGroup 'Init - Export configuration' {
     $configuration.Run.PassThru = $true
 
     Format-Hashtable -Hashtable $configuration
+    Write-Output "Exporting configuration [$path/Invoke-Pester.Configuration.ps1]"
     Export-Hashtable -Hashtable $configuration -Path "$path/Invoke-Pester.Configuration.ps1"
 }
