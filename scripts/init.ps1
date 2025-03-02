@@ -213,16 +213,17 @@ LogGroup 'Init - Export containers' {
                 }
             }
         }
-        $configuration.Run.Container = @()
     }
+    $configuration.Run.Container = @()
+}
 
-    LogGroup 'Init - Export configuration' {
-        $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
-        $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
-        $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
-        $configuration.Run.PassThru = $true
+LogGroup 'Init - Export configuration' {
+    $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
+    $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
+    $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
+    $configuration.Run.PassThru = $true
 
-        Format-Hashtable -Hashtable $configuration
-        Write-Output "Exporting configuration [$path/Invoke-Pester.Configuration.ps1]"
-        Export-Hashtable -Hashtable $configuration -Path "$path/Invoke-Pester.Configuration.ps1"
-    }
+    Format-Hashtable -Hashtable $configuration
+    Write-Output "Exporting configuration [$path/Invoke-Pester.Configuration.ps1]"
+    Export-Hashtable -Hashtable $configuration -Path "$path/Invoke-Pester.Configuration.ps1"
+}
