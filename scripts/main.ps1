@@ -21,16 +21,16 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 '::endgroup::'
 
 '::group::Exec - Info about environment'
+$path = $pwd.Path
 [pscustomobject]@{
-    Path = $pwd.Path
-
+    Path = $path
 } | Format-List | Out-String
 
 '::group::Exec - Import Configuration'
-$configuration = & "$env:tmp/Invoke-Pester.Configuration.ps1"
+$configuration = & "$path/Invoke-Pester.Configuration.ps1"
 $configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String
 $configuration.Run.Container = @()
-$containerFiles = Get-ChildItem -Path $env:tmp -Filter *.Container.* -Recurse | Sort-Object FullName
+$containerFiles = Get-ChildItem -Path $path -Filter *.Container.* -Recurse | Sort-Object FullName
 foreach ($containerFile in $containerFiles) {
     $container = & $($containerFile.FullName)
     Write-Verbose "Processing container [$container]"

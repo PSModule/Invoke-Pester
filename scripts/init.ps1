@@ -178,6 +178,7 @@ LogGroup 'Init - Export containers' {
     Write-Output "Containers from configuration: [$($containers.Count)]"
     # Search for "*.Container.*" files in each Run.Path directory
     Write-Output 'Searching for containers in same location as config.'
+    $path = $pwd.Path
     foreach ($testDir in $inputs.Path) {
         #If testDir is a file, get the directory
         $testItem = Get-Item -Path $testDir
@@ -193,7 +194,7 @@ LogGroup 'Init - Export containers' {
             LogGroup "Init - Export containers - $containerFileName" {
                 Format-Hashtable -Hashtable $container
                 Write-Verbose 'Converting hashtable to PesterContainer'
-                Export-Hashtable -Hashtable $container -Path "$env:tmp/$containerFileName"
+                Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
             }
         }
     }
@@ -207,5 +208,5 @@ LogGroup 'Init - Export configuration' {
     $configuration.Run.PassThru = $true
 
     Format-Hashtable -Hashtable $configuration
-    Export-Hashtable -Hashtable $configuration -Path "$env:tmp/Invoke-Pester.Configuration.ps1"
+    Export-Hashtable -Hashtable $configuration -Path "$path/Invoke-Pester.Configuration.ps1"
 }
