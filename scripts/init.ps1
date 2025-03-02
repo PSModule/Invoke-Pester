@@ -196,30 +196,33 @@ LogGroup 'Init - Export containers' {
                 $container = @{
                     Path = $testFile.FullName
                 }
-                $containers += $container
+                LogGroup "Init - Export containers - Generated - $containerFileName" {
+                    $containerFileName = ($testFile | Split-Path -Leaf).Replace('.Tests.ps1', '.Container.ps1')
+                    Write-Output "Exporting container [$path/$containerFileName]"
+                    Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
+                }
+                Write-Output "Containers created from test files: [$($containers.Count)]"
             }
-            Write-Output "Containers created from test files: [$($containers.Count)]"
-        }
-        foreach ($containerFile in $containerFiles) {
-            $container = Import-Hashtable $containerFile
-            $containerFileName = $containerFile | Split-Path -Leaf
-            LogGroup "Init - Export containers - $containerFileName" {
-                Format-Hashtable -Hashtable $container
-                Write-Output "Exporting container [$path/$containerFileName]"
-                Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
+            foreach ($containerFile in $containerFiles) {
+                $container = Import-Hashtable $containerFile
+                $containerFileName = $containerFile | Split-Path -Leaf
+                LogGroup "Init - Export containers - $containerFileName" {
+                    Format-Hashtable -Hashtable $container
+                    Write-Output "Exporting container [$path/$containerFileName]"
+                    Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
+                }
             }
         }
+        $configuration.Run.Container = @()
     }
-    $configuration.Run.Container = @()
-}
 
-LogGroup 'Init - Export configuration' {
-    $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
-    $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
-    $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
-    $configuration.Run.PassThru = $true
+    LogGroup 'Init - Export configuration' {
+        $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
+        $configuration.TestResult.OutputPath = "test_reports/$artifactName-TestResult-Report.xml"
+        $configuration.CodeCoverage.OutputPath = "test_reports/$artifactName-CodeCoverage-Report.xml"
+        $configuration.Run.PassThru = $true
 
-    Format-Hashtable -Hashtable $configuration
-    Write-Output "Exporting configuration [$path/Invoke-Pester.Configuration.ps1]"
-    Export-Hashtable -Hashtable $configuration -Path "$path/Invoke-Pester.Configuration.ps1"
-}
+        Format-Hashtable -Hashtable $configuration
+        Write-Output "Exporting configuration [$path/Invoke-Pester.Configuration.ps1]"
+        Export-Hashtable -Hashtable $configuration -Path "$path/Invoke-Pester.Configuration.ps1"
+    }
