@@ -95,9 +95,9 @@ LogGroup 'Init - Load configuration - Action overrides' {
             ScriptBlock            = $inputs.Run_ScriptBlock
             Container              = $inputs.Run_Container
             TestExtension          = $inputs.Run_TestExtension
-            Exit                   = $inputs.Run_Exit
-            Throw                  = $inputs.Run_Throw
-            SkipRun                = $inputs.Run_SkipRun
+            Exit                   = $inputs.Run_Exit -eq 'true'
+            Throw                  = $inputs.Run_Throw -eq 'true'
+            SkipRun                = $inputs.Run_SkipRun -eq 'true'
             SkipRemainingOnFailure = $inputs.Run_SkipRemainingOnFailure
         }
         Filter       = @{
@@ -108,19 +108,19 @@ LogGroup 'Init - Load configuration - Action overrides' {
             FullName    = $inputs.Filter_FullName
         }
         CodeCoverage = @{
-            Enabled               = $inputs.CodeCoverage_Enabled
+            Enabled               = $inputs.CodeCoverage_Enabled -eq 'true'
             OutputFormat          = $inputs.CodeCoverage_OutputFormat
             OutputPath            = $inputs.CodeCoverage_OutputPath
             OutputEncoding        = $inputs.CodeCoverage_OutputEncoding
             Path                  = $inputs.CodeCoverage_Path
-            ExcludeTests          = $inputs.CodeCoverage_ExcludeTests
-            RecursePaths          = $inputs.CodeCoverage_RecursePaths
-            CoveragePercentTarget = $inputs.CodeCoverage_CoveragePercentTarget
-            UseBreakpoints        = $inputs.CodeCoverage_UseBreakpoints
-            SingleHitBreakpoints  = $inputs.CodeCoverage_SingleHitBreakpoints
+            ExcludeTests          = $inputs.CodeCoverage_ExcludeTests -eq 'true'
+            RecursePaths          = $inputs.CodeCoverage_RecursePaths -eq 'true'
+            CoveragePercentTarget = [decimal]$inputs.CodeCoverage_CoveragePercentTarget
+            UseBreakpoints        = $inputs.CodeCoverage_UseBreakpoints -eq 'true'
+            SingleHitBreakpoints  = $inputs.CodeCoverage_SingleHitBreakpoints -eq 'true'
         }
         TestResult   = @{
-            Enabled        = $inputs.TestResult_Enabled
+            Enabled        = $inputs.TestResult_Enabled -eq 'true'
             OutputFormat   = $inputs.TestResult_OutputFormat
             OutputPath     = $inputs.TestResult_OutputPath
             OutputEncoding = $inputs.TestResult_OutputEncoding
@@ -130,11 +130,11 @@ LogGroup 'Init - Load configuration - Action overrides' {
             ErrorAction = $inputs.Should_ErrorAction
         }
         Debug        = @{
-            ShowFullErrors         = $inputs.Debug_ShowFullErrors
-            WriteDebugMessages     = $inputs.Debug_WriteDebugMessages
+            ShowFullErrors         = $inputs.Debug_ShowFullErrors -eq 'true'
+            WriteDebugMessages     = $inputs.Debug_WriteDebugMessages -eq 'true'
             WriteDebugMessagesFrom = $inputs.Debug_WriteDebugMessagesFrom
-            ShowNavigationMarkers  = $inputs.Debug_ShowNavigationMarkers
-            ReturnRawResultObject  = $inputs.Debug_ReturnRawResultObject
+            ShowNavigationMarkers  = $inputs.Debug_ShowNavigationMarkers -eq 'true'
+            ReturnRawResultObject  = $inputs.Debug_ReturnRawResultObject -eq 'true'
         }
         Output       = @{
             CIFormat            = $inputs.Output_CIFormat
@@ -144,10 +144,10 @@ LogGroup 'Init - Load configuration - Action overrides' {
             RenderMode          = $inputs.Output_RenderMode
         }
         TestDrive    = @{
-            Enabled = $inputs.TestDrive_Enabled
+            Enabled = $inputs.TestDrive_Enabled -eq 'true'
         }
         TestRegistry = @{
-            Enabled = $inputs.TestRegistry_Enabled
+            Enabled = $inputs.TestRegistry_Enabled -eq 'true'
         }
     }
 
