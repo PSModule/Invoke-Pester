@@ -4,7 +4,7 @@ param()
 $PSStyle.OutputRendering = 'Ansi'
 
 '::group::Exec - Setup prerequisites'
-'Pester' | ForEach-Object {
+'Pester', 'Hashtable' | ForEach-Object {
     Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
     Import-Module -Name $_
 }
@@ -28,7 +28,7 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 
 '::group::Exec - Import Configuration'
 $configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
-$configuration | Convert-PesterConfigurationToHashtable | Out-String
+$configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String
 $configuration.Run.Container = @()
 $containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse | Sort-Object FullName
 foreach ($containerFile in $containerFiles) {
