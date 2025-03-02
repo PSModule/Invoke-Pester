@@ -31,6 +31,7 @@ $configPath = (Join-Path -Path $path -ChildPath 'Invoke-Pester.Configuration.ps1
 Test-Path -Path $configPath
 Get-Content -Path $configPath -Raw
 $configuration = . $configPath
+$configuration | ConvertTo-Json
 $configuration.Run | Out-String
 $configuration.Run.Container = @()
 $containerFiles = Get-ChildItem -Path $path -Filter *.Container.* -Recurse | Sort-Object FullName
