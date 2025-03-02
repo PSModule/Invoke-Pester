@@ -156,7 +156,7 @@ LogGroup 'Init - Load configuration - Action overrides' {
 }
 
 LogGroup 'Init - Load configuration' {
-    $defaults = New-PesterConfigurationHashtable
+    $defaults = New-PesterConfigurationHashtable -Default
     $configuration = Merge-PesterConfiguration -BaseConfiguration $defaults -AdditionalConfiguration $customConfig, $customInputs
 
     if ([string]::IsNullOrEmpty($configuration.Run.Path)) {
