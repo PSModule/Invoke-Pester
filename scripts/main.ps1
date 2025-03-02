@@ -34,8 +34,6 @@ if (-not (Test-Path -Path $configPath)) {
 }
 Get-Content -Path $configPath -Raw
 $configuration = . $configPath
-$configuration | ConvertTo-Json
-$configuration.Run | Out-String
 $configuration.Run.Container = @()
 $containerFiles = Get-ChildItem -Path $path -Filter *.Container.* -Recurse | Sort-Object FullName
 foreach ($containerFile in $containerFiles) {
@@ -44,7 +42,9 @@ foreach ($containerFile in $containerFiles) {
     Write-Verbose 'Converting hashtable to PesterContainer'
     $configuration.Run.Container += New-PesterContainer @container
 }
-$configuration.Run.Container | ConvertTo-Json
+
+$configuration | ConvertTo-Json
+
 '::endgroup::'
 
 '::group::Exec - Available modules'
