@@ -4,7 +4,7 @@ param()
 $PSStyle.OutputRendering = 'Ansi'
 
 '::group::Exec - Setup prerequisites'
-'Pester', 'Hashtable' | ForEach-Object {
+'Pester' | ForEach-Object {
     Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
     Import-Module -Name $_
 }
