@@ -27,10 +27,10 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 } | Format-List | Out-String
 
 '::group::Exec - Import Configuration'
-$configuration = & "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
+$configuration = & "$env:tmp/Invoke-Pester.Configuration.ps1"
 $configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String
 $configuration.Run.Container = @()
-$containerFiles = Get-ChildItem -Path $PSScriptRoot -Filter *.Container.* -Recurse | Sort-Object FullName
+$containerFiles = Get-ChildItem -Path $env:tmp -Filter *.Container.* -Recurse | Sort-Object FullName
 foreach ($containerFile in $containerFiles) {
     $container = & $($containerFile.FullName)
     Write-Verbose "Processing container [$container]"

@@ -193,7 +193,7 @@ LogGroup 'Init - Export containers' {
             LogGroup "Init - Export containers - $containerFileName" {
                 Format-Hashtable -Hashtable $container
                 Write-Verbose 'Converting hashtable to PesterContainer'
-                Export-Hashtable -Hashtable $container -Path "$PSScriptRoot/$containerFileName"
+                Export-Hashtable -Hashtable $container -Path "$env:tmp/$containerFileName"
             }
         }
     }
@@ -207,5 +207,5 @@ LogGroup 'Init - Export configuration' {
     $configuration.Run.PassThru = $true
 
     Format-Hashtable -Hashtable $configuration
-    Export-Hashtable -Hashtable $configuration -Path "$PSScriptRoot/Invoke-Pester.Configuration.ps1"
+    Export-Hashtable -Hashtable $configuration -Path "$env:tmp/Invoke-Pester.Configuration.ps1"
 }
