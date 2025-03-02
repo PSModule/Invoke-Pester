@@ -28,6 +28,8 @@ $path = $pwd.Path
 
 '::group::Exec - Import Configuration'
 $configPath = (Join-Path -Path $path -ChildPath 'Invoke-Pester.Configuration.ps1')
+Test-Path -Path $configPath
+Get-Content -Path $configPath -Raw
 Write-Output "Importing configuration from [$configPath]"
 $configuration = . $configPath
 $configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable | Out-String
