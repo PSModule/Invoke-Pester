@@ -925,15 +925,5 @@ filter Show-Input {
         [hashtable] $Inputs
     )
 
-    $new = [pscustomobject]@{}
-    $Inputs.GetEnumerator() | Where-Object { -not [string]::IsNullOrEmpty($_.Value) } | ForEach-Object {
-        $name = $_.Key
-        $value = $_.Value
-        if ($value -is [string]) {
-            $new | Add-Member -MemberType NoteProperty -Name $name -Value $value
-        } elseif ($value -is [array]) {
-            $new | Add-Member -MemberType NoteProperty -Name $name -Value ($value -join ', ')
-        }
-    }
-    [pscustomobject]$new | Format-List | Out-String
+
 }
