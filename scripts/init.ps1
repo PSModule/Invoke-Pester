@@ -203,14 +203,14 @@ LogGroup 'Init - Export containers' {
                 }
                 Write-Output "Containers created from test files: [$($containers.Count)]"
             }
-            foreach ($containerFile in $containerFiles) {
-                $container = Import-Hashtable $containerFile
-                $containerFileName = $containerFile | Split-Path -Leaf
-                LogGroup "Init - Export containers - $containerFileName" {
-                    Format-Hashtable -Hashtable $container
-                    Write-Output "Exporting container [$path/$containerFileName]"
-                    Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
-                }
+        }
+        foreach ($containerFile in $containerFiles) {
+            $container = Import-Hashtable $containerFile
+            $containerFileName = $containerFile | Split-Path -Leaf
+            LogGroup "Init - Export containers - $containerFileName" {
+                Format-Hashtable -Hashtable $container
+                Write-Output "Exporting container [$path/$containerFileName]"
+                Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
             }
         }
     }
