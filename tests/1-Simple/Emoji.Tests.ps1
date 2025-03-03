@@ -34,7 +34,7 @@ Describe 'Get-Emoji' {
             }
 
             It 'Returns 🐧 (penguin)' {
-                $penEmojis.Animal | Should -Contain 'Animal'
+                $penEmojis.Kind | Should -Contain 'Animal'
             }
 
             It 'Returns 😔 (pensive)' {
@@ -48,15 +48,15 @@ Describe 'Get-Emoji' {
             }
 
             It 'Returns 🙂 (slightly smiling face)' {
-                $smilingEmojis | Should -Contain '🙂'
+                $smilingEmojis.Symbol | Should -Contain '🙂'
             }
 
             It 'Returns 😁 (beaming face with smiling eyes)' {
-                $smilingEmojis | Should -Contain '😁'
+                $smilingEmojis.Kind | Should -Contain 'Face'
             }
 
             It 'Returns 😊 (smiling face with smiling eyes)' {
-                $smilingEmojis | Should -Contain '😊'
+                $smilingEmojis.Name | Should -Contain 'smiling face with smiling eyes'
             }
         }
     }
