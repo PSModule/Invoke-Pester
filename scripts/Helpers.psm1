@@ -1,4 +1,4 @@
-﻿$nbsp = [char]0x00A0
+$nbsp = [char]0x00A0
 $indent = "$nbsp" * 4
 $statusIcon = @{
     Passed       = '✅'
@@ -384,7 +384,7 @@ function New-PesterConfigurationHashtable {
     $result
 }
 
-filter Convert-PesterConfigurationToHashtable {
+filter ConvertFrom-PesterConfiguration {
     <#
         .SYNOPSIS
         Converts a PesterConfiguration object into a hashtable containing only modified settings.
@@ -396,7 +396,7 @@ filter Convert-PesterConfigurationToHashtable {
         When the -IncludeDefaults switch is provided, it includes settings that have not been modified, outputting their default values.
 
         .EXAMPLE
-        New-PesterConfiguration | Convert-PesterConfigurationToHashtable | Format-Hashtable
+        New-PesterConfiguration | ConvertFrom-PesterConfiguration -AsHashtable | Format-Hashtable
 
         Output:
         ```powershell
@@ -475,7 +475,7 @@ filter Convert-PesterConfigurationToHashtable {
         .EXAMPLE
         $config = New-PesterConfiguration
         $config.Run.PassThru = $true
-        Convert-PesterConfigurationToHashtable -PesterConfiguration $config -OnlyModified | Format-Hashtable
+        ConvertFrom-PesterConfiguration -PesterConfiguration $config -OnlyModified -AsHashtable | Format-Hashtable
 
         Output:
         ```powershell
@@ -504,33 +504,44 @@ filter Convert-PesterConfigurationToHashtable {
 
         # Include default values in the output hashtable.
         [Parameter()]
-        [switch] $OnlyModified
+        [switch] $OnlyModified,
+
+        # Output as a hashtable
+        [Parameter()]
+        [switch] $AsHashtable
     )
 
     # Prepare the output hashtable
     $result = @{}
 
     # Iterate over each top-level category (Run, Filter, etc.)
-    foreach ($category in $PesterConfiguration.PSObject.Properties.Name) {
-        $categoryObj = $PesterConfiguration.$category
+    foreach ($category in $PesterConfiguration.PSObject.Properties) {
+        $categoryObj = $PesterConfiguration.($category.Name)
         $subHash = @{}
 
         # Iterate over each setting within the category
-        foreach ($settingName in $categoryObj.PSObject.Properties.Name) {
+        foreach ($setting in $categoryObj.PSObject.Properties) {
             if ($OnlyModified) {
                 if ($setting.IsModified) {
-                    $subHash[$settingName] = $setting.Value
+                    $subHash[$setting.Name] = $setting.Value
                 }
             } else {
-                $subHash[$settingName] = if ($setting.IsModified) { $setting.Value } else { $setting.Default }
+                $subHash[$setting.Name] = if ($setting.IsModified) { $setting.Value } else { $setting.Default }
             }
         }
 
         # Add the category sub-hashtable to the result even if empty, to preserve structure.
-        $result[$category] = $subHash
+        if ($AsHashtable) {
+            $result[$category.Name] = $subHash
+        } else {
+            $result[$category.Name] = [pscustomobject]$subHash
+        }
     }
 
-    return $result
+    if ($AsHashtable) {
+        return $result
+    }
+    return [PSCustomObject]$result
 }
 
 filter Clear-PesterConfigurationEmptyValue {
@@ -853,7 +864,7 @@ filter Set-PesterReportConfigurationSummary {
         [Pester.Run] $TestResults
     )
 
-    $configurationHashtable = $TestResults.Configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable
+    $configurationHashtable = $TestResults.Configuration | ConvertFrom-PesterConfiguration -AsHashtable | Format-Hashtable
 
     Details 'Configuration' {
         CodeBlock 'pwsh' {

@@ -176,7 +176,7 @@ LogGroup 'Init - Export containers' {
         Write-Output "Containers from configuration: [$($existingContainers.Count)]"
         foreach ($existingContainer in $existingContainers) {
             Write-Output "Processing container [$existingContainer]"
-            $containers += $existingContainer | Convert-PesterConfigurationToHashtable
+            $containers += $existingContainer | ConvertTo-Hashtable
         }
     }
     Write-Output "Containers from configuration: [$($containers.Count)]"
