@@ -649,18 +649,26 @@ filter Get-PesterTestTree {
             Mandatory,
             ValueFromPipeline
         )]
-        [object] $InputObject
+        [object] $InputObject,
+
+        # Path to this node.
+        [Parameter()]
+        [string[]] $Path
     )
 
+    $children = [System.Collections.Generic.List[object]]::new()
     Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
     switch ($InputObject.GetType().Name) {
         'Run' {
-            $children = $InputObject.Containers | Get-PesterTestTree
-            $configuration = $InputObject.Configuration | ConvertTo-Hashtable
+            $Name = $InputObject.Configuration.TestResult.TestSuiteName.Value
+            $childPath = @($Path, $Name)
+            $children.Add(($InputObject.Containers | Get-PesterTestTree -Path $childPath))
+            $configuration = $InputObject.Configuration | ConvertFrom-PesterConfiguration
             [pscustomobject]@{
                 Depth                 = 0
                 ItemType              = 'TestSuite'
-                Name                  = $($InputObject.Configuration.TestResult.TestSuiteName.Value)
+                Name                  = $Name
+                Path                  = @()
                 Children              = $children
                 Result                = $InputObject.Result
                 FailedCount           = $InputObject.FailedCount
@@ -686,22 +694,97 @@ filter Get-PesterTestTree {
             }
         }
         'Container' {
-            $children = $InputObject.Blocks | Get-PesterTestTree
-            $InputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 1
-            $InputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'Container'
-            $InputObject | Add-Member -MemberType NoteProperty -Name Name -Value ((Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1') -Force
-            $InputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Blocks
+            $Name = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
+            $childPath = @($Path, $Name)
+            $children.Add(($InputObject.Blocks | Get-PesterTestTree -Path $childPath))
+            [pscustomobject]@{
+                Depth                 = 1
+                ItemType              = 'Container'
+                Name                  = $Name
+                Path                  = $Path
+                Children              = $children
+                Result                = $InputObject.Result
+                FailedCount           = $InputObject.FailedCount
+                FailedBlocksCount     = $InputObject.FailedBlocksCount
+                FailedContainersCount = $InputObject.FailedContainersCount
+                PassedCount           = $InputObject.PassedCount
+                SkippedCount          = $InputObject.SkippedCount
+                InconclusiveCount     = $InputObject.InconclusiveCount
+                NotRunCount           = $InputObject.NotRunCount
+                TotalCount            = $InputObject.TotalCount
+                Duration              = $InputObject.Duration
+                Executed              = $InputObject.Executed
+                ExecutedAt            = $InputObject.ExecutedAt
+                Version               = $InputObject.Version
+                PSVersion             = $InputObject.PSVersion
+                Plugins               = $InputObject.Plugins
+                PluginConfiguration   = $InputObject.PluginConfiguration
+                PluginData            = $InputObject.PluginData
+                DiscoveryDuration     = $InputObject.DiscoveryDuration
+                UserDuration          = $InputObject.UserDuration
+                FrameworkDuration     = $InputObject.FrameworkDuration
+            }
         }
         'Block' {
-            $children = $InputObject.Order | Get-PesterTestTree
-            $InputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
-            $InputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
-            $InputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Order
+            $Name = ($InputObject.ExpandedName)
+            $childPath = @($Path, $Name)
+            $children.Add(($InputObject.Order | Get-PesterTestTree -Path $childPath))
+            [pscustomobject]@{
+                Depth                 = ($InputObject.Path.Count + 1)
+                ItemType              = $InputObject.ItemType
+                Name                  = $Name
+                Path                  = $Path
+                Children              = $children
+                Result                = $InputObject.Result
+                FailedCount           = $InputObject.FailedCount
+                FailedBlocksCount     = $InputObject.FailedBlocksCount
+                FailedContainersCount = $InputObject.FailedContainersCount
+                PassedCount           = $InputObject.PassedCount
+                SkippedCount          = $InputObject.SkippedCount
+                InconclusiveCount     = $InputObject.InconclusiveCount
+                NotRunCount           = $InputObject.NotRunCount
+                TotalCount            = $InputObject.TotalCount
+                Duration              = $InputObject.Duration
+                Executed              = $InputObject.Executed
+                ExecutedAt            = $InputObject.ExecutedAt
+                Version               = $InputObject.Version
+                PSVersion             = $InputObject.PSVersion
+                Plugins               = $InputObject.Plugins
+                PluginConfiguration   = $InputObject.PluginConfiguration
+                PluginData            = $InputObject.PluginData
+                DiscoveryDuration     = $InputObject.DiscoveryDuration
+                UserDuration          = $InputObject.UserDuration
+                FrameworkDuration     = $InputObject.FrameworkDuration
+            }
         }
         'Test' {
-            $InputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
-            $InputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
-            $InputObject
+            $Name = ($InputObject.ExpandedName)
+            [pscustomobject]@{
+                Depth                 = ($InputObject.Path.Count + 1)
+                ItemType              = $InputObject.ItemType
+                Name                  = $Name
+                Path                  = $Path
+                Result                = $InputObject.Result
+                FailedCount           = $InputObject.FailedCount
+                FailedBlocksCount     = $InputObject.FailedBlocksCount
+                FailedContainersCount = $InputObject.FailedContainersCount
+                PassedCount           = $InputObject.PassedCount
+                SkippedCount          = $InputObject.SkippedCount
+                InconclusiveCount     = $InputObject.InconclusiveCount
+                NotRunCount           = $InputObject.NotRunCount
+                TotalCount            = $InputObject.TotalCount
+                Duration              = $InputObject.Duration
+                Executed              = $InputObject.Executed
+                ExecutedAt            = $InputObject.ExecutedAt
+                Version               = $InputObject.Version
+                PSVersion             = $InputObject.PSVersion
+                Plugins               = $InputObject.Plugins
+                PluginConfiguration   = $InputObject.PluginConfiguration
+                PluginData            = $InputObject.PluginData
+                DiscoveryDuration     = $InputObject.DiscoveryDuration
+                UserDuration          = $InputObject.UserDuration
+                FrameworkDuration     = $InputObject.FrameworkDuration
+            }
         }
         default {
             Write-Error "Unknown object type: [$($InputObject.GetType().Name)]"
