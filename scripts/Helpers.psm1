@@ -1,4 +1,4 @@
-$nbsp = [char]0x00A0
+﻿$nbsp = [char]0x00A0
 $indent = "$nbsp" * 4
 $statusIcon = @{
     Passed       = '✅'
@@ -524,8 +524,9 @@ filter ConvertFrom-PesterConfiguration {
         foreach ($setting in $categoryValue.PSObject.Properties) {
             $settingName = $setting.Name
             $settingValue = $setting.Value
-            $settingValue = $settingValue.IsModified ? ($OnlyModified ? $settingValue.Value : $null ) : $settingValue.Default
+            $settingValue = $OnlyModified ? $settingValue.Value : ($settingValue.IsModified ? $settingValue.Value : $settingValue.Default)
             $subHash[$settingName] = $settingValue
+            Write-Verbose "[$categoryName] [$settingName] = $settingValue" -Verbose
         }
 
         # Add the category sub-hashtable to the result even if empty, to preserve structure.
@@ -654,32 +655,53 @@ filter Get-PesterTestTree {
     Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
     switch ($InputObject.GetType().Name) {
         'Run' {
-            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 0
-            $inputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'TestSuite'
-            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value $($testResults.Configuration.TestResult.TestSuiteName.Value) -Force
-            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $inputObject.Containers
-            $inputObject
-            $inputObject.Containers | Get-PesterTestTree
+            $children = $InputObject.Containers | Get-PesterTestTree
+            $configuration = $InputObject.Configuration | ConvertTo-Hashtable
+            [pscustomobject]@{
+                Depth                 = 0
+                ItemType              = 'TestSuite'
+                Name                  = $($InputObject.Configuration.TestResult.TestSuiteName.Value)
+                Children              = $children
+                Result                = $InputObject.Result
+                FailedCount           = $InputObject.FailedCount
+                FailedBlocksCount     = $InputObject.FailedBlocksCount
+                FailedContainersCount = $InputObject.FailedContainersCount
+                PassedCount           = $InputObject.PassedCount
+                SkippedCount          = $InputObject.SkippedCount
+                InconclusiveCount     = $InputObject.InconclusiveCount
+                NotRunCount           = $InputObject.NotRunCount
+                TotalCount            = $InputObject.TotalCount
+                Duration              = $InputObject.Duration
+                Executed              = $InputObject.Executed
+                ExecutedAt            = $InputObject.ExecutedAt
+                Version               = $InputObject.Version
+                PSVersion             = $InputObject.PSVersion
+                Plugins               = $InputObject.Plugins
+                PluginConfiguration   = $InputObject.PluginConfiguration
+                PluginData            = $InputObject.PluginData
+                Configuration         = $configuration
+                DiscoveryDuration     = $InputObject.DiscoveryDuration
+                UserDuration          = $InputObject.UserDuration
+                FrameworkDuration     = $InputObject.FrameworkDuration
+            }
         }
         'Container' {
-            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 1
-            $inputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'Container'
-            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ((Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1') -Force
-            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Blocks
-            $inputObject
-            $InputObject.Blocks | Get-PesterTestTree
+            $children = $InputObject.Blocks | Get-PesterTestTree
+            $InputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 1
+            $InputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'Container'
+            $InputObject | Add-Member -MemberType NoteProperty -Name Name -Value ((Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1') -Force
+            $InputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Blocks
         }
         'Block' {
-            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
-            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
-            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Order
-            $inputObject
-            $InputObject.Order | Get-PesterTestTree
+            $children = $InputObject.Order | Get-PesterTestTree
+            $InputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
+            $InputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
+            $InputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Order
         }
         'Test' {
-            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
-            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
-            $inputObject
+            $InputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
+            $InputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
+            $InputObject
         }
         default {
             Write-Error "Unknown object type: [$($InputObject.GetType().Name)]"
