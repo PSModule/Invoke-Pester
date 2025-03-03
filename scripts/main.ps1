@@ -85,25 +85,33 @@ LogGroup 'Eval - Test results summary' {
 }
 
 LogGroup 'Eval - Set outputs' {
-    Set-GitHubOutput -Name 'TestSuiteName' -Value $testResults.Configuration.TestResult.TestSuiteName.Value
-    Set-GitHubOutput -Name 'TestResultEnabled' -Value $testResults.Configuration.TestResult.Enabled.Value
     $testResultOutputFolderPath = $testResults.Configuration.TestResult.OutputPath.Value | Split-Path -Parent
-    Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResultOutputFolderPath
-    Set-GitHubOutput -Name 'CodeCoverageEnabled' -Value $testResults.Configuration.CodeCoverage.Enabled.Value
-    Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $testResults.Configuration.CodeCoverage.OutputPath.Value
+    $codeCoverageOutputFolderPath = $testResults.Configuration.CodeCoverage.OutputPath.Value | Split-Path -Parent
     [pscustomobject]@{
         TestSuiteName          = $testResults.Configuration.TestResult.TestSuiteName.Value
         TestResultEnabled      = $testResults.Configuration.TestResult.Enabled.Value
-        TestResultOutputPath   = $testResults.Configuration.TestResult.OutputPath.Value
+        TestResultOutputPath   = $testResultOutputFolderPath
         CodeCoverageEnabled    = $testResults.Configuration.CodeCoverage.Enabled.Value
-        CodeCoverageOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value
+        CodeCoverageOutputPath = $codeCoverageOutputFolderPath
     } | Format-List | Out-String
+    Set-GitHubOutput -Name 'TestSuiteName' -Value $testResults.Configuration.TestResult.TestSuiteName.Value
+    Set-GitHubOutput -Name 'TestResultEnabled' -Value $testResults.Configuration.TestResult.Enabled.Value
+    Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResultOutputFolderPath
+    Set-GitHubOutput -Name 'CodeCoverageEnabled' -Value $testResults.Configuration.CodeCoverage.Enabled.Value
+    Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $codeCoverageOutputFolderPath
 
     if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
         $outputFolderPath = $testResults.Configuration.TestResult.OutputPath.Value | Split-Path -Parent
         $outputFilePath = Join-Path -Path $outputFolderPath -ChildPath 'TestResults.json'
         Write-Host "Exporting test results to [$outputFilePath]"
         $testResults | ConvertTo-Json -Depth 2 | Out-File -FilePath $outputFilePath
+    }
+
+    if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.CodeCoverage.Enabled.Value) {
+        $outputFolderPath = $testResults.Configuration.CodeCoverage.OutputPath.Value | Split-Path -Parent
+        $outputFilePath = Join-Path -Path $outputFolderPath -ChildPath 'CodeCoverage.json'
+        Write-Host "Exporting CodeCoverage results to [$outputFilePath]"
+        $testResults.CodeCoverage | ConvertTo-Json -Depth 100 | Out-File -FilePath $outputFilePath
     }
 }
 

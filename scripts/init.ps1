@@ -223,8 +223,8 @@ LogGroup 'Init - Export containers' {
 
 LogGroup 'Init - Export configuration' {
     $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
-    $configuration.TestResult.OutputPath = "$pwd/test_reports/$artifactName-TestResult-Report.xml"
-    $configuration.CodeCoverage.OutputPath = "$pwd/test_reports/$artifactName-CodeCoverage-Report.xml"
+    $configuration.TestResult.OutputPath = "$pwd/TestResult/$artifactName-TestResult-Report.xml"
+    $configuration.CodeCoverage.OutputPath = "$pwd/CodeCoverage/$artifactName-CodeCoverage-Report.xml"
     $configuration.Run.PassThru = $true
 
     Format-Hashtable -Hashtable $configuration
