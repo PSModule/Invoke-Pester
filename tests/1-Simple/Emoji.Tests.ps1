@@ -10,39 +10,17 @@
 param()
 
 BeforeAll {
-    $script:emojis = @(
-        @{ Name = 'apple'; Symbol = '🍎'; Kind = 'Fruit' }
-        @{ Name = 'beaming face with smiling eyes'; Symbol = '😁'; Kind = 'Face' }
-        @{ Name = 'cactus'; Symbol = '🌵'; Kind = 'Plant' }
-        @{ Name = 'giraffe'; Symbol = '🦒'; Kind = 'Animal' }
-        @{ Name = 'pencil'; Symbol = '✏️'; Kind = 'Item' }
-        @{ Name = 'penguin'; Symbol = '🐧'; Kind = 'Animal' }
-        @{ Name = 'pensive'; Symbol = '😔'; Kind = 'Face' }
-        @{ Name = 'slightly smiling face'; Symbol = '🙂'; Kind = 'Face' }
-        @{ Name = 'smiling face with smiling eyes'; Symbol = '😊'; Kind = 'Face' }
-    ) | ForEach-Object { [PSCustomObject]$_ }
-
-    function Get-Emoji {
-        <#
-            .SYNOPSIS
-            Get emoji by name.
-        #>
-        [CmdletBinding()]
-        param(
-            [string]$Name = '*'
-        )
-        $script:emojis | Where-Object Name -Like $Name | ForEach-Object Symbol
-    }
+    . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
 Describe 'Get-Emoji' {
     Context 'Lookup by whole name' {
         It 'Returns 🌵 (cactus)' {
-            Get-Emoji -Name cactus | Should -Be '🌵'
+            (Get-Emoji -Name cactus).Symbol | Should -Be '🌵'
         }
 
         It 'Returns 🦒 (giraffe)' {
-            Get-Emoji -Name giraffe | Should -Be '🦒'
+            Get-Emoji -Name giraffe -Property Symbol | Should -Be '🦒'
         }
     }
 
@@ -52,15 +30,15 @@ Describe 'Get-Emoji' {
                 $penEmojis = Get-Emoji -Name pen*
             }
             It 'Returns ✏️ (pencil)' {
-                $penEmojis | Should -Contain '✏️'
+                $penEmojis.Symbol | Should -Contain '✏️'
             }
 
             It 'Returns 🐧 (penguin)' {
-                $penEmojis | Should -Contain '🐧'
+                $penEmojis.Animal | Should -Contain 'Animal'
             }
 
             It 'Returns 😔 (pensive)' {
-                $penEmojis | Should -Contain '😔'
+                $penEmojis.Name | Should -Contain 'pensive'
             }
         }
 
