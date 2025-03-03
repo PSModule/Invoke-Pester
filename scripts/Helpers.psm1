@@ -712,7 +712,7 @@ filter Get-PesterTestTree {
                 InconclusiveCount     = $InputObject.InconclusiveCount
                 NotRunCount           = $InputObject.NotRunCount
                 TotalCount            = $InputObject.TotalCount
-                Duration              = $InputObject.Duration
+                Duration              = $InputObject.Duration.Ticks
                 Executed              = $InputObject.Executed
                 ExecutedAt            = $InputObject.ExecutedAt
                 Version               = $InputObject.Version
@@ -720,9 +720,9 @@ filter Get-PesterTestTree {
                 Plugins               = $InputObject.Plugins
                 PluginConfiguration   = $InputObject.PluginConfiguration
                 PluginData            = $InputObject.PluginData
-                DiscoveryDuration     = $InputObject.DiscoveryDuration
-                UserDuration          = $InputObject.UserDuration
-                FrameworkDuration     = $InputObject.FrameworkDuration
+                DiscoveryDuration     = $InputObject.DiscoveryDuration.Ticks
+                UserDuration          = $InputObject.UserDuration.Ticks
+                FrameworkDuration     = $InputObject.FrameworkDuration.Ticks
             }
         }
         'Block' {
@@ -744,7 +744,7 @@ filter Get-PesterTestTree {
                 InconclusiveCount     = $InputObject.InconclusiveCount
                 NotRunCount           = $InputObject.NotRunCount
                 TotalCount            = $InputObject.TotalCount
-                Duration              = $InputObject.Duration
+                Duration              = $InputObject.Duration.Ticks
                 Executed              = $InputObject.Executed
                 ExecutedAt            = $InputObject.ExecutedAt
                 Version               = $InputObject.Version
@@ -752,9 +752,9 @@ filter Get-PesterTestTree {
                 Plugins               = $InputObject.Plugins
                 PluginConfiguration   = $InputObject.PluginConfiguration
                 PluginData            = $InputObject.PluginData
-                DiscoveryDuration     = $InputObject.DiscoveryDuration
-                UserDuration          = $InputObject.UserDuration
-                FrameworkDuration     = $InputObject.FrameworkDuration
+                DiscoveryDuration     = $InputObject.DiscoveryDuration.Ticks
+                UserDuration          = $InputObject.UserDuration.Ticks
+                FrameworkDuration     = $InputObject.FrameworkDuration.Ticks
             }
         }
         'Test' {
@@ -773,7 +773,7 @@ filter Get-PesterTestTree {
                 InconclusiveCount     = $InputObject.InconclusiveCount
                 NotRunCount           = $InputObject.NotRunCount
                 TotalCount            = $InputObject.TotalCount
-                Duration              = $InputObject.Duration
+                Duration              = $InputObject.Duration.Ticks
                 Executed              = $InputObject.Executed
                 ExecutedAt            = $InputObject.ExecutedAt
                 Version               = $InputObject.Version
@@ -781,9 +781,9 @@ filter Get-PesterTestTree {
                 Plugins               = $InputObject.Plugins
                 PluginConfiguration   = $InputObject.PluginConfiguration
                 PluginData            = $InputObject.PluginData
-                DiscoveryDuration     = $InputObject.DiscoveryDuration
-                UserDuration          = $InputObject.UserDuration
-                FrameworkDuration     = $InputObject.FrameworkDuration
+                DiscoveryDuration     = $InputObject.DiscoveryDuration.Ticks
+                UserDuration          = $InputObject.UserDuration.Ticks
+                FrameworkDuration     = $InputObject.FrameworkDuration.Ticks
             }
         }
         default {
