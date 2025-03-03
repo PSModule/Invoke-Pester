@@ -527,12 +527,16 @@ filter ConvertFrom-PesterConfiguration {
             $settingValue = $OnlyModified ? $settingValue.Value : ($settingValue.IsModified ? $settingValue.Value : $settingValue.Default)
             Write-Verbose "[$categoryName] [$settingName] = $settingValue" -Verbose
             if ($categoryName -eq 'Run' -and $settingName -eq 'Container') {
-                $subHash[$settingName] = $settingValue | ForEach-Object {
-                    [pscustomobject]@{
-                        Path = $_.Path.ToString()
-                        Data = $_.Data
-                    }
+                $containers = [System.Collections.Generic.List[object]]::new()
+                foreach ($container in $settingValue) {
+                    $containers.Add(
+                        [pscustomobject]@{
+                            Path = $container.Path.ToString()
+                            Data = $container.Data
+                        }
+                    )
                 }
+                $subHash[$settingName] = $containers
             } else {
                 $subHash[$settingName] = $settingValue
             }
