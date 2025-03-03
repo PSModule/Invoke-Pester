@@ -8,7 +8,7 @@
         TestSuiteName = 'Standard'
     }
     CodeCoverage = @{
-        Enabled       = $true
+        Enabled = $true
     }
     Output       = @{
         CIFormat            = 'Auto'

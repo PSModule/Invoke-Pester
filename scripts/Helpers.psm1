@@ -1,4 +1,4 @@
-$nbsp = [char]0x00A0
+﻿$nbsp = [char]0x00A0
 $indent = "$nbsp" * 4
 $statusIcon = @{
     Passed       = '✅'
