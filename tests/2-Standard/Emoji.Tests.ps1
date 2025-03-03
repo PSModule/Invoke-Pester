@@ -7,10 +7,15 @@
     Justification = 'Required for Pester tests'
 )]
 [CmdletBinding()]
-param()
+param(
+    [Parameter(Mandatory)]
+    [string] $Path
+)
 
-BeforeAll {
-    . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
+Describe 'Emoji' {
+    It 'Module is importable' {
+        { Import-Module -Name $Path } | Should -Not -Throw
+    }
 }
 
 Describe 'Get-Emoji' {
