@@ -283,6 +283,7 @@ runs:
       with:
         name: ${{ steps.test.outputs.TestSuiteName }}-TestResults
         path: ${{ steps.test.outputs.TestResultOutputPath }}
+        retention-days: 1
 
     - name: Upload code coverage report - [${{ steps.test.outputs.TestSuiteName }}-CodeCoverage]
       uses: actions/upload-artifact@v4
@@ -290,6 +291,7 @@ runs:
       with:
         name: ${{ steps.test.outputs.TestSuiteName }}-CodeCoverage
         path: ${{ steps.test.outputs.CodeCoverageOutputPath }}
+        retention-days: 1
 
     - name: Status
       shell: pwsh
