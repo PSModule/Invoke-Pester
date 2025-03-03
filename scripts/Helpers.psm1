@@ -525,8 +525,17 @@ filter ConvertFrom-PesterConfiguration {
             $settingName = $setting.Name
             $settingValue = $setting.Value
             $settingValue = $OnlyModified ? $settingValue.Value : ($settingValue.IsModified ? $settingValue.Value : $settingValue.Default)
-            $subHash[$settingName] = $settingValue
-            Write-Verbose "[$categoryName] [$settingName] = $settingValue" -Verbose
+            if ($categoryName -eq 'Run' -and $settingName -eq 'Container') {
+                $settingValue | ForEach-Object {
+                    $subHash[$settingName] = [pscustomobject]@{
+                        Path = $_.Path.ToString()
+                        Data = $_.Data
+                    }
+                }
+            } else {
+                $subHash[$settingName] = $settingValue
+                Write-Verbose "[$categoryName] [$settingName] = $settingValue" -Verbose
+            }
         }
 
         # Add the category sub-hashtable to the result even if empty, to preserve structure.
@@ -664,9 +673,6 @@ filter Get-PesterTestTree {
             $childPath = @($Path, $Name)
             $children.Add(($InputObject.Containers | Get-PesterTestTree -Path $childPath))
             $configuration = $InputObject.Configuration | ConvertFrom-PesterConfiguration
-            $configuration.Containers = $InputObject.Configuration.Containers | ForEach-Object {
-                $_ | ConvertTo-Hashtable
-            }
             [pscustomobject]@{
                 Depth                 = 0
                 ItemType              = 'TestSuite'
