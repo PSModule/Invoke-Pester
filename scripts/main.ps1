@@ -98,7 +98,7 @@ LogGroup 'Eval - Set outputs' {
         CodeCoverageOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value
     } | Format-List | Out-String
 
-    if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true') {
+    if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
         $outputFolderPath = $testResults.Configuration.TestResult.OutputPath.Value | Split-Path -Parent
         $outputFilePath = Join-Path -Path $outputFolderPath -ChildPath 'TestResults.json'
         Write-Host "Exporting test results to [$outputFilePath]"
