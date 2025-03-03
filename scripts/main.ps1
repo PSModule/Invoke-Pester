@@ -103,13 +103,13 @@ LogGroup 'Eval - Set outputs' {
     if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
         $jsonOutputPath = $testResults.Configuration.TestResult.OutputPath.Value -Replace '\.xml$', '.json'
         Write-Output "Exporting test results to [$jsonOutputPath]"
-        $testResults | Get-PesterTestTree | ConvertTo-Json -Depth 100 | Out-File -FilePath $jsonOutputPath
+        $testResults | Get-PesterTestTree | ConvertTo-Json -Depth 1 | Out-File -FilePath $jsonOutputPath
     }
 
     if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.CodeCoverage.Enabled.Value) {
         $jsonOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value -Replace '\.xml$', '.json'
         Write-Output "Exporting code coverage results to [$jsonOutputPath]"
-        $testResults.CodeCoverage | ConvertTo-Json -Depth 1 -Compress | Out-File -FilePath $jsonOutputPath
+        $testResults.CodeCoverage | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
     }
 }
 
