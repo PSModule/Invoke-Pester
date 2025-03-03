@@ -1,4 +1,4 @@
-﻿$nbsp = [char]0x00A0
+$nbsp = [char]0x00A0
 $indent = "$nbsp" * 4
 $statusIcon = @{
     Passed       = '✅'
@@ -516,25 +516,23 @@ filter ConvertFrom-PesterConfiguration {
 
     # Iterate over each top-level category (Run, Filter, etc.)
     foreach ($category in $PesterConfiguration.PSObject.Properties) {
-        $categoryObj = $PesterConfiguration.($category.Name)
+        $categoryName = $category.Name
+        $categoryValue = $category.Value
         $subHash = @{}
 
         # Iterate over each setting within the category
-        foreach ($setting in $categoryObj.PSObject.Properties) {
-            if ($OnlyModified) {
-                if ($setting.IsModified) {
-                    $subHash[$setting.Name] = $setting.Value
-                }
-            } else {
-                $subHash[$setting.Name] = if ($setting.IsModified) { $setting.Value } else { $setting.Default }
-            }
+        foreach ($setting in $categoryValue.PSObject.Properties) {
+            $settingName = $setting.Name
+            $settingValue = $setting.Value
+            $settingValue = $settingValue.IsModified ? ($OnlyModified ? $settingValue.Value : $null ) : $settingValue.Default
+            $subHash[$settingName] = $settingValue
         }
 
         # Add the category sub-hashtable to the result even if empty, to preserve structure.
         if ($AsHashtable) {
-            $result[$category.Name] = $subHash
+            $result[$categoryName] = $subHash
         } else {
-            $result[$category.Name] = [pscustomobject]$subHash
+            $result[$categoryName] = [pscustomobject]$subHash
         }
     }
 
