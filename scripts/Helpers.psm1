@@ -664,6 +664,9 @@ filter Get-PesterTestTree {
             $childPath = @($Path, $Name)
             $children.Add(($InputObject.Containers | Get-PesterTestTree -Path $childPath))
             $configuration = $InputObject.Configuration | ConvertFrom-PesterConfiguration
+            $configuration.Containers = $InputObject.Configuration.Containers | ForEach-Object {
+                $_ | ConvertTo-Hashtable
+            }
             [pscustomobject]@{
                 Depth                 = 0
                 ItemType              = 'TestSuite'
