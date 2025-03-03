@@ -527,6 +527,7 @@ filter ConvertFrom-PesterConfiguration {
             $settingValue = $OnlyModified ? $settingValue.Value : ($settingValue.IsModified ? $settingValue.Value : $settingValue.Default)
             Write-Verbose "[$categoryName] [$settingName] = $settingValue" -Verbose
             if ($categoryName -eq 'Run' -and $settingName -eq 'Container') {
+                Write-Verbose ($settingValue | ConvertTo-Json -Depth 1 | Out-String) -Verbose
                 $containers = [System.Collections.Generic.List[object]]::new()
                 foreach ($container in $settingValue) {
                     $containers.Add(
