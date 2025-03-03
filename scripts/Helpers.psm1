@@ -384,7 +384,7 @@ function New-PesterConfigurationHashtable {
     $result
 }
 
-filter Convert-PesterConfigurationToHashtable {
+filter ConvertFrom-PesterConfiguration {
     <#
         .SYNOPSIS
         Converts a PesterConfiguration object into a hashtable containing only modified settings.
@@ -396,7 +396,7 @@ filter Convert-PesterConfigurationToHashtable {
         When the -IncludeDefaults switch is provided, it includes settings that have not been modified, outputting their default values.
 
         .EXAMPLE
-        New-PesterConfiguration | Convert-PesterConfigurationToHashtable | Format-Hashtable
+        New-PesterConfiguration | ConvertFrom-PesterConfiguration -AsHashtable | Format-Hashtable
 
         Output:
         ```powershell
@@ -475,7 +475,7 @@ filter Convert-PesterConfigurationToHashtable {
         .EXAMPLE
         $config = New-PesterConfiguration
         $config.Run.PassThru = $true
-        Convert-PesterConfigurationToHashtable -PesterConfiguration $config -OnlyModified | Format-Hashtable
+        ConvertFrom-PesterConfiguration -PesterConfiguration $config -OnlyModified -AsHashtable | Format-Hashtable
 
         Output:
         ```powershell
@@ -504,33 +504,57 @@ filter Convert-PesterConfigurationToHashtable {
 
         # Include default values in the output hashtable.
         [Parameter()]
-        [switch] $OnlyModified
+        [switch] $OnlyModified,
+
+        # Output as a hashtable
+        [Parameter()]
+        [switch] $AsHashtable
     )
 
     # Prepare the output hashtable
     $result = @{}
 
     # Iterate over each top-level category (Run, Filter, etc.)
-    foreach ($category in $PesterConfiguration.PSObject.Properties.Name) {
-        $categoryObj = $PesterConfiguration.$category
+    foreach ($category in $PesterConfiguration.PSObject.Properties) {
+        $categoryName = $category.Name
+        $categoryValue = $category.Value
         $subHash = @{}
 
         # Iterate over each setting within the category
-        foreach ($settingName in $categoryObj.PSObject.Properties.Name) {
-            if ($OnlyModified) {
-                if ($setting.IsModified) {
-                    $subHash[$settingName] = $setting.Value
+        foreach ($setting in $categoryValue.PSObject.Properties) {
+            $settingName = $setting.Name
+            $settingValue = $setting.Value
+            $settingValue = $OnlyModified ? $settingValue.Value : ($settingValue.IsModified ? $settingValue.Value : $settingValue.Default)
+            Write-Verbose "[$categoryName] [$settingName] = $settingValue" -Verbose
+            if ($categoryName -eq 'Run' -and $settingName -eq 'Container') {
+                Write-Verbose ($settingValue | ConvertTo-Json -Depth 1 | Out-String) -Verbose
+                $containers = [System.Collections.Generic.List[object]]::new()
+                foreach ($container in $settingValue) {
+                    $containers.Add(
+                        [pscustomobject]@{
+                            Path = $container.Item.FullName
+                            Data = $container.Data
+                        }
+                    )
                 }
+                $subHash[$settingName] = $containers
             } else {
-                $subHash[$settingName] = if ($setting.IsModified) { $setting.Value } else { $setting.Default }
+                $subHash[$settingName] = $settingValue
             }
         }
 
         # Add the category sub-hashtable to the result even if empty, to preserve structure.
-        $result[$category] = $subHash
+        if ($AsHashtable) {
+            $result[$categoryName] = $subHash
+        } else {
+            $result[$categoryName] = [pscustomobject]$subHash
+        }
     }
 
-    return $result
+    if ($AsHashtable) {
+        return $result
+    }
+    return [PSCustomObject]$result
 }
 
 filter Clear-PesterConfigurationEmptyValue {
@@ -639,38 +663,142 @@ filter Get-PesterTestTree {
             Mandatory,
             ValueFromPipeline
         )]
-        [object] $InputObject
+        [object] $InputObject,
+
+        # Path to this node.
+        [Parameter()]
+        [string[]] $Path
     )
 
+    $children = [System.Collections.Generic.List[object]]::new()
     Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
     switch ($InputObject.GetType().Name) {
         'Run' {
-            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 0
-            $inputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'TestSuite'
-            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value $($testResults.Configuration.TestResult.TestSuiteName.Value) -Force
-            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $inputObject.Containers
-            $inputObject
-            $inputObject.Containers | Get-PesterTestTree
+            $Name = $InputObject.Configuration.TestResult.TestSuiteName.Value
+            $childPath = @($Path, $Name)
+            $children.Add(($InputObject.Containers | Get-PesterTestTree -Path $childPath))
+            $configuration = $InputObject.Configuration | ConvertFrom-PesterConfiguration
+            [pscustomobject]@{
+                Depth                 = 0
+                ItemType              = 'TestSuite'
+                Name                  = $Name
+                Path                  = @()
+                Children              = $children
+                Result                = $InputObject.Result
+                FailedCount           = $InputObject.FailedCount
+                FailedBlocksCount     = $InputObject.FailedBlocksCount
+                FailedContainersCount = $InputObject.FailedContainersCount
+                PassedCount           = $InputObject.PassedCount
+                SkippedCount          = $InputObject.SkippedCount
+                InconclusiveCount     = $InputObject.InconclusiveCount
+                NotRunCount           = $InputObject.NotRunCount
+                TotalCount            = $InputObject.TotalCount
+                Executed              = $InputObject.Executed
+                ExecutedAt            = $InputObject.ExecutedAt
+                Version               = $InputObject.Version
+                PSVersion             = $InputObject.PSVersion
+                Plugins               = $InputObject.Plugins
+                PluginConfiguration   = $InputObject.PluginConfiguration
+                PluginData            = $InputObject.PluginData
+                Configuration         = $configuration
+                Duration              = [int64]$InputObject.Duration.Ticks
+                DiscoveryDuration     = [int64]$InputObject.DiscoveryDuration.Ticks
+                UserDuration          = [int64]$InputObject.UserDuration.Ticks
+                FrameworkDuration     = [int64]$InputObject.FrameworkDuration.Ticks
+            }
         }
         'Container' {
-            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value 1
-            $inputObject | Add-Member -MemberType NoteProperty -Name ItemType -Value 'Container'
-            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ((Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1') -Force
-            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Blocks
-            $inputObject
-            $InputObject.Blocks | Get-PesterTestTree
+            $Name = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
+            $childPath = @($Path, $Name)
+            $children.Add(($InputObject.Blocks | Get-PesterTestTree -Path $childPath))
+            [pscustomobject]@{
+                Depth                 = 1
+                ItemType              = 'Container'
+                Name                  = $Name
+                Path                  = $Path
+                Children              = $children
+                Result                = $InputObject.Result
+                FailedCount           = $InputObject.FailedCount
+                FailedBlocksCount     = $InputObject.FailedBlocksCount
+                FailedContainersCount = $InputObject.FailedContainersCount
+                PassedCount           = $InputObject.PassedCount
+                SkippedCount          = $InputObject.SkippedCount
+                InconclusiveCount     = $InputObject.InconclusiveCount
+                NotRunCount           = $InputObject.NotRunCount
+                TotalCount            = $InputObject.TotalCount
+                Executed              = $InputObject.Executed
+                ExecutedAt            = $InputObject.ExecutedAt
+                Version               = $InputObject.Version
+                PSVersion             = $InputObject.PSVersion
+                Plugins               = $InputObject.Plugins
+                PluginConfiguration   = $InputObject.PluginConfiguration
+                PluginData            = $InputObject.PluginData
+                Duration              = [int64]$InputObject.Duration.Ticks
+                DiscoveryDuration     = [int64]$InputObject.DiscoveryDuration.Ticks
+                UserDuration          = [int64]$InputObject.UserDuration.Ticks
+                FrameworkDuration     = [int64]$InputObject.FrameworkDuration.Ticks
+            }
         }
         'Block' {
-            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
-            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
-            $inputObject | Add-Member -MemberType NoteProperty -Name Children -Value $InputObject.Order
-            $inputObject
-            $InputObject.Order | Get-PesterTestTree
+            $Name = ($InputObject.ExpandedName)
+            $childPath = @($Path, $Name)
+            $children.Add(($InputObject.Order | Get-PesterTestTree -Path $childPath))
+            [pscustomobject]@{
+                Depth                 = ($InputObject.Path.Count + 1)
+                ItemType              = $InputObject.ItemType
+                Name                  = $Name
+                Path                  = $Path
+                Children              = $children
+                Result                = $InputObject.Result
+                FailedCount           = $InputObject.FailedCount
+                FailedBlocksCount     = $InputObject.FailedBlocksCount
+                FailedContainersCount = $InputObject.FailedContainersCount
+                PassedCount           = $InputObject.PassedCount
+                SkippedCount          = $InputObject.SkippedCount
+                InconclusiveCount     = $InputObject.InconclusiveCount
+                NotRunCount           = $InputObject.NotRunCount
+                TotalCount            = $InputObject.TotalCount
+                Executed              = $InputObject.Executed
+                ExecutedAt            = $InputObject.ExecutedAt
+                Version               = $InputObject.Version
+                PSVersion             = $InputObject.PSVersion
+                Plugins               = $InputObject.Plugins
+                PluginConfiguration   = $InputObject.PluginConfiguration
+                PluginData            = $InputObject.PluginData
+                Duration              = [int64]$InputObject.Duration.Ticks
+                DiscoveryDuration     = [int64]$InputObject.DiscoveryDuration.Ticks
+                UserDuration          = [int64]$InputObject.UserDuration.Ticks
+                FrameworkDuration     = [int64]$InputObject.FrameworkDuration.Ticks
+            }
         }
         'Test' {
-            $inputObject | Add-Member -MemberType NoteProperty -Name Depth -Value ($InputObject.Path.Count + 1)
-            $inputObject | Add-Member -MemberType NoteProperty -Name Name -Value ($InputObject.ExpandedName) -Force
-            $inputObject
+            $Name = ($InputObject.ExpandedName)
+            [pscustomobject]@{
+                Depth                 = ($InputObject.Path.Count + 1)
+                ItemType              = $InputObject.ItemType
+                Name                  = $Name
+                Path                  = $Path
+                Result                = $InputObject.Result
+                FailedCount           = $InputObject.FailedCount
+                FailedBlocksCount     = $InputObject.FailedBlocksCount
+                FailedContainersCount = $InputObject.FailedContainersCount
+                PassedCount           = $InputObject.PassedCount
+                SkippedCount          = $InputObject.SkippedCount
+                InconclusiveCount     = $InputObject.InconclusiveCount
+                NotRunCount           = $InputObject.NotRunCount
+                TotalCount            = $InputObject.TotalCount
+                Executed              = $InputObject.Executed
+                ExecutedAt            = $InputObject.ExecutedAt
+                Version               = $InputObject.Version
+                PSVersion             = $InputObject.PSVersion
+                Plugins               = $InputObject.Plugins
+                PluginConfiguration   = $InputObject.PluginConfiguration
+                PluginData            = $InputObject.PluginData
+                Duration              = [int64]$InputObject.Duration.Ticks
+                DiscoveryDuration     = [int64]$InputObject.DiscoveryDuration.Ticks
+                UserDuration          = [int64]$InputObject.UserDuration.Ticks
+                FrameworkDuration     = [int64]$InputObject.FrameworkDuration.Ticks
+            }
         }
         default {
             Write-Error "Unknown object type: [$($InputObject.GetType().Name)]"
@@ -853,7 +981,7 @@ filter Set-PesterReportConfigurationSummary {
         [Pester.Run] $TestResults
     )
 
-    $configurationHashtable = $TestResults.Configuration | Convert-PesterConfigurationToHashtable | Format-Hashtable
+    $configurationHashtable = $TestResults.Configuration | ConvertFrom-PesterConfiguration -AsHashtable | Format-Hashtable
 
     Details 'Configuration' {
         CodeBlock 'pwsh' {

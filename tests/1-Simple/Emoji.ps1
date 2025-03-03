@@ -36,5 +36,5 @@ function Get-EmojiByKind {
     param(
         [string] $Kind
     )
-    $script:emojis | Where-Object Kind -EQ $Kind
+    $script:emojis | Where-Object Kind -eq $Kind
 }

@@ -21,48 +21,47 @@ Describe 'Emoji' {
 Describe 'Get-Emoji' {
     Context 'Lookup by whole name' {
         It 'Returns 🌵 (cactus)' {
-            Get-Emoji -Name cactus | Should -Be '🌵'
+            (Get-Emoji -Name cactus).Symbol | Should -Be '🌵'
         }
 
         It 'Returns 🦒 (giraffe)' {
-            Get-Emoji -Name giraffe | Should -Be '🦒'
+            Get-Emoji -Name giraffe -Property Symbol | Should -Be '🦒'
         }
     }
 
     Context 'Lookup by wildcard' {
         Context 'by prefix' {
             BeforeAll {
-                $script:emojis = Get-Emoji -Name pen*
+                $penEmojis = Get-Emoji -Name pen*
             }
-
             It 'Returns ✏️ (pencil)' {
-                $script:emojis | Should -Contain '✏️'
+                $penEmojis.Symbol | Should -Contain '✏️'
             }
 
             It 'Returns 🐧 (penguin)' {
-                $script:emojis | Should -Contain '🐧'
+                $penEmojis.Kind | Should -Contain 'Animal'
             }
 
             It 'Returns 😔 (pensive)' {
-                $script:emojis | Should -Contain '😔'
+                $penEmojis.Name | Should -Contain 'pensive'
             }
         }
 
         Context 'by contains' {
             BeforeAll {
-                $script:emojis = Get-Emoji -Name *smiling*
+                $smilingEmojis = Get-Emoji -Name *smiling*
             }
 
             It 'Returns 🙂 (slightly smiling face)' {
-                $script:emojis | Should -Contain '🙂'
+                $smilingEmojis.Symbol | Should -Contain '🙂'
             }
 
             It 'Returns 😁 (beaming face with smiling eyes)' {
-                $script:emojis | Should -Contain '😁'
+                $smilingEmojis.Kind | Should -Contain 'Face'
             }
 
             It 'Returns 😊 (smiling face with smiling eyes)' {
-                $script:emojis | Should -Contain '😊'
+                $smilingEmojis.Name | Should -Contain 'smiling face with smiling eyes'
             }
         }
     }

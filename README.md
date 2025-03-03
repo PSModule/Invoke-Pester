@@ -255,6 +255,7 @@ jobs:
 | **Input**                            | **Description**                                                                                        | **Default**                     |
 |--------------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------------|
 | `Path`                               | Path to where tests are located or a configuration file.                                               | *(none)*                        |
+| `ReportAsJson`                       | Output generated reports in JSON format in addition to the configured format through Pester.           | `true`                          |
 | `Run_Path`                           | Directories/files to be searched for tests.                                                            | *(none)*                        |
 | `Run_ExcludePath`                    | Directories/files to exclude from the run.                                                             | *(none)*                        |
 | `Run_ScriptBlock`                    | ScriptBlocks containing tests to be executed.                                                          | *(none)*                        |

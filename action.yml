@@ -10,6 +10,11 @@ inputs:
     description: |
       Path to where tests are located or a configuration file.
     required: false
+  ReportAsJson:
+    description: |
+      Output generated reports in JSON format in addition to the configured format through Pester.
+    required: false
+    default: 'true'
   Run_Path:
     description: |
       Directories to be searched for tests, paths directly to test files, or combination of both.
@@ -267,6 +272,8 @@ runs:
       shell: pwsh
       continue-on-error: true
       working-directory: ${{ inputs.WorkingDirectory }}
+      env:
+        PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
       id: test
       run: ${{ github.action_path }}/scripts/main.ps1
 
@@ -276,6 +283,8 @@ runs:
       with:
         name: ${{ steps.test.outputs.TestSuiteName }}-TestResults
         path: ${{ steps.test.outputs.TestResultOutputPath }}
+        retention-days: 1
+        if-no-files-found: error
 
     - name: Upload code coverage report - [${{ steps.test.outputs.TestSuiteName }}-CodeCoverage]
       uses: actions/upload-artifact@v4
@@ -283,6 +292,8 @@ runs:
       with:
         name: ${{ steps.test.outputs.TestSuiteName }}-CodeCoverage
         path: ${{ steps.test.outputs.CodeCoverageOutputPath }}
+        retention-days: 1
+        if-no-files-found: error
 
     - name: Status
       shell: pwsh

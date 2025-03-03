@@ -176,7 +176,7 @@ LogGroup 'Init - Export containers' {
         Write-Output "Containers from configuration: [$($existingContainers.Count)]"
         foreach ($existingContainer in $existingContainers) {
             Write-Output "Processing container [$existingContainer]"
-            $containers += $existingContainer | Convert-PesterConfigurationToHashtable
+            $containers += $existingContainer | ConvertTo-Hashtable
         }
     }
     Write-Output "Containers from configuration: [$($containers.Count)]"
@@ -223,8 +223,8 @@ LogGroup 'Init - Export containers' {
 
 LogGroup 'Init - Export configuration' {
     $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
-    $configuration.TestResult.OutputPath = "$pwd/test_reports/$artifactName-TestResult-Report.xml"
-    $configuration.CodeCoverage.OutputPath = "$pwd/test_reports/$artifactName-CodeCoverage-Report.xml"
+    $configuration.TestResult.OutputPath = "$pwd/TestResult/$artifactName-TestResult-Report.xml"
+    $configuration.CodeCoverage.OutputPath = "$pwd/CodeCoverage/$artifactName-CodeCoverage-Report.xml"
     $configuration.Run.PassThru = $true
 
     Format-Hashtable -Hashtable $configuration
