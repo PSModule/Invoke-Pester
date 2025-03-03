@@ -109,7 +109,7 @@ LogGroup 'Eval - Set outputs' {
     if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.CodeCoverage.Enabled.Value) {
         $jsonOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value -Replace '\.xml$', '.json'
         Write-Output "Exporting code coverage results to [$jsonOutputPath]"
-        $testResults.CodeCoverage | ConvertTo-Json -Depth 100 | Out-File -FilePath $jsonOutputPath
+        $testResults.CodeCoverage | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
     }
 }
 
