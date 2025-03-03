@@ -101,17 +101,15 @@ LogGroup 'Eval - Set outputs' {
     Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $codeCoverageOutputFolderPath
 
     if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
-        $outputFolderPath = $testResults.Configuration.TestResult.OutputPath.Value | Split-Path -Parent
-        $outputFilePath = Join-Path -Path $outputFolderPath -ChildPath 'TestResults.json'
-        Write-Host "Exporting test results to [$outputFilePath]"
-        $testResults | ConvertTo-Json -Depth 2 | Out-File -FilePath $outputFilePath
+        $jsonOutputPath = $testResults.Configuration.TestResult.OutputPath.Value -Replace '\.xml$', '.json'
+        Write-Host "Exporting test results to [$jsonOutputPath]"
+        $testResults | ConvertTo-Json -Depth 2 | Out-File -FilePath $jsonOutputPath
     }
 
     if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.CodeCoverage.Enabled.Value) {
-        $outputFolderPath = $testResults.Configuration.CodeCoverage.OutputPath.Value | Split-Path -Parent
-        $outputFilePath = Join-Path -Path $outputFolderPath -ChildPath 'CodeCoverage.json'
-        Write-Host "Exporting CodeCoverage results to [$outputFilePath]"
-        $testResults.CodeCoverage | ConvertTo-Json -Depth 100 | Out-File -FilePath $outputFilePath
+        $jsonOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value -Replace '\.xml$', '.json'
+        Write-Host "Exporting code coverage results to [$jsonOutputPath]"
+        $testResults.CodeCoverage | ConvertTo-Json -Depth 100 | Out-File -FilePath $jsonOutputPath
     }
 }
 
