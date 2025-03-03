@@ -17,7 +17,24 @@ function Get-Emoji {
         #>
     [CmdletBinding()]
     param(
-        [string]$Name = '*'
+        [string] $Name = '*',
+        [string] $Property
     )
-    $script:emojis | Where-Object Name -Like $Name | ForEach-Object Symbol
+    if ($Property) {
+        $script:emojis | Where-Object Name -Like $Name | ForEach-Object $Property
+    } else {
+        $script:emojis | Where-Object Name -Like $Name
+    }
+}
+
+function Get-EmojiByKind {
+    <#
+            .SYNOPSIS
+            Get emoji by kind.
+        #>
+    [CmdletBinding()]
+    param(
+        [string] $Kind
+    )
+    $script:emojis | Where-Object Kind -EQ $Kind
 }
