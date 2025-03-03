@@ -532,7 +532,7 @@ filter ConvertFrom-PesterConfiguration {
                 foreach ($container in $settingValue) {
                     $containers.Add(
                         [pscustomobject]@{
-                            Path = $container.Path.ToString()
+                            Path = $container.Item.FullName
                             Data = $container.Data
                         }
                     )
