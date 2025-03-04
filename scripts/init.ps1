@@ -115,7 +115,8 @@ LogGroup 'Init - Load configuration - Action overrides' {
             Path                  = $inputs.CodeCoverage_Path
             ExcludeTests          = [string]::IsNullOrEmpty($inputs.CodeCoverage_ExcludeTests) ? $null : $inputs.CodeCoverage_ExcludeTests -eq 'true'
             RecursePaths          = [string]::IsNullOrEmpty($inputs.CodeCoverage_RecursePaths) ? $null : $inputs.CodeCoverage_RecursePaths -eq 'true'
-            CoveragePercentTarget = [decimal]$inputs.CodeCoverage_CoveragePercentTarget
+            CoveragePercentTarget = [string]::IsNullOrEmpty($inputs.CodeCoverage_CoveragePercentTarget) ?
+            $null : [decimal]$inputs.CodeCoverage_CoveragePercentTarget
             UseBreakpoints        = [string]::IsNullOrEmpty($inputs.CodeCoverage_UseBreakpoints) ?
             $null : $inputs.CodeCoverage_UseBreakpoints -eq 'true'
             SingleHitBreakpoints  = [string]::IsNullOrEmpty($inputs.CodeCoverage_SingleHitBreakpoints) ?
