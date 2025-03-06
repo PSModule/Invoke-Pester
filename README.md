@@ -252,57 +252,57 @@ jobs:
 *All inputs are optional unless noted otherwise. For more details, refer to the [Pester Configuration documentation](https://pester.dev/docs/usage/configuration).*
 `Run.PassThru` is forced to `$true` to ensure the action can capture test results.
 
-| **Input**                            | **Description**                                                                                        | **Default**                     |
-|--------------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------------|
-| `Path`                               | Path to where tests are located or a configuration file.                                               | *(none)*                        |
-| `ReportAsJson`                       | Output generated reports in JSON format in addition to the configured format through Pester.           | `true`                          |
-| `Run_Path`                           | Directories/files to be searched for tests.                                                            | *(none)*                        |
-| `Run_ExcludePath`                    | Directories/files to exclude from the run.                                                             | *(none)*                        |
-| `Run_ScriptBlock`                    | ScriptBlocks containing tests to be executed.                                                          | *(none)*                        |
-| `Run_Container`                      | ContainerInfo objects containing tests to be executed.                                                 | *(none)*                        |
-| `Run_TestExtension`                  | Filter used to identify test files (e.g. `.Tests.ps1`).                                                | *(none)*                        |
-| `Run_Exit`                           | Whether to exit with a non-zero exit code on failure.                                                  | *(none)*                        |
-| `Run_Throw`                          | Whether to throw an exception on test failure.                                                         | *(none)*                        |
-| `Run_SkipRun`                        | Discovery only, skip actual test run.                                                                  | *(none)*                        |
-| `Run_SkipRemainingOnFailure`         | Skips remaining tests after the first failure. Options: `None`, `Run`, `Container`, `Block`.           | *(none)*                        |
-| `Filter_Tag`                         | Tags of Describe/Context/It blocks to run.                                                             | *(none)*                        |
-| `Filter_ExcludeTag`                  | Tags of Describe/Context/It blocks to exclude.                                                         | *(none)*                        |
-| `Filter_Line`                        | Filter by file + scriptblock start line (e.g. `C:\tests\file1.Tests.ps1:37`).                          | *(none)*                        |
-| `Filter_ExcludeLine`                 | Exclude by file + scriptblock start line. Precedence over `Filter_Line`.                               | *(none)*                        |
-| `Filter_FullName`                    | Full name of a test with wildcards, joined by dot. E.g. `*.describe Get-Item.test1`                    | *(none)*                        |
-| `CodeCoverage_Enabled`               | Enable code coverage.                                                                                  | *(none)*                        |
-| `CodeCoverage_OutputFormat`          | Format for the coverage report. Possible values: `JaCoCo`, `CoverageGutters`, `Cobertura`.             | *(none)*                        |
-| `CodeCoverage_OutputPath`            | Where to save the code coverage report (relative to the current dir).                                  | *(none)*                        |
-| `CodeCoverage_OutputEncoding`        | Encoding of the coverage file.                                                                         | *(none)*                        |
-| `CodeCoverage_Path`                  | Files/directories to measure coverage on (by default, reuses `Path` from the general settings).        | *(none)*                        |
-| `CodeCoverage_ExcludeTests`          | Exclude tests themselves from coverage.                                                                | *(none)*                        |
-| `CodeCoverage_RecursePaths`          | Recurse through coverage directories.                                                                  | *(none)*                        |
-| `CodeCoverage_CoveragePercentTarget` | Desired minimum coverage percentage.                                                                   | *(none)*                        |
-| `CodeCoverage_UseBreakpoints`        | **Experimental**: When `false`, use a Profiler-based tracer instead of breakpoints.                    | *(none)*                        |
-| `CodeCoverage_SingleHitBreakpoints`  | Remove breakpoints after first hit.                                                                    | *(none)*                        |
-| `TestResult_Enabled`                 | Enable test-result output (e.g. NUnitXml, JUnitXml).                                                   | *(none)*                        |
-| `TestResult_OutputFormat`            | Possible values: `NUnitXml`, `NUnit2.5`, `NUnit3`, `JUnitXml`.                                         | *(none)*                        |
-| `TestResult_OutputPath`              | Where to save the test-result report (relative path).                                                  | *(none)*                        |
-| `TestResult_OutputEncoding`          | Encoding of the test-result file.                                                                      | *(none)*                        |
-| `TestResult_TestSuiteName`           | Name used for the root `test-suite` element in the result file.                                        | *(none)*                        |
-| `Should_ErrorAction`                 | Controls if `Should` throws on error. Use `Stop` to throw, or `Continue` to fail at the end.           | *(none)*                        |
-| `Debug_ShowFullErrors`               | Show Pester internal stack on errors. (Deprecated – overrides `Output.StackTraceVerbosity` to `Full`). | *(none)*                        |
-| `Debug_WriteDebugMessages`           | Write debug messages to screen.                                                                        | *(none)*                        |
-| `Debug_WriteDebugMessagesFrom`       | Filter debug messages by source. Wildcards allowed.                                                    | *(none)*                        |
-| `Debug_ShowNavigationMarkers`        | Write paths after every block/test for easy navigation in Visual Studio Code.                          | *(none)*                        |
-| `Debug_ReturnRawResultObject`        | Returns an unfiltered result object, for development only.                                             | *(none)*                        |
-| `Output_Verbosity`                   | Verbosity: `None`, `Normal`, `Detailed`, `Diagnostic`.                                                 | *(none)*                        |
-| `Output_StackTraceVerbosity`         | Stacktrace detail: `None`, `FirstLine`, `Filtered`, `Full`.                                            | *(none)*                        |
-| `Output_CIFormat`                    | CI format of error output: `None`, `Auto`, `AzureDevops`, `GithubActions`.                             | *(none)*                        |
-| `Output_CILogLevel`                  | CI log level: `Error` or `Warning`.                                                                    | *(none)*                        |
-| `Output_RenderMode`                  | How to render console output: `Auto`, `Ansi`, `ConsoleColor`, `Plaintext`.                             | *(none)*                        |
-| `TestDrive_Enabled`                  | Enable `TestDrive`.                                                                                    | *(none)*                        |
-| `TestRegistry_Enabled`               | Enable `TestRegistry`.                                                                                 | *(none)*                        |
-| `Debug`                              | Enable debug output.                                                                                   | `'false'`                       |
-| `Verbose`                            | Enable verbose output.                                                                                 | `'false'`                       |
-| `Version`                            | Specifies the exact version of the GitHub module to install.                                           | *(none)*                        |
-| `Prerelease`                         | Allow prerelease versions if available.                                                                | `'false'`                       |
-| `WorkingDirectory`                   | The working directory where the script runs.                                                           | `${{ github.workspace }}`       |
+| **Input**                            | **Description**                                                                                        | **Default** |
+|--------------------------------------|--------------------------------------------------------------------------------------------------------|-------------|
+| `Path`                               | Path to where tests are located or a configuration file.                                               | *(none)*    |
+| `ReportAsJson`                       | Output generated reports in JSON format in addition to the configured format through Pester.           | `true`      |
+| `Run_Path`                           | Directories/files to be searched for tests.                                                            | *(none)*    |
+| `Run_ExcludePath`                    | Directories/files to exclude from the run.                                                             | *(none)*    |
+| `Run_ScriptBlock`                    | ScriptBlocks containing tests to be executed.                                                          | *(none)*    |
+| `Run_Container`                      | ContainerInfo objects containing tests to be executed.                                                 | *(none)*    |
+| `Run_TestExtension`                  | Filter used to identify test files (e.g. `.Tests.ps1`).                                                | *(none)*    |
+| `Run_Exit`                           | Whether to exit with a non-zero exit code on failure.                                                  | *(none)*    |
+| `Run_Throw`                          | Whether to throw an exception on test failure.                                                         | *(none)*    |
+| `Run_SkipRun`                        | Discovery only, skip actual test run.                                                                  | *(none)*    |
+| `Run_SkipRemainingOnFailure`         | Skips remaining tests after the first failure. Options: `None`, `Run`, `Container`, `Block`.           | *(none)*    |
+| `Filter_Tag`                         | Tags of Describe/Context/It blocks to run.                                                             | *(none)*    |
+| `Filter_ExcludeTag`                  | Tags of Describe/Context/It blocks to exclude.                                                         | *(none)*    |
+| `Filter_Line`                        | Filter by file + scriptblock start line (e.g. `C:\tests\file1.Tests.ps1:37`).                          | *(none)*    |
+| `Filter_ExcludeLine`                 | Exclude by file + scriptblock start line. Precedence over `Filter_Line`.                               | *(none)*    |
+| `Filter_FullName`                    | Full name of a test with wildcards, joined by dot. E.g. `*.describe Get-Item.test1`                    | *(none)*    |
+| `CodeCoverage_Enabled`               | Enable code coverage.                                                                                  | *(none)*    |
+| `CodeCoverage_OutputFormat`          | Format for the coverage report. Possible values: `JaCoCo`, `CoverageGutters`, `Cobertura`.             | *(none)*    |
+| `CodeCoverage_OutputPath`            | Where to save the code coverage report (relative to the current dir).                                  | *(none)*    |
+| `CodeCoverage_OutputEncoding`        | Encoding of the coverage file.                                                                         | *(none)*    |
+| `CodeCoverage_Path`                  | Files/directories to measure coverage on (by default, reuses `Path` from the general settings).        | *(none)*    |
+| `CodeCoverage_ExcludeTests`          | Exclude tests themselves from coverage.                                                                | *(none)*    |
+| `CodeCoverage_RecursePaths`          | Recurse through coverage directories.                                                                  | *(none)*    |
+| `CodeCoverage_CoveragePercentTarget` | Desired minimum coverage percentage.                                                                   | *(none)*    |
+| `CodeCoverage_UseBreakpoints`        | **Experimental**: When `false`, use a Profiler-based tracer instead of breakpoints.                    | *(none)*    |
+| `CodeCoverage_SingleHitBreakpoints`  | Remove breakpoints after first hit.                                                                    | *(none)*    |
+| `TestResult_Enabled`                 | Enable test-result output (e.g. NUnitXml, JUnitXml).                                                   | *(none)*    |
+| `TestResult_OutputFormat`            | Possible values: `NUnitXml`, `NUnit2.5`, `NUnit3`, `JUnitXml`.                                         | *(none)*    |
+| `TestResult_OutputPath`              | Where to save the test-result report (relative path).                                                  | *(none)*    |
+| `TestResult_OutputEncoding`          | Encoding of the test-result file.                                                                      | *(none)*    |
+| `TestResult_TestSuiteName`           | Name used for the root `test-suite` element in the result file.                                        | *(none)*    |
+| `Should_ErrorAction`                 | Controls if `Should` throws on error. Use `Stop` to throw, or `Continue` to fail at the end.           | *(none)*    |
+| `Debug_ShowFullErrors`               | Show Pester internal stack on errors. (Deprecated – overrides `Output.StackTraceVerbosity` to `Full`). | *(none)*    |
+| `Debug_WriteDebugMessages`           | Write debug messages to screen.                                                                        | *(none)*    |
+| `Debug_WriteDebugMessagesFrom`       | Filter debug messages by source. Wildcards allowed.                                                    | *(none)*    |
+| `Debug_ShowNavigationMarkers`        | Write paths after every block/test for easy navigation in Visual Studio Code.                          | *(none)*    |
+| `Debug_ReturnRawResultObject`        | Returns an unfiltered result object, for development only.                                             | *(none)*    |
+| `Output_Verbosity`                   | Verbosity: `None`, `Normal`, `Detailed`, `Diagnostic`.                                                 | *(none)*    |
+| `Output_StackTraceVerbosity`         | Stacktrace detail: `None`, `FirstLine`, `Filtered`, `Full`.                                            | *(none)*    |
+| `Output_CIFormat`                    | CI format of error output: `None`, `Auto`, `AzureDevops`, `GithubActions`.                             | *(none)*    |
+| `Output_CILogLevel`                  | CI log level: `Error` or `Warning`.                                                                    | *(none)*    |
+| `Output_RenderMode`                  | How to render console output: `Auto`, `Ansi`, `ConsoleColor`, `Plaintext`.                             | *(none)*    |
+| `TestDrive_Enabled`                  | Enable `TestDrive`.                                                                                    | *(none)*    |
+| `TestRegistry_Enabled`               | Enable `TestRegistry`.                                                                                 | *(none)*    |
+| `Debug`                              | Enable debug output.                                                                                   | `'false'`   |
+| `Verbose`                            | Enable verbose output.                                                                                 | `'false'`   |
+| `Version`                            | Specifies the exact version of the GitHub module to install.                                           | *(none)*    |
+| `Prerelease`                         | Allow prerelease versions if available.                                                                | `'false'`   |
+| `WorkingDirectory`                   | The working directory where the script runs.                                                           | `'.'`       |
 
 ### Outputs
 
