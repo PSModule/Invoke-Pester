@@ -102,7 +102,7 @@ LogGroup 'Eval - Set outputs' {
     Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResultOutputFolderPath
     Set-GitHubOutput -Name 'CodeCoverageEnabled' -Value $testResults.Configuration.CodeCoverage.Enabled.Value
     Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $codeCoverageOutputFolderPath
-    Set-GitHubOutput -Name 'Executed' -Value $testResults.Executed
+    Set-GitHubOutput -Name 'TestResults' -Value ($testResults | ConvertTo-Json -Depth 0 -Compress)
 
     if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
         $jsonOutputPath = $testResults.Configuration.TestResult.OutputPath.Value -Replace '\.xml$', '.json'

@@ -268,14 +268,16 @@ runs:
           # Invoke-Pester (init)
           ${{ github.action_path }}/scripts/init.ps1
 
-    - name: Invoke-Pester
+    - name: Invoke-Pester (exec)
       shell: pwsh
       continue-on-error: true
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
       id: test
-      run: ${{ github.action_path }}/scripts/main.ps1
+      run: |
+        # Invoke-Pester (exec)
+        ${{ github.action_path }}/scripts/exec.ps1
 
     - name: Upload test results - [${{ steps.test.outputs.TestSuiteName }}-TestResults]
       uses: actions/upload-artifact@v4
@@ -299,11 +301,12 @@ runs:
       shell: pwsh
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
-        PSMODULE_INVOKE_PESTER_INTERNAL_Executed: ${{ steps.test.outputs.Executed }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_TestResults: ${{ steps.test.outputs.TestResults }}
         PSMODULE_INVOKE_PESTER_INTERNAL_Outcome: ${{ steps.test.outcome }}
         PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion: ${{ steps.test.conclusion }}
       run: |
-        $executed = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Executed
+        $testResults = $env:PSMODULE_INVOKE_PESTER_INTERNAL_TestResults | ConvertFrom-Json
+        $testResults | Format-List | Out-String
         $outcome = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Outcome
         $conclusion = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion
 
@@ -311,7 +314,7 @@ runs:
           Executed   = $executed
           Outcome    = $outcome
           Conclusion = $conclusion
-        } | Format-Table -AutoSize
+        } | Format-List | Out-String
 
         # If the tests did not execute, exit with a failure code
         if ($executed -ne 'true') {
@@ -326,11 +329,5 @@ runs:
         # If the conclusion is not success
         if ($conclusion -ne 'success') {
           Write-Error "Tests did not pass."
-          exit 1
-        }
-
-
-        if ($outcome -ne 'success') {
-
           exit 1
         }
