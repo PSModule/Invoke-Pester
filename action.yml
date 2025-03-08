@@ -324,10 +324,12 @@ runs:
         $testResults = $env:PSMODULE_INVOKE_PESTER_INTERNAL_TestResults | ConvertFrom-Json
         $outcome = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Outcome
         $conclusion = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion
-
-        $testResults | Add-Member -MemberType NoteProperty -Name Outcome -Value $outcome -Force
-        $testResults | Add-Member -MemberType NoteProperty -Name Conclusion -Value $conclusion -Force
         $testResults | Format-List | Out-String
+
+        [PSCustomObject]@{
+          Outcome = $outcome
+          Conclusion = $conclusion
+        } | Format-List | Out-String
 
         # If the tests did not execute, exit with a failure code
         if ($testResults.Executed -ne 'true') {
