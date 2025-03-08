@@ -64,6 +64,30 @@ jobs:
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
 
+  ActionTest1SimpleExecutionFailure:
+    name: Action-Test - [1-Simple-ExecutionFailure]
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.action-test.outcome }}
+      conclusion: ${{ steps.action-test.conclusion }}
+    steps:
+      # Need to check out as part of the test, as its a local action
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Action-Test [1-Simple-ExecutionFailure]
+        uses: ./
+        id: action-test
+        continue-on-error: true
+        with:
+          WorkingDirectory: tests/1-Simple-ExecutionFailure
+
+      - name: Status
+        shell: pwsh
+        run: |
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
     runs-on: ubuntu-latest
@@ -117,6 +141,7 @@ jobs:
     needs:
       - ActionTest1Simple
       - ActionTest1SimpleFailure
+      - ActionTest1SimpleExecutionFailure
       - ActionTest2Standard
       - ActionTest3Advanced
     if: always()
@@ -135,18 +160,28 @@ jobs:
             $ActionTest1SimpleConclusion = "${{ needs.ActionTest1Simple.outputs.conclusion }}"
             $ActionTest1SimpleExpectedConclusion = "success"
             $ActionTest1SimpleConclusionResult = $ActionTest1SimpleConclusion -eq $ActionTest1SimpleExpectedConclusion
+
             $ActionTest1SimpleFailureOutcome = "${{ needs.ActionTest1SimpleFailure.outputs.outcome }}"
             $ActionTest1SimpleFailureExpectedOutcome = "failure"
             $ActionTest1SimpleFailureOutcomeResult = $ActionTest1SimpleFailureOutcome -eq $ActionTest1SimpleFailureExpectedOutcome
             $ActionTest1SimpleFailureConclusion = "${{ needs.ActionTest1SimpleFailure.outputs.conclusion }}"
             $ActionTest1SimpleFailureExpectedConclusion = "success"
             $ActionTest1SimpleFailureConclusionResult = $ActionTest1SimpleFailureConclusion -eq $ActionTest1SimpleFailureExpectedConclusion
+
+            $ActionTest1SimpleExecutionFailureOutcome = "${{ needs.ActionTest1SimpleExecutionFailure.outputs.outcome }}"
+            $ActionTest1SimpleExecutionFailureExpectedOutcome = "failure"
+            $ActionTest1SimpleExecutionFailureOutcomeResult = $ActionTest1SimpleExecutionFailureOutcome -eq $ActionTest1SimpleExecutionFailureExpectedOutcome
+            $ActionTest1SimpleExecutionFailureConclusion = "${{ needs.ActionTest1SimpleExecutionFailure.outputs.conclusion }}"
+            $ActionTest1SimpleExecutionFailureExpectedConclusion = "success"
+            $ActionTest1SimpleExecutionFailureConclusionResult = $ActionTest1SimpleExecutionFailureConclusion -eq $ActionTest1SimpleExecutionFailureExpectedConclusion
+
             $ActionTest2StandardOutcome = "${{ needs.ActionTest2Standard.outputs.outcome }}"
             $ActionTest2StandardExpectedOutcome = "success"
             $ActionTest2StandardOutcomeResult = $ActionTest2StandardOutcome -eq $ActionTest2StandardExpectedOutcome
             $ActionTest2StandardConclusion = "${{ needs.ActionTest2Standard.outputs.conclusion }}"
             $ActionTest2StandardExpectedConclusion = "success"
             $ActionTest2StandardConclusionResult = $ActionTest2StandardConclusion -eq $ActionTest2StandardExpectedConclusion
+
             $ActionTest3AdvancedOutcome = "${{ needs.ActionTest3Advanced.outputs.outcome }}"
             $ActionTest3AdvancedExpectedOutcome = "success"
             $ActionTest3AdvancedOutcomeResult = $ActionTest3AdvancedOutcome -eq $ActionTest3AdvancedExpectedOutcome
@@ -172,6 +207,15 @@ jobs:
                 Conclusion         = $ActionTest1SimpleFailureConclusion
                 ExpectedConclusion = $ActionTest1SimpleFailureExpectedConclusion
                 PassedConclusion   = $ActionTest1SimpleFailureConclusionResult
+              },
+              [PSCustomObject]@{
+                Name               = "Action-Test - [1-Simple-ExecutionFailure]"
+                Outcome            = $ActionTest1SimpleExecutionFailureOutcome
+                ExpectedOutcome    = $ActionTest1SimpleExecutionFailureExpectedOutcome
+                PassedOutcome      = $ActionTest1SimpleExecutionFailureOutcomeResult
+                Conclusion         = $ActionTest1SimpleExecutionFailureConclusion
+                ExpectedConclusion = $ActionTest1SimpleExecutionFailureExpectedConclusion
+                PassedConclusion   = $ActionTest1SimpleExecutionFailureConclusionResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [2-Standard]"
