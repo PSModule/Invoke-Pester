@@ -180,7 +180,7 @@ jobs:
             $ActionTest1SimpleExecutedResult = $ActionTest1SimpleExecuted -eq $ActionTest1SimpleExecutedExpected
             $ActionTest1SimpleResult = '${{ needs.ActionTest1Simple.outputs.Result }}'
             $ActionTest1SimpleResultExpected = 'Passed'
-            $ActionTest1SimplePassedResult = $ActionTest1SimpleResult -eq $ActionTest1SimpleResultExpected
+            $ActionTest1SimpleResultResult = $ActionTest1SimpleResult -eq $ActionTest1SimpleResultExpected
 
             $ActionTest1SimpleFailureOutcome = '${{ needs.ActionTest1SimpleFailure.outputs.outcome }}'
             $ActionTest1SimpleFailureOutcomeExpected = 'failure'
@@ -193,7 +193,7 @@ jobs:
             $ActionTest1SimpleFailureExecutedResult = $ActionTest1SimpleFailureExecuted -eq $ActionTest1SimpleFailureExecutedExpected
             $ActionTest1SimpleFailureResult = '${{ needs.ActionTest1SimpleFailure.outputs.Result }}'
             $ActionTest1SimpleFailureResultExpected = 'Failed'
-            $ActionTest1SimpleFailurePassedResult = $ActionTest1SimpleFailureResult -eq $ActionTest1SimpleFailureResultExpected
+            $ActionTest1SimpleFailureResultResult = $ActionTest1SimpleFailureResult -eq $ActionTest1SimpleFailureResultExpected
 
             $ActionTest1SimpleExecutionFailureOutcome = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.outcome }}'
             $ActionTest1SimpleExecutionFailureOutcomeExpected = 'failure'
@@ -206,7 +206,7 @@ jobs:
             $ActionTest1SimpleExecutionFailureExecutedResult = $ActionTest1SimpleExecutionFailureExecuted -eq $ActionTest1SimpleExecutionFailureExecutedExpected
             $ActionTest1SimpleExecutionFailureResult = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Result }}'
             $ActionTest1SimpleExecutionFailureResultExpected = ''
-            $ActionTest1SimpleExecutionFailurePassedResult = $ActionTest1SimpleExecutionFailureResult -eq $ActionTest1SimpleExecutionFailureResultExpected
+            $ActionTest1SimpleExecutionFailureResultResult = $ActionTest1SimpleExecutionFailureResult -eq $ActionTest1SimpleExecutionFailureResultExpected
 
             $ActionTest2StandardOutcome = '${{ needs.ActionTest2Standard.outputs.outcome }}'
             $ActionTest2StandardOutcomeExpected = 'success'
@@ -219,7 +219,7 @@ jobs:
             $ActionTest2StandardExecutedResult = $ActionTest2StandardExecuted -eq $ActionTest2StandardExecutedExpected
             $ActionTest2StandardResult = '${{ needs.ActionTest2Standard.outputs.Result }}'
             $ActionTest2StandardResultExpected = 'Passed'
-            $ActionTest2StandardPassedResult = $ActionTest2StandardResult -eq $ActionTest2StandardResultExpected
+            $ActionTest2StandardResultResult = $ActionTest2StandardResult -eq $ActionTest2StandardResultExpected
 
             $ActionTest3AdvancedOutcome = '${{ needs.ActionTest3Advanced.outputs.outcome }}'
             $ActionTest3AdvancedOutcomeExpected = 'success'
@@ -232,7 +232,7 @@ jobs:
             $ActionTest3AdvancedExecutedResult = $ActionTest3AdvancedExecuted -eq $ActionTest3AdvancedExecutedExpected
             $ActionTest3AdvancedResult = '${{ needs.ActionTest3Advanced.outputs.Result }}'
             $ActionTest3AdvancedResultExpected = 'Passed'
-            $ActionTest3AdvancedPassedResult = $ActionTest3AdvancedResult -eq $ActionTest3AdvancedResultExpected
+            $ActionTest3AdvancedResultResult = $ActionTest3AdvancedResult -eq $ActionTest3AdvancedResultExpected
 
             $jobs = @(
               [PSCustomObject]@{
