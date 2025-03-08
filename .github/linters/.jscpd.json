@@ -5,7 +5,7 @@
     ],
     "ignore": [
         "**/tests/**",
-        "**.github/workflows/Action-Test**"
+        "**/.github/workflows/Action-Test**"
     ],
     "absolute": true
 }
