@@ -298,9 +298,39 @@ runs:
     - name: Status
       shell: pwsh
       working-directory: ${{ inputs.WorkingDirectory }}
+      env:
+        PSMODULE_INVOKE_PESTER_INTERNAL_Executed: ${{ steps.test.outputs.Executed }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_Outcome: ${{ steps.test.outcome }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion: ${{ steps.test.conclusion }}
       run: |
-        $outcome = '${{ steps.test.outcome }}'
-        Write-Host "outcome: [$outcome]"
+        $executed = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Executed
+        $outcome = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Outcome
+        $conclusion = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion
+
+        [pscustomobject]@{
+          Executed   = $executed
+          Outcome    = $outcome
+          Conclusion = $conclusion
+        } | Format-Table -AutoSize
+
+        # If the tests did not execute, exit with a failure code
+        if ($executed -ne 'true') {
+          Write-Error "Tests did not execute."
+          exit 1
+        }
+        # If the outcome is not success, exit with a failure code
         if ($outcome -ne 'success') {
+          Write-Error "Tests did not pass."
+          exit 1
+        }
+        # If the conclusion is not success
+        if ($conclusion -ne 'success') {
+          Write-Error "Tests did not pass."
+          exit 1
+        }
+
+
+        if ($outcome -ne 'success') {
+
           exit 1
         }
