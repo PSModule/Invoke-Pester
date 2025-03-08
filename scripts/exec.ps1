@@ -88,7 +88,9 @@ LogGroup 'Eval - Test results summary' {
     $onlyFailuresSummary = $env:PSMODULE_INVOKE_PESTER_INPUT_OnlyFailuresSummary -eq 'true'
 
     if (-not $disableStepSummary) {
+        $PSStyle.OutputRendering = 'Host'
         Set-GitHubStepSummary -Summary ($testResults | Set-PesterReportSummary -FailedOnly:$onlyFailuresSummary)
+        $PSStyle.OutputRendering = 'Ansi'
     } else {
         Write-Verbose 'Step summary has been disabled'
     }
