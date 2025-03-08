@@ -91,8 +91,8 @@ jobs:
         with:
           WorkingDirectory: tests/1-Simple-Failure
           TestResult_TestSuiteName: 1-Simple-Failure
-          ShowStepSummary: true
-          OnlyFailuresSummary: true
+          StepSummary_Enabled: true
+          StepSummary_ShowTests: Failed
 
       - name: Status
         shell: pwsh
@@ -147,8 +147,8 @@ jobs:
         with:
           WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
-          ShowStepSummary: true
-          OnlyFailuresSummary: true
+          StepSummary_Enabled: true
+          StepSummary_ShowTests: Failed
 
       - name: Status
         shell: pwsh
@@ -177,7 +177,6 @@ jobs:
           WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
           TestResult_TestSuiteName: 2-Standard-NoSummary
-          ShowStepSummary: false
 
       - name: Status
         shell: pwsh

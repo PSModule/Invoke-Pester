@@ -836,7 +836,7 @@ filter Set-PesterReportSummary {
 
         # Controls which tests to show in the summary. Allows "Full", "Failed", or "None".
         [Parameter()]
-        [string] $ShowTestsMode = "Failed",
+        [string] $ShowTestsMode = 'Failed',
 
         # Controls whether to show the configuration details in the summary.
         [Parameter()]
@@ -854,8 +854,8 @@ filter Set-PesterReportSummary {
         }
 
         # Show tests based on the specified mode
-        if ($ShowTestsMode -ne "None") {
-            $showOnlyFailed = $ShowTestsMode -eq "Failed"
+        if ($ShowTestsMode -ne 'None') {
+            $showOnlyFailed = $ShowTestsMode -eq 'Failed'
             $testResults.Containers | Set-PesterReportTestsSummary -FailedOnly:$showOnlyFailed
         }
 

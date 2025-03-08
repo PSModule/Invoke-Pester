@@ -91,13 +91,13 @@ LogGroup 'Eval - Test results summary' {
 
     if ($stepSummaryEnabled) {
         $PSStyle.OutputRendering = 'Host'
-        
+
         $summaryParams = @{
-            ShowTestOverview   = $showTestOverview
-            ShowTestsMode      = $showTests
-            ShowConfiguration  = $showConfiguration
+            ShowTestOverview  = $showTestOverview
+            ShowTestsMode     = $showTests
+            ShowConfiguration = $showConfiguration
         }
-        
+
         Set-GitHubStepSummary -Summary ($testResults | Set-PesterReportSummary @summaryParams)
         $PSStyle.OutputRendering = 'Ansi'
     } else {
