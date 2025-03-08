@@ -327,13 +327,13 @@ jobs:
                 $passed = $false
               }
 
-              if (-not $_.ExecutedResult) {
+              if (-not $_.PassedExecuted) {
                 Write-Error "Job $($_.Name) not executed as expected. (Actual: $($_.Executed), Expected: $($_.ExecutedExpected))"
                 $passed = $false
               }
 
               if (-not $_.PassedResult) {
-                Write-Error "Job $($_.Name) tests did not pass as expected. (Actual: $($_.Passed), Expected: $($_.PassedExpected))"
+                Write-Error "Job $($_.Name) tests did not pass as expected. (Actual: $($_.Result), Expected: $($_.ResultExpected))"
                 $passed = $false
               }
             }
