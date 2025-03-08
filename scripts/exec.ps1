@@ -84,10 +84,10 @@ LogGroup 'Eval - Test results' {
 }
 
 LogGroup 'Eval - Test results summary' {
-    $disableStepSummary = $env:PSMODULE_INVOKE_PESTER_INPUT_DisableStepSummary -eq 'true'
+    $showStepSummary = $env:PSMODULE_INVOKE_PESTER_INPUT_ShowStepSummary -eq 'true'
     $onlyFailuresSummary = $env:PSMODULE_INVOKE_PESTER_INPUT_OnlyFailuresSummary -eq 'true'
 
-    if (-not $disableStepSummary) {
+    if ($showStepSummary) {
         $PSStyle.OutputRendering = 'Host'
         Set-GitHubStepSummary -Summary ($testResults | Set-PesterReportSummary -FailedOnly:$onlyFailuresSummary)
         $PSStyle.OutputRendering = 'Ansi'

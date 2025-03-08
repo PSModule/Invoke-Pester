@@ -263,7 +263,7 @@ jobs:
 |--------------------------------------|--------------------------------------------------------------------------------------------------------|-------------|
 | `Path`                               | Path to where tests are located or a configuration file.                                               | *(none)*    |
 | `ReportAsJson`                       | Output generated reports in JSON format in addition to the configured format through Pester.           | `true`      |
-| `DisableStepSummary`                 | Disable GitHub step summary for test results.                                                          | `false`     |
+| `ShowStepSummary`                    | Enable GitHub step summary for test results.                                                           | `false`     |
 | `OnlyFailuresSummary`                | When set to true, the summary only shows failed tests.                                                 | `false`     |
 | `Run_Path`                           | Directories/files to be searched for tests.                                                            | *(none)*    |
 | `Run_ExcludePath`                    | Directories/files to exclude from the run.                                                             | *(none)*    |
