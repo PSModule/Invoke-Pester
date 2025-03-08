@@ -203,8 +203,14 @@ LogGroup 'Init - Export containers' {
                 Where-Object { $_.DirectoryName -ne $testDir }
             Write-Output "Subfolder test files found in [$testDir]: [$($subfolderTestFiles.Count)]"
 
-            # Combine all test files
-            $testFiles = $rootTestFiles + $subfolderTestFiles
+            # Combine all test files using a generic List
+            $testFiles = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
+            if ($rootTestFiles) {
+                $rootTestFiles | ForEach-Object { $testFiles.Add($_) }
+            }
+            if ($subfolderTestFiles) {
+                $subfolderTestFiles | ForEach-Object { $testFiles.Add($_) }
+            }
             Write-Output "Total test files found in [$testDir]: [$($testFiles.Count)]"
 
             foreach ($testFile in $testFiles) {
