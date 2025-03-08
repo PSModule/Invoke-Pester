@@ -158,26 +158,33 @@ If you specify `CodeCoverage_Enabled: true` here, it will enable coverage even i
 
 ## How to Determine a Test's Outcome
 
-After running your tests, you can assess the overall result by checking:
+After running your tests, you can assess the overall result by checking the following outputs provided by the action:
 
-- **Outcome:**
-  The step's outcome will be `success` if all tests passed or `failure` if one or more tests failed.
-
-- **Conclusion:**
-  This value provides an overall summary (typically `success` or `failure`) of the test run.
-  Use this with the `continue-on-error` flag to run a separate step to gather results of parallel tests.
+- **Outcome**: Indicates the GitHub Action step outcome (`success` or `failure`).
+- **Conclusion**: Provides an overall summary (`success` or `failure`) of the test run.
+- **Executed**: Indicates whether tests were executed (`True` or `False`).
+- **Result**: Overall result of the Pester test run (`Passed` or `Failed`).
+- **PassedCount**: Number of passed tests.
+- **FailedCount**: Number of failed tests.
+- **SkippedCount**: Number of skipped tests.
+- **InconclusiveCount**: Number of inconclusive tests.
+- **NotRunCount**: Number of tests not run.
+- **TotalCount**: Total number of tests executed.
 
 These values are accessible in your workflow using the step's outputs, for example:
 
 ```yaml
 - name: Status
   shell: pwsh
-  env:
-    OUTCOME: ${{ steps.action-test.outcome }}
-    CONCLUSION: ${{ steps.action-test.conclusion }}
   run: |
-    Write-Host "Outcome: [$env:OUTCOME]"
-    Write-Host "Conclusion: [$env:CONCLUSION]"
+    Write-Host "Outcome: [${{ steps.action-test.outputs.Outcome }}]"
+    Write-Host "Conclusion: [${{ steps.action-test.outputs.Conclusion }}]"
+    Write-Host "Executed: [${{ steps.action-test.outputs.Executed }}]"
+    Write-Host "Result: [${{ steps.action-test.outputs.Result }}]"
+    Write-Host "Passed tests: [${{ steps.action-test.outputs.PassedCount }}]"
+    Write-Host "Failed tests: [${{ steps.action-test.outputs.FailedCount }}]"
+    Write-Host "Skipped tests: [${{ steps.action-test.outputs.SkippedCount }}]"
+    Write-Host "Total tests: [${{ steps.action-test.outputs.TotalCount }}]"
 ```
 
 ## Controlling Workflow Execution Based on Test Outcome/Conclusion
@@ -229,7 +236,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Pester Tests
-        uses: PSModule/Invoke-Pester@v2
+        uses: PSModule/Invoke-Pester@v3
         id: action-test
         continue-on-error: true
         with:
@@ -350,8 +357,8 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Run Pester tests
-        id: pester
-        uses: PSModule/Invoke-Pester@v1
+        uses: PSModule/Invoke-Pester@v3
+        id: action-test
         with:
           Path: './tests'
           TestResult_Enabled: 'true'
@@ -360,15 +367,16 @@ jobs:
       - name: Process test results
         if: always()
         run: |
-          $testResults = '${{ steps.pester.outputs.TestResults }}' | ConvertFrom-Json
-          Write-Output "Total tests: $($testResults.TotalCount)"
-          Write-Output "Passed tests: $($testResults.PassedCount)"
-          Write-Output "Failed tests: $($testResults.FailedCount)"
-          Write-Output "Test outcome: ${{ steps.pester.outputs.Outcome }}"
+          Write-Output "Total tests: ${{ steps.action-test.outputs.TotalCount }}"
+          Write-Output "Passed tests: ${{ steps.action-test.outputs.PassedCount }}"
+          Write-Output "Failed tests: ${{ steps.action-test.outputs.FailedCount }}"
+          Write-Output "Failed blocks: ${{ steps.action-test.outputs.FailedBlocksCount }}"
+          Write-Output "Failed containers: ${{ steps.action-test.outputs.FailedContainersCount }}"
+          Write-Output "Test outcome: ${{ steps.action-test.outputs.Result }}"
         shell: pwsh
 
       - name: Take action based on test outcome
-        if: steps.pester.outputs.Outcome == 'success'
+        if: steps.action-test.outputs.Result == 'Passed'
         run: echo "All tests passed! Ready to proceed with deployment."
 ```
 
