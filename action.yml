@@ -337,12 +337,12 @@ runs:
           exit 1
         }
         # If the outcome is not success, exit with a failure code
-        if ($testResults.Outcome -ne 'success') {
+        if ($outcome -ne 'success') {
           Write-Error "Tests did not pass."
           exit 1
         }
         # If the conclusion is not success
-        if ($testResults.Conclusion -ne 'success') {
+        if ($conclusion -ne 'success') {
           Write-Error "Tests did not pass."
           exit 1
         }
