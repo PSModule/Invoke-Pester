@@ -975,7 +975,6 @@ filter Set-PesterReportTestsSummary {
                 # Format the error message by adding line breaks before "Expected:" and "But was:"
                 $newLine = [Environment]::NewLine
                 $formattedError = $errorMessage -replace 'Expected:', "$newLine`Expected:" -replace 'But was:', "$newLine`But was:"
-                $formattedError
                 # Find and format the arrow (^) indicator to appear on its own line
                 # Look for the pattern where there's a single caret character that often appears at the end of a line
                 if ($formattedError -match '(\s*)\^') {
@@ -985,7 +984,7 @@ filter Set-PesterReportTestsSummary {
                 }
                 Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
                     CodeBlock 'pwsh' {
-                        $formattedError | Out-String
+                        $formattedError -join $newLine | Out-String
                     } -Execute
                 }
             } else {
