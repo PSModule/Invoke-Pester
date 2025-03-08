@@ -205,7 +205,57 @@ inputs:
   WorkingDirectory:
     description: The working directory where the script will run from.
     required: false
-    default: ${{ github.workspace }}
+    default: '.'
+
+outputs:
+  Outcome:
+    description: |
+      The outcome of the test run.
+    value: ${{ steps.test.outcome }}
+  Conclusion:
+    description: |
+      The conclusion of the test run.
+    value: ${{ steps.test.conclusion }}
+  Executed:
+    description: |
+      Whether tests were executed.
+    value: ${{ steps.status.outputs.Executed }}
+  Result:
+    description: |
+      Overall result of the Pester test run (e.g., Passed, Failed).
+    value: ${{ steps.test.outputs.Result }}
+  FailedCount:
+    description: |
+      Number of failed tests.
+    value: ${{ steps.test.outputs.FailedCount }}
+  FailedBlocksCount:
+    description: |
+      Number of failed blocks.
+    value: ${{ steps.test.outputs.FailedBlocksCount }}
+  FailedContainersCount:
+    description: |
+      Number of failed containers.
+    value: ${{ steps.test.outputs.FailedContainersCount }}
+  PassedCount:
+    description: |
+      Number of passed tests.
+    value: ${{ steps.test.outputs.PassedCount }}
+  SkippedCount:
+    description: |
+      Number of skipped tests.
+    value: ${{ steps.test.outputs.SkippedCount }}
+  InconclusiveCount:
+    description: |
+      Number of inconclusive tests.
+    value: ${{ steps.test.outputs.InconclusiveCount }}
+  NotRunCount:
+    description: |
+      Number of tests not run.
+    value: ${{ steps.test.outputs.NotRunCount }}
+  TotalCount:
+    description: |
+      Total count of tests.
+    value: ${{ steps.test.outputs.TotalCount }}
 
 runs:
   using: composite
@@ -268,14 +318,16 @@ runs:
           # Invoke-Pester (init)
           ${{ github.action_path }}/scripts/init.ps1
 
-    - name: Invoke-Pester
+    - name: Invoke-Pester (exec)
       shell: pwsh
       continue-on-error: true
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
       id: test
-      run: ${{ github.action_path }}/scripts/main.ps1
+      run: |
+        # Invoke-Pester (exec)
+        ${{ github.action_path }}/scripts/exec.ps1
 
     - name: Upload test results - [${{ steps.test.outputs.TestSuiteName }}-TestResults]
       uses: actions/upload-artifact@v4
@@ -297,10 +349,39 @@ runs:
 
     - name: Status
       shell: pwsh
+      id: status
       working-directory: ${{ inputs.WorkingDirectory }}
+      env:
+        PSMODULE_INVOKE_PESTER_INTERNAL_Executed: ${{ steps.test.outputs.Executed }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_Outcome: ${{ steps.test.outcome }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion: ${{ steps.test.conclusion }}
       run: |
-        $outcome = '${{ steps.test.outcome }}'
-        Write-Host "outcome: [$outcome]"
+        # Status
+        $PSStyle.OutputRendering = 'Ansi'
+        $executed = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Executed -eq 'true'
+        $outcome = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Outcome
+        $conclusion = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion
+
+        "Executed=$executed" >> $env:GITHUB_OUTPUT
+
+        [PSCustomObject]@{
+          Executed = $executed
+          Outcome = $outcome
+          Conclusion = $conclusion
+        } | Format-List | Out-String
+
+        # If the tests did not execute, exit with a failure code
+        if ($executed -ne 'true') {
+          Write-Error "Tests did not execute."
+          exit 1
+        }
+        # If the outcome is not success, exit with a failure code
         if ($outcome -ne 'success') {
+          Write-Error "Tests did not pass."
+          exit 1
+        }
+        # If the conclusion is not success
+        if ($conclusion -ne 'success') {
+          Write-Error "Tests did not pass."
           exit 1
         }

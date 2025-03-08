@@ -33,6 +33,9 @@ if (-not (Test-Path -Path $configPath)) {
     exit 1
 }
 Get-Content -Path $configPath -Raw
+'::endgroup::'
+
+'::group::Exec - PesterConfiguration'
 $configuration = . $configPath
 $configuration.Run.Container = @()
 $containerFiles = Get-ChildItem -Path $path -Filter *.Container.* -Recurse | Sort-Object FullName
@@ -99,6 +102,16 @@ LogGroup 'Eval - Set outputs' {
     Set-GitHubOutput -Name 'TestResultOutputPath' -Value $testResultOutputFolderPath
     Set-GitHubOutput -Name 'CodeCoverageEnabled' -Value $testResults.Configuration.CodeCoverage.Enabled.Value
     Set-GitHubOutput -Name 'CodeCoverageOutputPath' -Value $codeCoverageOutputFolderPath
+    Set-GitHubOutput -Name 'Executed' -Value $testResults.Executed
+    Set-GitHubOutput -Name 'Result' -Value $testResults.Result
+    Set-GitHubOutput -Name 'FailedCount' -Value $testResults.FailedCount
+    Set-GitHubOutput -Name 'FailedBlocksCount' -Value $testResults.FailedBlocksCount
+    Set-GitHubOutput -Name 'FailedContainersCount' -Value $testResults.FailedContainersCount
+    Set-GitHubOutput -Name 'PassedCount' -Value $testResults.PassedCount
+    Set-GitHubOutput -Name 'SkippedCount' -Value $testResults.SkippedCount
+    Set-GitHubOutput -Name 'InconclusiveCount' -Value $testResults.InconclusiveCount
+    Set-GitHubOutput -Name 'NotRunCount' -Value $testResults.NotRunCount
+    Set-GitHubOutput -Name 'TotalCount' -Value $testResults.TotalCount
 
     if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
         $jsonOutputPath = $testResults.Configuration.TestResult.OutputPath.Value -Replace '\.xml$', '.json'
