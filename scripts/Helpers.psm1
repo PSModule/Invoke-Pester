@@ -824,7 +824,11 @@ filter Set-PesterReportSummary {
     param(
         # The Pester result object.
         [Parameter(Mandatory, ValueFromPipeline)]
-        [Pester.Run] $TestResults
+        [Pester.Run] $TestResults,
+
+        # When specified, only failed tests will be included in the summary.
+        [Parameter()]
+        [switch] $FailedOnly
     )
 
     $testSuitName = $TestResults.Configuration.TestResult.TestSuiteName.Value
@@ -834,7 +838,7 @@ filter Set-PesterReportSummary {
     Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
         $testResults | Set-PesterReportSummaryTable
 
-        $testResults.Containers | Set-PesterReportTestsSummary
+        $testResults.Containers | Set-PesterReportTestsSummary -FailedOnly:$FailedOnly
 
         '----'
 
@@ -908,12 +912,21 @@ filter Set-PesterReportTestsSummary {
 
         # The indentation level for the current item.
         [Parameter()]
-        [int] $Depth = 0
+        [int] $Depth = 0,
+
+        # When specified, only failed tests will be shown in the report.
+        [Parameter()]
+        [switch] $FailedOnly
     )
 
     $itemIndent = $Indent * $Depth
     $formattedTestDuration = $inputObject.Duration | Format-TimeSpan
     $testStatusIcon = $statusIcon[$InputObject.Result]
+
+    # Skip this item if we're only showing failures and this item passed
+    if ($FailedOnly -and $InputObject.Result -eq 'Passed' -and $InputObject.GetType().Name -eq 'Test') {
+        return
+    }
 
     Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
     switch ($InputObject.GetType().Name) {
@@ -921,21 +934,31 @@ filter Set-PesterReportTestsSummary {
             $testName = $testResults.Configuration.TestResult.TestSuiteName.Value
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Containers | Set-PesterReportTestsSummary -Depth ($Depth + 1)
+                $inputObject.Containers | Set-PesterReportTestsSummary -Depth ($Depth + 1) -FailedOnly:$FailedOnly
             }
         }
         'Container' {
+            # Skip containers with no failures if we're only showing failures
+            if ($FailedOnly -and $InputObject.FailedCount -eq 0) {
+                return
+            }
+
             $testName = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth ($Depth + 1)
+                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth ($Depth + 1) -FailedOnly:$FailedOnly
             }
         }
         'Block' {
+            # Skip blocks with no failures if we're only showing failures
+            if ($FailedOnly -and $InputObject.FailedCount -eq 0) {
+                return
+            }
+
             $testName = $InputObject.ExpandedName
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Order | Set-PesterReportTestsSummary -Depth ($Depth + 1)
+                $inputObject.Order | Set-PesterReportTestsSummary -Depth ($Depth + 1) -FailedOnly:$FailedOnly
             }
         }
         'Test' {

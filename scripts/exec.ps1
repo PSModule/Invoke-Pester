@@ -84,7 +84,14 @@ LogGroup 'Eval - Test results' {
 }
 
 LogGroup 'Eval - Test results summary' {
-    Set-GitHubStepSummary -Summary ($testResults | Set-PesterReportSummary)
+    $disableStepSummary = $env:PSMODULE_INVOKE_PESTER_INPUT_DisableStepSummary -eq 'true'
+    $onlyFailuresSummary = $env:PSMODULE_INVOKE_PESTER_INPUT_OnlyFailuresSummary -eq 'true'
+
+    if (-not $disableStepSummary) {
+        Set-GitHubStepSummary -Summary ($testResults | Set-PesterReportSummary -FailedOnly:$onlyFailuresSummary)
+    } else {
+        Write-Verbose 'Step summary has been disabled'
+    }
 }
 
 LogGroup 'Eval - Set outputs' {

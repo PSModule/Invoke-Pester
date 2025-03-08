@@ -117,6 +117,7 @@ jobs:
         with:
           WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
+          DisableStepSummary: true
 
       - name: Status
         shell: pwsh

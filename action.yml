@@ -15,6 +15,16 @@ inputs:
       Output generated reports in JSON format in addition to the configured format through Pester.
     required: false
     default: 'true'
+  DisableStepSummary:
+    description: |
+      Disable GitHub step summary for test results.
+    required: false
+    default: 'false'
+  OnlyFailuresSummary:
+    description: |
+      When set to true, the summary only shows failed tests.
+    required: false
+    default: 'false'
   Run_Path:
     description: |
       Directories to be searched for tests, paths directly to test files, or combination of both.
@@ -324,6 +334,8 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
+        PSMODULE_INVOKE_PESTER_INPUT_DisableStepSummary: ${{ inputs.DisableStepSummary }}
+        PSMODULE_INVOKE_PESTER_INPUT_OnlyFailuresSummary: ${{ inputs.OnlyFailuresSummary }}
       id: test
       run: |
         # Invoke-Pester (exec)
