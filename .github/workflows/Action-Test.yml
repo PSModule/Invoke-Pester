@@ -239,76 +239,76 @@ jobs:
                 Name               = "Action-Test - [1-Simple]"
                 Outcome            = $ActionTest1SimpleOutcome
                 OutcomeExpected    = $ActionTest1SimpleOutcomeExpected
-                PassedOutcome      = $ActionTest1SimpleOutcomeResult
+                OutcomeResult      = $ActionTest1SimpleOutcomeResult
                 Conclusion         = $ActionTest1SimpleConclusion
                 ConclusionExpected = $ActionTest1SimpleConclusionExpected
-                PassedConclusion   = $ActionTest1SimpleConclusionResult
+                ConclusionResult   = $ActionTest1SimpleConclusionResult
                 Executed           = $ActionTest1SimpleExecuted
                 ExecutedExpected   = $ActionTest1SimpleExecutedExpected
                 ExecutedResult     = $ActionTest1SimpleExecutedResult
                 Result             = $ActionTest1SimpleResult
                 ResultExpected     = $ActionTest1SimpleResultExpected
-                PassedResult       = $ActionTest1SimplePassedResult
+                ResultResult       = $ActionTest1SimpleResultResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [1-Simple-Failure]"
                 Outcome            = $ActionTest1SimpleFailureOutcome
                 OutcomeExpected    = $ActionTest1SimpleFailureOutcomeExpected
-                PassedOutcome      = $ActionTest1SimpleFailureOutcomeResult
+                OutcomeResult      = $ActionTest1SimpleFailureOutcomeResult
                 Conclusion         = $ActionTest1SimpleFailureConclusion
                 ConclusionExpected = $ActionTest1SimpleFailureConclusionExpected
-                PassedConclusion   = $ActionTest1SimpleFailureConclusionResult
+                ConclusionResult   = $ActionTest1SimpleFailureConclusionResult
                 Executed           = $ActionTest1SimpleFailureExecuted
                 ExecutedExpected   = $ActionTest1SimpleFailureExecutedExpected
                 ExecutedResult     = $ActionTest1SimpleFailureExecutedResult
                 Result             = $ActionTest1SimpleFailureResult
                 ResultExpected     = $ActionTest1SimpleFailureResultExpected
-                PassedResult       = $ActionTest1SimpleFailurePassedResult
+                ResultResult       = $ActionTest1SimpleFailureResultResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [1-Simple-ExecutionFailure]"
                 Outcome            = $ActionTest1SimpleExecutionFailureOutcome
                 OutcomeExpected    = $ActionTest1SimpleExecutionFailureOutcomeExpected
-                PassedOutcome      = $ActionTest1SimpleExecutionFailureOutcomeResult
+                OutcomeResult      = $ActionTest1SimpleExecutionFailureOutcomeResult
                 Conclusion         = $ActionTest1SimpleExecutionFailureConclusion
                 ConclusionExpected = $ActionTest1SimpleExecutionFailureConclusionExpected
-                PassedConclusion   = $ActionTest1SimpleExecutionFailureConclusionResult
+                ConclusionResult   = $ActionTest1SimpleExecutionFailureConclusionResult
                 Executed           = $ActionTest1SimpleExecutionFailureExecuted
                 ExecutedExpected   = $ActionTest1SimpleExecutionFailureExecutedExpected
                 ExecutedResult     = $ActionTest1SimpleExecutionFailureExecutedResult
                 Result             = $ActionTest1SimpleExecutionFailureResult
                 ResultExpected     = $ActionTest1SimpleExecutionFailureResultExpected
-                PassedResult       = $ActionTest1SimpleExecutionFailurePassedResult
+                ResultResult       = $ActionTest1SimpleExecutionFailureResultResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [2-Standard]"
                 Outcome            = $ActionTest2StandardOutcome
                 OutcomeExpected    = $ActionTest2StandardOutcomeExpected
-                PassedOutcome      = $ActionTest2StandardOutcomeResult
+                OutcomeResult      = $ActionTest2StandardOutcomeResult
                 Conclusion         = $ActionTest2StandardConclusion
                 ConclusionExpected = $ActionTest2StandardConclusionExpected
-                PassedConclusion   = $ActionTest2StandardConclusionResult
+                ConclusionResult   = $ActionTest2StandardConclusionResult
                 Executed           = $ActionTest2StandardExecuted
                 ExecutedExpected   = $ActionTest2StandardExecutedExpected
                 ExecutedResult     = $ActionTest2StandardExecutedResult
                 Result             = $ActionTest2StandardResult
                 ResultExpected     = $ActionTest2StandardResultExpected
-                PassedResult       = $ActionTest2StandardPassedResult
+                ResultResult       = $ActionTest2StandardResultResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [3-Advanced]"
                 Outcome            = $ActionTest3AdvancedOutcome
                 OutcomeExpected    = $ActionTest3AdvancedOutcomeExpected
-                PassedOutcome      = $ActionTest3AdvancedOutcomeResult
+                OutcomeResult      = $ActionTest3AdvancedOutcomeResult
                 Conclusion         = $ActionTest3AdvancedConclusion
                 ConclusionExpected = $ActionTest3AdvancedConclusionExpected
-                PassedConclusion   = $ActionTest3AdvancedConclusionResult
+                ConclusionResult   = $ActionTest3AdvancedConclusionResult
                 Executed           = $ActionTest3AdvancedExecuted
                 ExecutedExpected   = $ActionTest3AdvancedExecutedExpected
                 ExecutedResult     = $ActionTest3AdvancedExecutedResult
                 Result             = $ActionTest3AdvancedResult
                 ResultExpected     = $ActionTest3AdvancedResultExpected
-                PassedResult       = $ActionTest3AdvancedPassedResult
+                ResultResult       = $ActionTest3AdvancedResultResult
               }
             )
 
@@ -317,22 +317,22 @@ jobs:
 
             $passed = $true
             $jobs | ForEach-Object {
-              if (-not $_.PassedOutcome) {
+              if (-not $_.OutcomeResult) {
                 Write-Error "Job $($_.Name) failed with Outcome $($_.Outcome) and Expected Outcome $($_.OutcomeExpected)"
                 $passed = $false
               }
 
-              if (-not $_.PassedConclusion) {
+              if (-not $_.ConclusionResult) {
                 Write-Error "Job $($_.Name) failed with Conclusion $($_.Conclusion) and Expected Conclusion $($_.ConclusionExpected)"
                 $passed = $false
               }
 
-              if (-not $_.PassedExecuted) {
+              if (-not $_.ExecutedResult) {
                 Write-Error "Job $($_.Name) not executed as expected. (Actual: $($_.Executed), Expected: $($_.ExecutedExpected))"
                 $passed = $false
               }
 
-              if (-not $_.PassedResult) {
+              if (-not $_.ResultResult) {
                 Write-Error "Job $($_.Name) tests did not pass as expected. (Actual: $($_.Result), Expected: $($_.ResultExpected))"
                 $passed = $false
               }
