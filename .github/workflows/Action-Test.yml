@@ -161,194 +161,145 @@ jobs:
 
             # Build an array of objects for each job
             $ActionTest1SimpleOutcome = '${{ needs.ActionTest1Simple.outputs.outcome }}'
-            $ActionTest1SimpleExpectedOutcome = 'success'
-            $ActionTest1SimpleOutcomeResult = $ActionTest1SimpleOutcome -eq $ActionTest1SimpleExpectedOutcome
+            $ActionTest1SimpleOutcomeExpected = 'success'
+            $ActionTest1SimpleOutcomeResult = $ActionTest1SimpleOutcome -eq $ActionTest1SimpleOutcomeExpected
             $ActionTest1SimpleConclusion = '${{ needs.ActionTest1Simple.outputs.conclusion }}'
-            $ActionTest1SimpleExpectedConclusion = 'success'
-            $ActionTest1SimpleConclusionResult = $ActionTest1SimpleConclusion -eq $ActionTest1SimpleExpectedConclusion
-
-            $ActionTest1SimpleTestResults = '${{ needs.ActionTest1Simple.outputs.TestResults }}'
-            $ActionTest1SimpleExecuted = -not [string]::IsNullOrEmpty($ActionTest1SimpleTestResults)
-            $ActionTest1SimpleTestsPassed = $false
-            if ($ActionTest1SimpleExecuted) {
-              try {
-                $testData = $ActionTest1SimpleTestResults | ConvertFrom-Json
-                $ActionTest1SimpleTestsPassed = $testData.FailedCount -eq 0
-              } catch {
-                Write-Warning "Failed to parse ActionTest1Simple test results: $_"
-              }
-            }
-
-            $ActionTest1SimpleExpectedExecuted = $true
-            $ActionTest1SimplePassedExecuted = $ActionTest1SimpleExecuted -eq $ActionTest1SimpleExpectedExecuted
-            $ActionTest1SimpleExpectedPassed = $true
-            $ActionTest1SimplePassedPassed = $ActionTest1SimpleTestsPassed -eq $ActionTest1SimpleExpectedPassed
+            $ActionTest1SimpleConclusionExpected = 'success'
+            $ActionTest1SimpleConclusionResult = $ActionTest1SimpleConclusion -eq $ActionTest1SimpleConclusionExpected
+            $ActionTest1SimpleExecuted = '${{ needs.ActionTest1Simple.outputs.Executed }}'
+            $ActionTest1SimpleExecutedExpected = 'True'
+            $ActionTest1SimpleExecutedResult = $ActionTest1SimpleExecuted -eq $ActionTest1SimpleExecutedExpected
+            $ActionTest1SimpleResult = '${{ needs.ActionTest1Simple.outputs.Result }}'
+            $ActionTest1SimpleResultExpected = 'Passed'
+            $ActionTest1SimplePassedResult = $ActionTest1SimpleResult -eq $ActionTest1SimpleResultExpected
 
             $ActionTest1SimpleFailureOutcome = '${{ needs.ActionTest1SimpleFailure.outputs.outcome }}'
-            $ActionTest1SimpleFailureExpectedOutcome = 'failure'
-            $ActionTest1SimpleFailureOutcomeResult = $ActionTest1SimpleFailureOutcome -eq $ActionTest1SimpleFailureExpectedOutcome
+            $ActionTest1SimpleFailureOutcomeExpected = 'failure'
+            $ActionTest1SimpleFailureOutcomeResult = $ActionTest1SimpleFailureOutcome -eq $ActionTest1SimpleFailureOutcomeExpected
             $ActionTest1SimpleFailureConclusion = '${{ needs.ActionTest1SimpleFailure.outputs.conclusion }}'
-            $ActionTest1SimpleFailureExpectedConclusion = 'success'
-            $ActionTest1SimpleFailureConclusionResult = $ActionTest1SimpleFailureConclusion -eq $ActionTest1SimpleFailureExpectedConclusion
-
-            $ActionTest1SimpleFailureTestResults = '${{ needs.ActionTest1SimpleFailure.outputs.TestResults }}'
-            $ActionTest1SimpleFailureExecuted = -not [string]::IsNullOrEmpty($ActionTest1SimpleFailureTestResults)
-            $ActionTest1SimpleFailureTestsPassed = $false
-            if ($ActionTest1SimpleFailureExecuted) {
-              try {
-                $testData = $ActionTest1SimpleFailureTestResults | ConvertFrom-Json
-                # This one is expected to fail, so invert the logic
-                $ActionTest1SimpleFailureTestsPassed = $testData.FailedCount -gt 0
-              } catch {
-                Write-Warning "Failed to parse ActionTest1SimpleFailure test results: $_"
-              }
-            }
-
-            $ActionTest1SimpleFailureExpectedExecuted = $true
-            $ActionTest1SimpleFailurePassedExecuted = $ActionTest1SimpleFailureExecuted -eq $ActionTest1SimpleFailureExpectedExecuted
-            $ActionTest1SimpleFailureExpectedPassed = $true
-            $ActionTest1SimpleFailurePassedPassed = $ActionTest1SimpleFailureTestsPassed -eq $ActionTest1SimpleFailureExpectedPassed
+            $ActionTest1SimpleFailureConclusionExpected = 'success'
+            $ActionTest1SimpleFailureConclusionResult = $ActionTest1SimpleFailureConclusion -eq $ActionTest1SimpleFailureConclusionExpected
+            $ActionTest1SimpleFailureExecuted = '${{ needs.ActionTest1SimpleFailure.outputs.Executed }}'
+            $ActionTest1SimpleFailureExecutedExpected = 'True'
+            $ActionTest1SimpleFailureExecutedResult = $ActionTest1SimpleFailureExecuted -eq $ActionTest1SimpleFailureExecutedExpected
+            $ActionTest1SimpleFailureResult = '${{ needs.ActionTest1SimpleFailure.outputs.Result }}'
+            $ActionTest1SimpleFailureResultExpected = 'Failed'
+            $ActionTest1SimpleFailurePassedResult = $ActionTest1SimpleFailureResult -eq $ActionTest1SimpleFailureResultExpected
 
             $ActionTest1SimpleExecutionFailureOutcome = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.outcome }}'
-            $ActionTest1SimpleExecutionFailureExpectedOutcome = 'failure'
-            $ActionTest1SimpleExecutionFailureOutcomeResult = $ActionTest1SimpleExecutionFailureOutcome -eq $ActionTest1SimpleExecutionFailureExpectedOutcome
+            $ActionTest1SimpleExecutionFailureOutcomeExpected = 'failure'
+            $ActionTest1SimpleExecutionFailureOutcomeResult = $ActionTest1SimpleExecutionFailureOutcome -eq $ActionTest1SimpleExecutionFailureOutcomeExpected
             $ActionTest1SimpleExecutionFailureConclusion = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.conclusion }}'
-            $ActionTest1SimpleExecutionFailureExpectedConclusion = 'success'
-            $ActionTest1SimpleExecutionFailureConclusionResult = $ActionTest1SimpleExecutionFailureConclusion -eq $ActionTest1SimpleExecutionFailureExpectedConclusion
-
-            $ActionTest1SimpleExecutionFailureTestResults = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.TestResults }}'
-            $ActionTest1SimpleExecutionFailureExecuted = -not [string]::IsNullOrEmpty($ActionTest1SimpleExecutionFailureTestResults)
-            # For execution failure, we don't expect valid test results
-            $ActionTest1SimpleExecutionFailureTestsPassed = $true
-
-            $ActionTest1SimpleExecutionFailureExpectedExecuted = $true
-            $ActionTest1SimpleExecutionFailurePassedExecuted = $ActionTest1SimpleExecutionFailureExecuted -eq $ActionTest1SimpleExecutionFailureExpectedExecuted
-            $ActionTest1SimpleExecutionFailureExpectedPassed = $true
-            $ActionTest1SimpleExecutionFailurePassedPassed = $ActionTest1SimpleExecutionFailureTestsPassed -eq $ActionTest1SimpleExecutionFailureExpectedPassed
+            $ActionTest1SimpleExecutionFailureConclusionExpected = 'success'
+            $ActionTest1SimpleExecutionFailureConclusionResult = $ActionTest1SimpleExecutionFailureConclusion -eq $ActionTest1SimpleExecutionFailureConclusionExpected
+            $ActionTest1SimpleExecutionFailureExecuted = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Executed }}'
+            $ActionTest1SimpleExecutionFailureExecutedExpected = 'True'
+            $ActionTest1SimpleExecutionFailureExecutedResult = $ActionTest1SimpleExecutionFailureExecuted -eq $ActionTest1SimpleExecutionFailureExecutedExpected
+            $ActionTest1SimpleExecutionFailureResult = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Result }}'
+            $ActionTest1SimpleExecutionFailureResultExpected = 'Passed'
+            $ActionTest1SimpleExecutionFailurePassedResult = $ActionTest1SimpleExecutionFailureResult -eq $ActionTest1SimpleExecutionFailureResultExpected
 
             $ActionTest2StandardOutcome = '${{ needs.ActionTest2Standard.outputs.outcome }}'
-            $ActionTest2StandardExpectedOutcome = 'success'
-            $ActionTest2StandardOutcomeResult = $ActionTest2StandardOutcome -eq $ActionTest2StandardExpectedOutcome
+            $ActionTest2StandardOutcomeExpected = 'success'
+            $ActionTest2StandardOutcomeResult = $ActionTest2StandardOutcome -eq $ActionTest2StandardOutcomeExpected
             $ActionTest2StandardConclusion = '${{ needs.ActionTest2Standard.outputs.conclusion }}'
-            $ActionTest2StandardExpectedConclusion = 'success'
-            $ActionTest2StandardConclusionResult = $ActionTest2StandardConclusion -eq $ActionTest2StandardExpectedConclusion
-
-            $ActionTest2StandardTestResults = '${{ needs.ActionTest2Standard.outputs.TestResults }}'
-            $ActionTest2StandardExecuted = -not [string]::IsNullOrEmpty($ActionTest2StandardTestResults)
-            $ActionTest2StandardTestsPassed = $false
-            if ($ActionTest2StandardExecuted) {
-              try {
-                $testData = $ActionTest2StandardTestResults | ConvertFrom-Json
-                $ActionTest2StandardTestsPassed = $testData.FailedCount -eq 0
-              } catch {
-                Write-Warning "Failed to parse ActionTest2Standard test results: $_"
-              }
-            }
-
-            $ActionTest2StandardExpectedExecuted = $true
-            $ActionTest2StandardPassedExecuted = $ActionTest2StandardExecuted -eq $ActionTest2StandardExpectedExecuted
-            $ActionTest2StandardExpectedPassed = $true
-            $ActionTest2StandardPassedPassed = $ActionTest2StandardTestsPassed -eq $ActionTest2StandardExpectedPassed
+            $ActionTest2StandardConclusionExpected = 'success'
+            $ActionTest2StandardConclusionResult = $ActionTest2StandardConclusion -eq $ActionTest2StandardConclusionExpected
+            $ActionTest2StandardExecuted = '${{ needs.ActionTest2Standard.outputs.Executed }}'
+            $ActionTest2StandardExecutedExpected = 'True'
+            $ActionTest2StandardExecutedResult = $ActionTest2StandardExecuted -eq $ActionTest2StandardExecutedExpected
+            $ActionTest2StandardResult = '${{ needs.ActionTest2Standard.outputs.Result }}'
+            $ActionTest2StandardResultExpected = 'Passed'
+            $ActionTest2StandardPassedResult = $ActionTest2StandardResult -eq $ActionTest2StandardResultExpected
 
             $ActionTest3AdvancedOutcome = '${{ needs.ActionTest3Advanced.outputs.outcome }}'
-            $ActionTest3AdvancedExpectedOutcome = 'success'
-            $ActionTest3AdvancedOutcomeResult = $ActionTest3AdvancedOutcome -eq $ActionTest3AdvancedExpectedOutcome
+            $ActionTest3AdvancedOutcomeExpected = 'success'
+            $ActionTest3AdvancedOutcomeResult = $ActionTest3AdvancedOutcome -eq $ActionTest3AdvancedOutcomeExpected
             $ActionTest3AdvancedConclusion = '${{ needs.ActionTest3Advanced.outputs.conclusion }}'
-            $ActionTest3AdvancedExpectedConclusion = 'success'
-            $ActionTest3AdvancedConclusionResult = $ActionTest3AdvancedConclusion -eq $ActionTest3AdvancedExpectedConclusion
-
-            $ActionTest3AdvancedTestResults = '${{ needs.ActionTest3Advanced.outputs.TestResults }}'
-            $ActionTest3AdvancedExecuted = -not [string]::IsNullOrEmpty($ActionTest3AdvancedTestResults)
-            $ActionTest3AdvancedTestsPassed = $false
-            if ($ActionTest3AdvancedExecuted) {
-              try {
-                $testData = $ActionTest3AdvancedTestResults | ConvertFrom-Json
-                $ActionTest3AdvancedTestsPassed = $testData.FailedCount -eq 0
-              } catch {
-                Write-Warning "Failed to parse ActionTest3Advanced test results: $_"
-              }
-            }
-
-            $ActionTest3AdvancedExpectedExecuted = $true
-            $ActionTest3AdvancedPassedExecuted = $ActionTest3AdvancedExecuted -eq $ActionTest3AdvancedExpectedExecuted
-            $ActionTest3AdvancedExpectedPassed = $true
-            $ActionTest3AdvancedPassedPassed = $ActionTest3AdvancedTestsPassed -eq $ActionTest3AdvancedExpectedPassed
+            $ActionTest3AdvancedConclusionExpected = 'success'
+            $ActionTest3AdvancedConclusionResult = $ActionTest3AdvancedConclusion -eq $ActionTest3AdvancedConclusionExpected
+            $ActionTest3AdvancedExecuted = '${{ needs.ActionTest3Advanced.outputs.Executed }}'
+            $ActionTest3AdvancedExecutedExpected = 'True'
+            $ActionTest3AdvancedExecutedResult = $ActionTest3AdvancedExecuted -eq $ActionTest3AdvancedExecutedExpected
+            $ActionTest3AdvancedResult = '${{ needs.ActionTest3Advanced.outputs.Result }}'
+            $ActionTest3AdvancedResultExpected = 'Passed'
+            $ActionTest3AdvancedPassedResult = $ActionTest3AdvancedResult -eq $ActionTest3AdvancedResultExpected
 
             $jobs = @(
               [PSCustomObject]@{
                 Name               = "Action-Test - [1-Simple]"
                 Outcome            = $ActionTest1SimpleOutcome
-                ExpectedOutcome    = $ActionTest1SimpleExpectedOutcome
+                OutcomeExpected    = $ActionTest1SimpleOutcomeExpected
                 PassedOutcome      = $ActionTest1SimpleOutcomeResult
                 Conclusion         = $ActionTest1SimpleConclusion
-                ExpectedConclusion = $ActionTest1SimpleExpectedConclusion
+                ConclusionExpected = $ActionTest1SimpleConclusionExpected
                 PassedConclusion   = $ActionTest1SimpleConclusionResult
                 Executed           = $ActionTest1SimpleExecuted
-                ExpectedExecuted   = $ActionTest1SimpleExpectedExecuted
-                PassedExecuted     = $ActionTest1SimplePassedExecuted
-                Passed             = $ActionTest1SimpleTestsPassed
-                ExpectedPassed     = $ActionTest1SimpleExpectedPassed
-                PassedPassed       = $ActionTest1SimplePassedPassed
+                ExecutedExpected   = $ActionTest1SimpleExecutedExpected
+                ExecutedResult     = $ActionTest1SimpleExecutedResult
+                Result             = $ActionTest1SimpleResult
+                ResultExpected     = $ActionTest1SimpleResultExpected
+                PassedResult       = $ActionTest1SimplePassedResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [1-Simple-Failure]"
                 Outcome            = $ActionTest1SimpleFailureOutcome
-                ExpectedOutcome    = $ActionTest1SimpleFailureExpectedOutcome
+                OutcomeExpected    = $ActionTest1SimpleFailureOutcomeExpected
                 PassedOutcome      = $ActionTest1SimpleFailureOutcomeResult
                 Conclusion         = $ActionTest1SimpleFailureConclusion
-                ExpectedConclusion = $ActionTest1SimpleFailureExpectedConclusion
+                ConclusionExpected = $ActionTest1SimpleFailureConclusionExpected
                 PassedConclusion   = $ActionTest1SimpleFailureConclusionResult
                 Executed           = $ActionTest1SimpleFailureExecuted
-                ExpectedExecuted   = $ActionTest1SimpleFailureExpectedExecuted
-                PassedExecuted     = $ActionTest1SimpleFailurePassedExecuted
-                Passed             = $ActionTest1SimpleFailureTestsPassed
-                ExpectedPassed     = $ActionTest1SimpleFailureExpectedPassed
-                PassedPassed       = $ActionTest1SimpleFailurePassedPassed
+                ExecutedExpected   = $ActionTest1SimpleFailureExecutedExpected
+                ExecutedResult     = $ActionTest1SimpleFailureExecutedResult
+                Result             = $ActionTest1SimpleFailureResult
+                ResultExpected     = $ActionTest1SimpleFailureResultExpected
+                PassedResult       = $ActionTest1SimpleFailurePassedResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [1-Simple-ExecutionFailure]"
                 Outcome            = $ActionTest1SimpleExecutionFailureOutcome
-                ExpectedOutcome    = $ActionTest1SimpleExecutionFailureExpectedOutcome
+                OutcomeExpected    = $ActionTest1SimpleExecutionFailureOutcomeExpected
                 PassedOutcome      = $ActionTest1SimpleExecutionFailureOutcomeResult
                 Conclusion         = $ActionTest1SimpleExecutionFailureConclusion
-                ExpectedConclusion = $ActionTest1SimpleExecutionFailureExpectedConclusion
+                ConclusionExpected = $ActionTest1SimpleExecutionFailureConclusionExpected
                 PassedConclusion   = $ActionTest1SimpleExecutionFailureConclusionResult
                 Executed           = $ActionTest1SimpleExecutionFailureExecuted
-                ExpectedExecuted   = $ActionTest1SimpleExecutionFailureExpectedExecuted
-                PassedExecuted     = $ActionTest1SimpleExecutionFailurePassedExecuted
-                Passed             = $ActionTest1SimpleExecutionFailureTestsPassed
-                ExpectedPassed     = $ActionTest1SimpleExecutionFailureExpectedPassed
-                PassedPassed       = $ActionTest1SimpleExecutionFailurePassedPassed
+                ExecutedExpected   = $ActionTest1SimpleExecutionFailureExecutedExpected
+                ExecutedResult     = $ActionTest1SimpleExecutionFailureExecutedResult
+                Result             = $ActionTest1SimpleExecutionFailureResult
+                ResultExpected     = $ActionTest1SimpleExecutionFailureResultExpected
+                PassedResult       = $ActionTest1SimpleExecutionFailurePassedResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [2-Standard]"
                 Outcome            = $ActionTest2StandardOutcome
-                ExpectedOutcome    = $ActionTest2StandardExpectedOutcome
+                OutcomeExpected    = $ActionTest2StandardOutcomeExpected
                 PassedOutcome      = $ActionTest2StandardOutcomeResult
                 Conclusion         = $ActionTest2StandardConclusion
-                ExpectedConclusion = $ActionTest2StandardExpectedConclusion
+                ConclusionExpected = $ActionTest2StandardConclusionExpected
                 PassedConclusion   = $ActionTest2StandardConclusionResult
                 Executed           = $ActionTest2StandardExecuted
-                ExpectedExecuted   = $ActionTest2StandardExpectedExecuted
-                PassedExecuted     = $ActionTest2StandardPassedExecuted
-                Passed             = $ActionTest2StandardTestsPassed
-                ExpectedPassed     = $ActionTest2StandardExpectedPassed
-                PassedPassed       = $ActionTest2StandardPassedPassed
+                ExecutedExpected   = $ActionTest2StandardExecutedExpected
+                ExecutedResult     = $ActionTest2StandardExecutedResult
+                Result             = $ActionTest2StandardResult
+                ResultExpected     = $ActionTest2StandardResultExpected
+                PassedResult       = $ActionTest2StandardPassedResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [3-Advanced]"
                 Outcome            = $ActionTest3AdvancedOutcome
-                ExpectedOutcome    = $ActionTest3AdvancedExpectedOutcome
+                OutcomeExpected    = $ActionTest3AdvancedOutcomeExpected
                 PassedOutcome      = $ActionTest3AdvancedOutcomeResult
                 Conclusion         = $ActionTest3AdvancedConclusion
-                ExpectedConclusion = $ActionTest3AdvancedExpectedConclusion
+                ConclusionExpected = $ActionTest3AdvancedConclusionExpected
                 PassedConclusion   = $ActionTest3AdvancedConclusionResult
                 Executed           = $ActionTest3AdvancedExecuted
-                ExpectedExecuted   = $ActionTest3AdvancedExpectedExecuted
-                PassedExecuted     = $ActionTest3AdvancedPassedExecuted
-                Passed             = $ActionTest3AdvancedTestsPassed
-                ExpectedPassed     = $ActionTest3AdvancedExpectedPassed
-                PassedPassed       = $ActionTest3AdvancedPassedPassed
+                ExecutedExpected   = $ActionTest3AdvancedExecutedExpected
+                ExecutedResult     = $ActionTest3AdvancedExecutedResult
+                Result             = $ActionTest3AdvancedResult
+                ResultExpected     = $ActionTest3AdvancedResultExpected
+                PassedResult       = $ActionTest3AdvancedPassedResult
               }
             )
 
@@ -358,22 +309,22 @@ jobs:
             $passed = $true
             $jobs | ForEach-Object {
               if (-not $_.PassedOutcome) {
-                Write-Error "Job $($_.Name) failed with Outcome $($_.Outcome) and Expected Outcome $($_.ExpectedOutcome)"
+                Write-Error "Job $($_.Name) failed with Outcome $($_.Outcome) and Expected Outcome $($_.OutcomeExpected)"
                 $passed = $false
               }
 
               if (-not $_.PassedConclusion) {
-                Write-Error "Job $($_.Name) failed with Conclusion $($_.Conclusion) and Expected Conclusion $($_.ExpectedConclusion)"
+                Write-Error "Job $($_.Name) failed with Conclusion $($_.Conclusion) and Expected Conclusion $($_.ConclusionExpected)"
                 $passed = $false
               }
 
-              if (-not $_.PassedExecuted) {
-                Write-Error "Job $($_.Name) not executed as expected. (Actual: $($_.Executed), Expected: $($_.ExpectedExecuted))"
+              if (-not $_.ExecutedResult) {
+                Write-Error "Job $($_.Name) not executed as expected. (Actual: $($_.Executed), Expected: $($_.ExecutedExpected))"
                 $passed = $false
               }
 
-              if (-not $_.PassedPassed) {
-                Write-Error "Job $($_.Name) tests did not pass as expected. (Actual: $($_.Passed), Expected: $($_.ExpectedPassed))"
+              if (-not $_.PassedResult) {
+                Write-Error "Job $($_.Name) tests did not pass as expected. (Actual: $($_.Passed), Expected: $($_.PassedExpected))"
                 $passed = $false
               }
             }

@@ -208,10 +208,6 @@ inputs:
     default: '.'
 
 outputs:
-  TestResults:
-    description: |
-      The test results in JSON format.
-    value: ${{ steps.test.outputs.TestResults }}
   Outcome:
     description: |
       The outcome of the test run.
@@ -220,6 +216,46 @@ outputs:
     description: |
       The conclusion of the test run.
     value: ${{ steps.test.conclusion }}
+  Executed:
+    description: |
+      Whether tests were executed.
+    value: ${{ steps.test.outputs.Executed }}
+  Result:
+    description: |
+      Overall result of the Pester test run (e.g., Passed, Failed).
+    value: ${{ steps.test.outputs.Result }}
+  FailedCount:
+    description: |
+      Number of failed tests.
+    value: ${{ steps.test.outputs.FailedCount }}
+  FailedBlocksCount:
+    description: |
+      Number of failed blocks.
+    value: ${{ steps.test.outputs.FailedBlocksCount }}
+  FailedContainersCount:
+    description: |
+      Number of failed containers.
+    value: ${{ steps.test.outputs.FailedContainersCount }}
+  PassedCount:
+    description: |
+      Number of passed tests.
+    value: ${{ steps.test.outputs.PassedCount }}
+  SkippedCount:
+    description: |
+      Number of skipped tests.
+    value: ${{ steps.test.outputs.SkippedCount }}
+  InconclusiveCount:
+    description: |
+      Number of inconclusive tests.
+    value: ${{ steps.test.outputs.InconclusiveCount }}
+  NotRunCount:
+    description: |
+      Number of tests not run.
+    value: ${{ steps.test.outputs.NotRunCount }}
+  TotalCount:
+    description: |
+      Total count of tests.
+    value: ${{ steps.test.outputs.TotalCount }}
 
 runs:
   using: composite
@@ -315,24 +351,24 @@ runs:
       shell: pwsh
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
-        PSMODULE_INVOKE_PESTER_INTERNAL_TestResults: ${{ steps.test.outputs.TestResults }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_Executed: ${{ steps.test.outputs.Executed }}
         PSMODULE_INVOKE_PESTER_INTERNAL_Outcome: ${{ steps.test.outcome }}
         PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion: ${{ steps.test.conclusion }}
       run: |
         # Status
         $PSStyle.OutputRendering = 'Ansi'
-        $testResults = $env:PSMODULE_INVOKE_PESTER_INTERNAL_TestResults | ConvertFrom-Json
+        $executed = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Executed
         $outcome = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Outcome
         $conclusion = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion
-        $testResults | Format-List | Out-String
 
         [PSCustomObject]@{
+          Executed = $executed
           Outcome = $outcome
           Conclusion = $conclusion
         } | Format-List | Out-String
 
         # If the tests did not execute, exit with a failure code
-        if ($testResults.Executed -ne 'true') {
+        if ($executed -ne 'true') {
           Write-Error "Tests did not execute."
           exit 1
         }

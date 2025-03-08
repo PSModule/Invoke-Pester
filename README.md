@@ -309,10 +309,19 @@ jobs:
 The action provides the following outputs:
 
 | Output | Description |
-| ------ | ----------- |
-| `TestResults` | The test results in JSON format. This output can be used in subsequent workflow steps to process or display test results. |
-| `Outcome` | The outcome of the test run (`success` or `failure`). This can be used to conditionally execute steps based on test results. |
-| `Conclusion` | The conclusion of the test run (`success` or `failure`). Similar to Outcome but can be used for workflow control. |
+|--------|-------------|
+| `Outcome` | The outcome of the test run (success/failure) |
+| `Conclusion` | The conclusion of the test run (success/failure) |
+| `Executed` | Whether tests were executed (True/False) |
+| `Result` | Overall result of the Pester test run (Passed/Failed) |
+| `FailedCount` | Number of failed tests |
+| `FailedBlocksCount` | Number of failed blocks |
+| `FailedContainersCount` | Number of failed containers |
+| `PassedCount` | Number of passed tests |
+| `SkippedCount` | Number of skipped tests |
+| `InconclusiveCount` | Number of inconclusive tests |
+| `NotRunCount` | Number of tests not run |
+| `TotalCount` | Total count of tests |
 
 ## Examples
 
