@@ -33,6 +33,9 @@ if (-not (Test-Path -Path $configPath)) {
     exit 1
 }
 Get-Content -Path $configPath -Raw
+'::endgroup::'
+
+'::group::Exec - PesterConfiguration'
 $configuration = . $configPath
 $configuration.Run.Container = @()
 $containerFiles = Get-ChildItem -Path $path -Filter *.Container.* -Recurse | Sort-Object FullName

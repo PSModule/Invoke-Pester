@@ -194,20 +194,31 @@ LogGroup 'Init - Export containers' {
         $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
         Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
         if ($containerFiles.Count -eq 0) {
-            # Look for test files and make a container for each test file.
-            $testFiles = Get-ChildItem -Path $testDir -Filter *.Tests.ps1 -Recurse
-            Write-Output "Test files found in [$testDir]: [$($testFiles.Count)]"
+            # First, look for test files directly in the test directory (non-recursive)
+            $rootTestFiles = Get-ChildItem -Path $testDir -Filter *.Tests.ps1 -File
+            Write-Output "Root level test files found in [$testDir]: [$($rootTestFiles.Count)]"
+
+            # Then, look for test files in subdirectories
+            $subfolderTestFiles = Get-ChildItem -Path $testDir -Filter *.Tests.ps1 -Recurse -File |
+                Where-Object { $_.DirectoryName -ne $testDir }
+            Write-Output "Subfolder test files found in [$testDir]: [$($subfolderTestFiles.Count)]"
+
+            # Combine all test files
+            $testFiles = $rootTestFiles + $subfolderTestFiles
+            Write-Output "Total test files found in [$testDir]: [$($testFiles.Count)]"
+
             foreach ($testFile in $testFiles) {
                 $container = @{
                     Path = $testFile.FullName
                 }
+                $containerFileName = ($testFile | Split-Path -Leaf).Replace('.Tests.ps1', '.Container.ps1')
                 LogGroup "Init - Export containers - Generated - $containerFileName" {
-                    $containerFileName = ($testFile | Split-Path -Leaf).Replace('.Tests.ps1', '.Container.ps1')
                     Write-Output "Exporting container [$path/$containerFileName]"
                     Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
                 }
-                Write-Output "Containers created from test files: [$($containers.Count)]"
+                $containers += $container
             }
+            Write-Output "Containers created from test files: [$($containers.Count)]"
         }
         foreach ($containerFile in $containerFiles) {
             $container = Import-Hashtable $containerFile
@@ -217,6 +228,7 @@ LogGroup 'Init - Export containers' {
                 Write-Output "Exporting container [$path/$containerFileName]"
                 Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
             }
+            $containers += $container
         }
     }
     $configuration.Run.Container = @()
