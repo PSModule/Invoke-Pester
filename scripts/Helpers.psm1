@@ -971,7 +971,7 @@ filter Set-PesterReportTestsSummary {
             if ($InputObject.ErrorRecord) {
                 Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
                     CodeBlock 'pwsh' {
-                        $InputObject.ErrorRecord -split [System.Environment]::NewLine | ForEach-Object { $_ | Out-String }
+                        $InputObject.ErrorRecord -split [System.Environment]::NewLine
                     } -Execute
                 }
             } else {
