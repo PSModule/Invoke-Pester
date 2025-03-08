@@ -819,6 +819,10 @@ filter Set-PesterReportSummary {
         'PSUseShouldProcessForStateChangingFunctions', '',
         Justification = 'Sets text in memory'
     )]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSReviewUnusedParameter', '',
+        Justification = 'Markdown DSL scoping the use of the parameter'
+    )]
     [OutputType([string])]
     [CmdletBinding()]
     param(
