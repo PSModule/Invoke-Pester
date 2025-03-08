@@ -160,14 +160,14 @@ jobs:
             Install-PSResource -Name Markdown -Repository PSGallery -TrustRepository
 
             # Build an array of objects for each job
-            $ActionTest1SimpleOutcome = "${{ needs.ActionTest1Simple.outputs.outcome }}"
-            $ActionTest1SimpleExpectedOutcome = "success"
+            $ActionTest1SimpleOutcome = '${{ needs.ActionTest1Simple.outputs.outcome }}'
+            $ActionTest1SimpleExpectedOutcome = 'success'
             $ActionTest1SimpleOutcomeResult = $ActionTest1SimpleOutcome -eq $ActionTest1SimpleExpectedOutcome
-            $ActionTest1SimpleConclusion = "${{ needs.ActionTest1Simple.outputs.conclusion }}"
-            $ActionTest1SimpleExpectedConclusion = "success"
+            $ActionTest1SimpleConclusion = '${{ needs.ActionTest1Simple.outputs.conclusion }}'
+            $ActionTest1SimpleExpectedConclusion = 'success'
             $ActionTest1SimpleConclusionResult = $ActionTest1SimpleConclusion -eq $ActionTest1SimpleExpectedConclusion
 
-            $ActionTest1SimpleTestResults = "${{ needs.ActionTest1Simple.outputs.TestResults }}"
+            $ActionTest1SimpleTestResults = '${{ needs.ActionTest1Simple.outputs.TestResults }}'
             $ActionTest1SimpleExecuted = -not [string]::IsNullOrEmpty($ActionTest1SimpleTestResults)
             $ActionTest1SimpleTestsPassed = $false
             if ($ActionTest1SimpleExecuted) {
@@ -184,14 +184,14 @@ jobs:
             $ActionTest1SimpleExpectedPassed = $true
             $ActionTest1SimplePassedPassed = $ActionTest1SimpleTestsPassed -eq $ActionTest1SimpleExpectedPassed
 
-            $ActionTest1SimpleFailureOutcome = "${{ needs.ActionTest1SimpleFailure.outputs.outcome }}"
-            $ActionTest1SimpleFailureExpectedOutcome = "failure"
+            $ActionTest1SimpleFailureOutcome = '${{ needs.ActionTest1SimpleFailure.outputs.outcome }}'
+            $ActionTest1SimpleFailureExpectedOutcome = 'failure'
             $ActionTest1SimpleFailureOutcomeResult = $ActionTest1SimpleFailureOutcome -eq $ActionTest1SimpleFailureExpectedOutcome
-            $ActionTest1SimpleFailureConclusion = "${{ needs.ActionTest1SimpleFailure.outputs.conclusion }}"
-            $ActionTest1SimpleFailureExpectedConclusion = "success"
+            $ActionTest1SimpleFailureConclusion = '${{ needs.ActionTest1SimpleFailure.outputs.conclusion }}'
+            $ActionTest1SimpleFailureExpectedConclusion = 'success'
             $ActionTest1SimpleFailureConclusionResult = $ActionTest1SimpleFailureConclusion -eq $ActionTest1SimpleFailureExpectedConclusion
 
-            $ActionTest1SimpleFailureTestResults = "${{ needs.ActionTest1SimpleFailure.outputs.TestResults }}"
+            $ActionTest1SimpleFailureTestResults = '${{ needs.ActionTest1SimpleFailure.outputs.TestResults }}'
             $ActionTest1SimpleFailureExecuted = -not [string]::IsNullOrEmpty($ActionTest1SimpleFailureTestResults)
             $ActionTest1SimpleFailureTestsPassed = $false
             if ($ActionTest1SimpleFailureExecuted) {
@@ -209,14 +209,14 @@ jobs:
             $ActionTest1SimpleFailureExpectedPassed = $true
             $ActionTest1SimpleFailurePassedPassed = $ActionTest1SimpleFailureTestsPassed -eq $ActionTest1SimpleFailureExpectedPassed
 
-            $ActionTest1SimpleExecutionFailureOutcome = "${{ needs.ActionTest1SimpleExecutionFailure.outputs.outcome }}"
-            $ActionTest1SimpleExecutionFailureExpectedOutcome = "failure"
+            $ActionTest1SimpleExecutionFailureOutcome = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.outcome }}'
+            $ActionTest1SimpleExecutionFailureExpectedOutcome = 'failure'
             $ActionTest1SimpleExecutionFailureOutcomeResult = $ActionTest1SimpleExecutionFailureOutcome -eq $ActionTest1SimpleExecutionFailureExpectedOutcome
-            $ActionTest1SimpleExecutionFailureConclusion = "${{ needs.ActionTest1SimpleExecutionFailure.outputs.conclusion }}"
-            $ActionTest1SimpleExecutionFailureExpectedConclusion = "success"
+            $ActionTest1SimpleExecutionFailureConclusion = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.conclusion }}'
+            $ActionTest1SimpleExecutionFailureExpectedConclusion = 'success'
             $ActionTest1SimpleExecutionFailureConclusionResult = $ActionTest1SimpleExecutionFailureConclusion -eq $ActionTest1SimpleExecutionFailureExpectedConclusion
 
-            $ActionTest1SimpleExecutionFailureTestResults = "${{ needs.ActionTest1SimpleExecutionFailure.outputs.TestResults }}"
+            $ActionTest1SimpleExecutionFailureTestResults = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.TestResults }}'
             $ActionTest1SimpleExecutionFailureExecuted = -not [string]::IsNullOrEmpty($ActionTest1SimpleExecutionFailureTestResults)
             # For execution failure, we don't expect valid test results
             $ActionTest1SimpleExecutionFailureTestsPassed = $true
@@ -226,14 +226,14 @@ jobs:
             $ActionTest1SimpleExecutionFailureExpectedPassed = $true
             $ActionTest1SimpleExecutionFailurePassedPassed = $ActionTest1SimpleExecutionFailureTestsPassed -eq $ActionTest1SimpleExecutionFailureExpectedPassed
 
-            $ActionTest2StandardOutcome = "${{ needs.ActionTest2Standard.outputs.outcome }}"
-            $ActionTest2StandardExpectedOutcome = "success"
+            $ActionTest2StandardOutcome = '${{ needs.ActionTest2Standard.outputs.outcome }}'
+            $ActionTest2StandardExpectedOutcome = 'success'
             $ActionTest2StandardOutcomeResult = $ActionTest2StandardOutcome -eq $ActionTest2StandardExpectedOutcome
-            $ActionTest2StandardConclusion = "${{ needs.ActionTest2Standard.outputs.conclusion }}"
-            $ActionTest2StandardExpectedConclusion = "success"
+            $ActionTest2StandardConclusion = '${{ needs.ActionTest2Standard.outputs.conclusion }}'
+            $ActionTest2StandardExpectedConclusion = 'success'
             $ActionTest2StandardConclusionResult = $ActionTest2StandardConclusion -eq $ActionTest2StandardExpectedConclusion
 
-            $ActionTest2StandardTestResults = "${{ needs.ActionTest2Standard.outputs.TestResults }}"
+            $ActionTest2StandardTestResults = '${{ needs.ActionTest2Standard.outputs.TestResults }}'
             $ActionTest2StandardExecuted = -not [string]::IsNullOrEmpty($ActionTest2StandardTestResults)
             $ActionTest2StandardTestsPassed = $false
             if ($ActionTest2StandardExecuted) {
@@ -250,14 +250,14 @@ jobs:
             $ActionTest2StandardExpectedPassed = $true
             $ActionTest2StandardPassedPassed = $ActionTest2StandardTestsPassed -eq $ActionTest2StandardExpectedPassed
 
-            $ActionTest3AdvancedOutcome = "${{ needs.ActionTest3Advanced.outputs.outcome }}"
-            $ActionTest3AdvancedExpectedOutcome = "success"
+            $ActionTest3AdvancedOutcome = '${{ needs.ActionTest3Advanced.outputs.outcome }}'
+            $ActionTest3AdvancedExpectedOutcome = 'success'
             $ActionTest3AdvancedOutcomeResult = $ActionTest3AdvancedOutcome -eq $ActionTest3AdvancedExpectedOutcome
-            $ActionTest3AdvancedConclusion = "${{ needs.ActionTest3Advanced.outputs.conclusion }}"
-            $ActionTest3AdvancedExpectedConclusion = "success"
+            $ActionTest3AdvancedConclusion = '${{ needs.ActionTest3Advanced.outputs.conclusion }}'
+            $ActionTest3AdvancedExpectedConclusion = 'success'
             $ActionTest3AdvancedConclusionResult = $ActionTest3AdvancedConclusion -eq $ActionTest3AdvancedExpectedConclusion
 
-            $ActionTest3AdvancedTestResults = "${{ needs.ActionTest3Advanced.outputs.TestResults }}"
+            $ActionTest3AdvancedTestResults = '${{ needs.ActionTest3Advanced.outputs.TestResults }}'
             $ActionTest3AdvancedExecuted = -not [string]::IsNullOrEmpty($ActionTest3AdvancedTestResults)
             $ActionTest3AdvancedTestsPassed = $false
             if ($ActionTest3AdvancedExecuted) {
