@@ -23,7 +23,8 @@ jobs:
     outputs:
       Outcome: ${{ steps.action-test.outcome }}
       Conclusion: ${{ steps.action-test.conclusion }}
-      TestResults: ${{ steps.action-test.outputs.TestResults }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
       # Need to check out as part of the test, as its a local action
@@ -48,7 +49,9 @@ jobs:
     outputs:
       Outcome: ${{ steps.action-test.outcome }}
       Conclusion: ${{ steps.action-test.conclusion }}
-      TestResults: ${{ steps.action-test.outputs.TestResults }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
+
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -73,7 +76,9 @@ jobs:
     outputs:
       Outcome: ${{ steps.action-test.outcome }}
       Conclusion: ${{ steps.action-test.conclusion }}
-      TestResults: ${{ steps.action-test.outputs.TestResults }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
+
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -98,7 +103,9 @@ jobs:
     outputs:
       Outcome: ${{ steps.action-test.outcome }}
       Conclusion: ${{ steps.action-test.conclusion }}
-      TestResults: ${{ steps.action-test.outputs.TestResults }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
+
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
@@ -123,7 +130,9 @@ jobs:
     outputs:
       Outcome: ${{ steps.action-test.outcome }}
       Conclusion: ${{ steps.action-test.conclusion }}
-      TestResults: ${{ steps.action-test.outputs.TestResults }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
+
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
