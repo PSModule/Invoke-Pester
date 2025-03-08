@@ -971,7 +971,22 @@ filter Set-PesterReportTestsSummary {
             if ($InputObject.ErrorRecord) {
                 Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
                     CodeBlock 'pwsh' {
-                        $InputObject.ErrorRecord
+                        # Improve error formatting by adding line breaks
+                        $errorMessage = $InputObject.ErrorRecord.ToString()
+                        
+                        # Format the error message by adding line breaks before "Expected:" and "But was:"
+                        $formattedError = $errorMessage -replace 'Expected:', "`nExpected:" -replace 'But was:', "`nBut was:"
+                        
+                        # Find and format the arrow (^) indicator to appear on its own line
+                        # Look for the pattern where there's a single caret character that often appears at the end of a line
+                        if ($formattedError -match '(\s*)\^') {
+                            $whitespace = $matches[1]
+                            # Add a newline before the whitespace and caret
+                            $formattedError = $formattedError -replace "($whitespace\^)", "`n$1"
+                        }
+                        
+                        # Return the formatted error message
+                        $formattedError
                     } -Execute
                 }
             } else {
