@@ -13,9 +13,9 @@ param()
 Describe 'Failure' {
 
     $categories = @(
-        @{ Category = 'Get-PSModuleTest'; Expected = 'Hello, World!' }
+        @{ Category = 'Get-PSModuleTest'; Expected = 'Get-PSModuleTest' }
         @{ Category = 'New-PSModuleTest'; Expected = 'Hello, World!' }
-        @{ Category = 'Set-PSModuleTest'; Expected = 'Hello, World!' }
+        @{ Category = 'Set-PSModuleTest'; Expected = 'Set-PSModuleTest' }
     )
 
     Context 'Cat: <Category> should be <Expected>' -ForEach $categories {
@@ -25,8 +25,8 @@ Describe 'Failure' {
     }
 
     $tests = @(
-        @{ Name = 'Get-PSModuleTest'; Expected = 'Hello, World!' }
-        @{ Name = 'New-PSModuleTest'; Expected = 'Hello, World!' }
+        @{ Name = 'Get-PSModuleTest'; Expected = 'Get-PSModuleTest' }
+        @{ Name = 'New-PSModuleTest'; Expected = 'New-PSModuleTest' }
         @{ Name = 'Set-PSModuleTest'; Expected = 'Hello, World!' }
     )
 

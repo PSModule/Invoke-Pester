@@ -1,6 +1,6 @@
 name: Action-Test
 
-run-name: "Action-Test - [${{ github.event.pull_request.title }} #${{ github.event.pull_request.number }}] by @${{ github.actor }}"
+run-name: 'Action-Test - [${{ github.event.pull_request.title }} #${{ github.event.pull_request.number }}] by @${{ github.actor }}'
 
 on:
   workflow_dispatch:
@@ -63,6 +63,37 @@ jobs:
         continue-on-error: true
         with:
           WorkingDirectory: tests/1-Simple-Failure
+          StepSummary_Enabled: true
+          StepSummary_ShowTests: Full
+
+      - name: Status
+        shell: pwsh
+        run: |
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+
+  ActionTest1SimpleFailureOnlyFailedSummary:
+    name: Action-Test - [1-Simple-Failure-OnlyFailedSummary]
+    runs-on: ubuntu-latest
+    outputs:
+      Outcome: ${{ steps.action-test.outcome }}
+      Conclusion: ${{ steps.action-test.conclusion }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
+
+    steps:
+      # Need to check out as part of the test, as its a local action
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Action-Test [1-Simple-Failure]
+        uses: ./
+        id: action-test
+        continue-on-error: true
+        with:
+          WorkingDirectory: tests/1-Simple-Failure
+          TestResult_TestSuiteName: 1-Simple-Failure
+          StepSummary_Enabled: true
 
       - name: Status
         shell: pwsh
@@ -117,6 +148,36 @@ jobs:
         with:
           WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
+          StepSummary_Enabled: true
+          StepSummary_ShowTests: Failed
+
+      - name: Status
+        shell: pwsh
+        run: |
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+
+  ActionTest2StandardNoSummary:
+    name: Action-Test - [2-Standard-NoSummary]
+    runs-on: ubuntu-latest
+    outputs:
+      Outcome: ${{ steps.action-test.outcome }}
+      Conclusion: ${{ steps.action-test.conclusion }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
+
+    steps:
+      # Need to check out as part of the test, as its a local action
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Action-Test [2-Standard-NoSummary]
+        uses: ./
+        id: action-test
+        with:
+          WorkingDirectory: tests/2-Standard
+          Output_CIFormat: GithubActions
+          TestResult_TestSuiteName: 2-Standard-NoSummary
 
       - name: Status
         shell: pwsh
@@ -152,12 +213,14 @@ jobs:
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
 
   CatchJob:
-    name: "Catch Job - Aggregate Status"
+    name: Catch Job - Aggregate Status
     needs:
       - ActionTest1Simple
       - ActionTest1SimpleFailure
+      - ActionTest1SimpleFailureOnlyFailedSummary
       - ActionTest1SimpleExecutionFailure
       - ActionTest2Standard
+      - ActionTest2StandardNoSummary
       - ActionTest3Advanced
     if: always()
     runs-on: ubuntu-latest
@@ -195,6 +258,19 @@ jobs:
             $ActionTest1SimpleFailureResultExpected = 'Failed'
             $ActionTest1SimpleFailureResultResult = $ActionTest1SimpleFailureResult -eq $ActionTest1SimpleFailureResultExpected
 
+            $ActionTest1SimpleFailureOnlyFailedSummaryOutcome = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.outcome }}'
+            $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeExpected = 'failure'
+            $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeResult = $ActionTest1SimpleFailureOnlyFailedSummaryOutcome -eq $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeExpected
+            $ActionTest1SimpleFailureOnlyFailedSummaryConclusion = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.conclusion }}'
+            $ActionTest1SimpleFailureOnlyFailedSummaryonclusionExpected = 'success'
+            $ActionTest1SimpleFailureOnlyFailedSummaryonclusionResult = $ActionTest1SimpleFailureOnlyFailedSummaryConclusion -eq $ActionTest1SimpleFailureOnlyFailedSummaryonclusionExpected
+            $ActionTest1SimpleFailureOnlyFailedSummaryExecuted = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Executed }}'
+            $ActionTest1SimpleFailureOnlyFailedSummaryExecutedExpected = 'True'
+            $ActionTest1SimpleFailureOnlyFailedSummaryExecutedResult = $ActionTest1SimpleFailureOnlyFailedSummaryExecuted -eq $ActionTest1SimpleFailureOnlyFailedSummaryExecutedExpected
+            $ActionTest1SimpleFailureOnlyFailedSummaryResult = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Result }}'
+            $ActionTest1SimpleFailureOnlyFailedSummaryResultExpected = 'Failed'
+            $ActionTest1SimpleFailureOnlyFailedSummaryResultResult = $ActionTest1SimpleFailureOnlyFailedSummaryResult -eq $ActionTest1SimpleFailureOnlyFailedSummaryResultExpected
+
             $ActionTest1SimpleExecutionFailureOutcome = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.outcome }}'
             $ActionTest1SimpleExecutionFailureOutcomeExpected = 'failure'
             $ActionTest1SimpleExecutionFailureOutcomeResult = $ActionTest1SimpleExecutionFailureOutcome -eq $ActionTest1SimpleExecutionFailureOutcomeExpected
@@ -220,6 +296,19 @@ jobs:
             $ActionTest2StandardResult = '${{ needs.ActionTest2Standard.outputs.Result }}'
             $ActionTest2StandardResultExpected = 'Passed'
             $ActionTest2StandardResultResult = $ActionTest2StandardResult -eq $ActionTest2StandardResultExpected
+
+            $ActionTest2StandardNoSummaryOutcome = '${{ needs.ActionTest2StandardNoSummary.outputs.outcome }}'
+            $ActionTest2StandardNoSummaryOutcomeExpected = 'success'
+            $ActionTest2StandardNoSummaryOutcomeResult = $ActionTest2StandardNoSummaryOutcome -eq $ActionTest2StandardNoSummaryOutcomeExpected
+            $ActionTest2StandardNoSummaryConclusion = '${{ needs.ActionTest2StandardNoSummary.outputs.conclusion }}'
+            $ActionTest2StandardNoSummaryConclusionExpected = 'success'
+            $ActionTest2StandardNoSummaryConclusionResult = $ActionTest2StandardNoSummaryConclusion -eq $ActionTest2StandardNoSummaryConclusionExpected
+            $ActionTest2StandardNoSummaryExecuted = '${{ needs.ActionTest2StandardNoSummary.outputs.Executed }}'
+            $ActionTest2StandardNoSummaryExecutedExpected = 'True'
+            $ActionTest2StandardNoSummaryExecutedResult = $ActionTest2StandardNoSummaryExecuted -eq $ActionTest2StandardNoSummaryExecutedExpected
+            $ActionTest2StandardNoSummaryResult = '${{ needs.ActionTest2StandardNoSummary.outputs.Result }}'
+            $ActionTest2StandardNoSummaryResultExpected = 'Passed'
+            $ActionTest2StandardNoSummaryResultResult = $ActionTest2StandardNoSummaryResult -eq $ActionTest2StandardNoSummaryResultExpected
 
             $ActionTest3AdvancedOutcome = '${{ needs.ActionTest3Advanced.outputs.outcome }}'
             $ActionTest3AdvancedOutcomeExpected = 'success'
@@ -266,6 +355,21 @@ jobs:
                 ResultResult       = $ActionTest1SimpleFailureResultResult
               },
               [PSCustomObject]@{
+                Name               = "Action-Test - [1-Simple-Failure-OnlyFailedSummary]"
+                Outcome            = $ActionTest1SimpleFailureOnlyFailedSummaryOutcome
+                OutcomeExpected    = $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeExpected
+                OutcomeResult      = $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeResult
+                Conclusion         = $ActionTest1SimpleFailureOnlyFailedSummaryConclusion
+                ConclusionExpected = $ActionTest1SimpleFailureOnlyFailedSummaryonclusionExpected
+                ConclusionResult   = $ActionTest1SimpleFailureOnlyFailedSummaryonclusionResult
+                Executed           = $ActionTest1SimpleFailureOnlyFailedSummaryExecuted
+                ExecutedExpected   = $ActionTest1SimpleFailureOnlyFailedSummaryExecutedExpected
+                ExecutedResult     = $ActionTest1SimpleFailureOnlyFailedSummaryExecutedResult
+                Result             = $ActionTest1SimpleFailureOnlyFailedSummaryResult
+                ResultExpected     = $ActionTest1SimpleFailureOnlyFailedSummaryResultExpected
+                ResultResult       = $ActionTest1SimpleFailureOnlyFailedSummaryResultResult
+              },
+              [PSCustomObject]@{
                 Name               = "Action-Test - [1-Simple-ExecutionFailure]"
                 Outcome            = $ActionTest1SimpleExecutionFailureOutcome
                 OutcomeExpected    = $ActionTest1SimpleExecutionFailureOutcomeExpected
@@ -294,6 +398,21 @@ jobs:
                 Result             = $ActionTest2StandardResult
                 ResultExpected     = $ActionTest2StandardResultExpected
                 ResultResult       = $ActionTest2StandardResultResult
+              },
+              [PSCustomObject]@{
+                Name               = "Action-Test - [2-Standard-NoSummary]"
+                Outcome            = $ActionTest2StandardNoSummaryOutcome
+                OutcomeExpected    = $ActionTest2StandardNoSummaryOutcomeExpected
+                OutcomeResult      = $ActionTest2StandardNoSummaryOutcomeResult
+                Conclusion         = $ActionTest2StandardNoSummaryConclusion
+                ConclusionExpected = $ActionTest2StandardNoSummaryConclusionExpected
+                ConclusionResult   = $ActionTest2StandardNoSummaryConclusionResult
+                Executed           = $ActionTest2StandardNoSummaryExecuted
+                ExecutedExpected   = $ActionTest2StandardNoSummaryExecutedExpected
+                ExecutedResult     = $ActionTest2StandardNoSummaryExecutedResult
+                Result             = $ActionTest2StandardNoSummaryResult
+                ResultExpected     = $ActionTest2StandardNoSummaryResultExpected
+                ResultResult       = $ActionTest2StandardNoSummaryResultResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [3-Advanced]"

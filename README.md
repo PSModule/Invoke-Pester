@@ -263,6 +263,10 @@ jobs:
 |--------------------------------------|--------------------------------------------------------------------------------------------------------|-------------|
 | `Path`                               | Path to where tests are located or a configuration file.                                               | *(none)*    |
 | `ReportAsJson`                       | Output generated reports in JSON format in addition to the configured format through Pester.           | `true`      |
+| `StepSummary_Enabled`                | Controls if a GitHub step summary should be shown.                                                     | `false`     |
+| `StepSummary_ShowTestOverview`       | Controls whether to show the test overview table in the GitHub step summary.                           | `true`      |
+| `StepSummary_ShowTests`              | Controls which tests to show in the GitHub step summary. Allows "Full", "Failed", or "None".           | `Failed`    |
+| `StepSummary_ShowConfiguration`      | Controls whether to show the configuration details in the GitHub step summary.                         | `false`     |
 | `Run_Path`                           | Directories/files to be searched for tests.                                                            | *(none)*    |
 | `Run_ExcludePath`                    | Directories/files to exclude from the run.                                                             | *(none)*    |
 | `Run_ScriptBlock`                    | ScriptBlocks containing tests to be executed.                                                          | *(none)*    |
@@ -305,11 +309,11 @@ jobs:
 | `Output_RenderMode`                  | How to render console output: `Auto`, `Ansi`, `ConsoleColor`, `Plaintext`.                             | *(none)*    |
 | `TestDrive_Enabled`                  | Enable `TestDrive`.                                                                                    | *(none)*    |
 | `TestRegistry_Enabled`               | Enable `TestRegistry`.                                                                                 | *(none)*    |
-| `Debug`                              | Enable debug output.                                                                                   | `'false'`   |
-| `Verbose`                            | Enable verbose output.                                                                                 | `'false'`   |
+| `Debug`                              | Enable debug output.                                                                                   | `false`     |
+| `Verbose`                            | Enable verbose output.                                                                                 | `false`     |
 | `Version`                            | Specifies the exact version of the GitHub module to install.                                           | *(none)*    |
-| `Prerelease`                         | Allow prerelease versions if available.                                                                | `'false'`   |
-| `WorkingDirectory`                   | The working directory where the script runs.                                                           | `'.'`       |
+| `Prerelease`                         | Allow prerelease versions if available.                                                                | `false`     |
+| `WorkingDirectory`                   | The working directory where the script runs.                                                           | `.`         |
 
 ### Outputs
 

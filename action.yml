@@ -15,6 +15,26 @@ inputs:
       Output generated reports in JSON format in addition to the configured format through Pester.
     required: false
     default: 'true'
+  StepSummary_Enabled:
+    description: |
+      Controls if a GitHub step summary should be shown.
+    required: false
+    default: 'false'
+  StepSummary_ShowTestOverview:
+    description: |
+      Controls whether to show the test overview table in the GitHub step summary.
+    required: false
+    default: 'true'
+  StepSummary_ShowTests:
+    description: |
+      Controls which tests to show in the GitHub step summary. Allows "Full", "Failed", or "None".
+    required: false
+    default: 'Failed'
+  StepSummary_ShowConfiguration:
+    description: |
+      Controls whether to show the configuration details in the GitHub step summary.
+    required: false
+    default: 'false'
   Run_Path:
     description: |
       Directories to be searched for tests, paths directly to test files, or combination of both.
@@ -324,6 +344,10 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
+        PSMODULE_INVOKE_PESTER_INPUT_StepSummary_Enabled: ${{ inputs.StepSummary_Enabled }}
+        PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTestOverview: ${{ inputs.StepSummary_ShowTestOverview }}
+        PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTests: ${{ inputs.StepSummary_ShowTests }}
+        PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowConfiguration: ${{ inputs.StepSummary_ShowConfiguration }}
       id: test
       run: |
         # Invoke-Pester (exec)
@@ -357,31 +381,4 @@ runs:
         PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion: ${{ steps.test.conclusion }}
       run: |
         # Status
-        $PSStyle.OutputRendering = 'Ansi'
-        $executed = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Executed -eq 'true'
-        $outcome = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Outcome
-        $conclusion = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion
-
-        "Executed=$executed" >> $env:GITHUB_OUTPUT
-
-        [PSCustomObject]@{
-          Executed = $executed
-          Outcome = $outcome
-          Conclusion = $conclusion
-        } | Format-List | Out-String
-
-        # If the tests did not execute, exit with a failure code
-        if ($executed -ne 'true') {
-          Write-Error "Tests did not execute."
-          exit 1
-        }
-        # If the outcome is not success, exit with a failure code
-        if ($outcome -ne 'success') {
-          Write-Error "Tests did not pass."
-          exit 1
-        }
-        # If the conclusion is not success
-        if ($conclusion -ne 'success') {
-          Write-Error "Tests did not pass."
-          exit 1
-        }
+        ${{ github.action_path }}/scripts/status.ps1

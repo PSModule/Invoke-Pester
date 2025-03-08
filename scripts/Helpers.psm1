@@ -819,12 +819,28 @@ filter Set-PesterReportSummary {
         'PSUseShouldProcessForStateChangingFunctions', '',
         Justification = 'Sets text in memory'
     )]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSReviewUnusedParameter', '',
+        Justification = 'Markdown DSL scoping the use of the parameter'
+    )]
     [OutputType([string])]
     [CmdletBinding()]
     param(
         # The Pester result object.
         [Parameter(Mandatory, ValueFromPipeline)]
-        [Pester.Run] $TestResults
+        [Pester.Run] $TestResults,
+
+        # Controls whether to show the test overview table in the summary.
+        [Parameter()]
+        [bool] $ShowTestOverview = $true,
+
+        # Controls which tests to show in the summary. Allows "Full", "Failed", or "None".
+        [Parameter()]
+        [string] $ShowTestsMode = 'Failed',
+
+        # Controls whether to show the configuration details in the summary.
+        [Parameter()]
+        [bool] $ShowConfiguration = $false
     )
 
     $testSuitName = $TestResults.Configuration.TestResult.TestSuiteName.Value
@@ -832,13 +848,23 @@ filter Set-PesterReportSummary {
     $formattedTestDuration = $testResults.Duration | Format-TimeSpan
 
     Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
-        $testResults | Set-PesterReportSummaryTable
+        # Show test overview table if enabled
+        if ($ShowTestOverview) {
+            $testResults | Set-PesterReportSummaryTable
+        }
 
-        $testResults.Containers | Set-PesterReportTestsSummary
+        # Show tests based on the specified mode
+        if ($ShowTestsMode -ne 'None') {
+            $showOnlyFailed = $ShowTestsMode -eq 'Failed'
+            $testResults.Containers | Set-PesterReportTestsSummary -FailedOnly:$showOnlyFailed
+        }
 
         '----'
 
-        $testResults | Set-PesterReportConfigurationSummary
+        # Show configuration if enabled
+        if ($ShowConfiguration) {
+            $testResults | Set-PesterReportConfigurationSummary
+        }
     }
 }
 
@@ -908,12 +934,21 @@ filter Set-PesterReportTestsSummary {
 
         # The indentation level for the current item.
         [Parameter()]
-        [int] $Depth = 0
+        [int] $Depth = 0,
+
+        # When specified, only failed tests will be shown in the report.
+        [Parameter()]
+        [switch] $FailedOnly
     )
 
     $itemIndent = $Indent * $Depth
     $formattedTestDuration = $inputObject.Duration | Format-TimeSpan
     $testStatusIcon = $statusIcon[$InputObject.Result]
+
+    # Skip this item if we're only showing failures and this item passed
+    if ($FailedOnly -and $InputObject.Result -eq 'Passed' -and $InputObject.GetType().Name -eq 'Test') {
+        return
+    }
 
     Write-Verbose "Processing object of type: $($InputObject.GetType().Name)"
     switch ($InputObject.GetType().Name) {
@@ -921,21 +956,31 @@ filter Set-PesterReportTestsSummary {
             $testName = $testResults.Configuration.TestResult.TestSuiteName.Value
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Containers | Set-PesterReportTestsSummary -Depth ($Depth + 1)
+                $inputObject.Containers | Set-PesterReportTestsSummary -Depth ($Depth + 1) -FailedOnly:$FailedOnly
             }
         }
         'Container' {
+            # Skip containers with no failures if we're only showing failures
+            if ($FailedOnly -and $InputObject.FailedCount -eq 0) {
+                return
+            }
+
             $testName = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth ($Depth + 1)
+                $inputObject.Blocks | Set-PesterReportTestsSummary -Depth ($Depth + 1) -FailedOnly:$FailedOnly
             }
         }
         'Block' {
+            # Skip blocks with no failures if we're only showing failures
+            if ($FailedOnly -and $InputObject.FailedCount -eq 0) {
+                return
+            }
+
             $testName = $InputObject.ExpandedName
 
             Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
-                $inputObject.Order | Set-PesterReportTestsSummary -Depth ($Depth + 1)
+                $inputObject.Order | Set-PesterReportTestsSummary -Depth ($Depth + 1) -FailedOnly:$FailedOnly
             }
         }
         'Test' {
@@ -944,7 +989,7 @@ filter Set-PesterReportTestsSummary {
             if ($InputObject.ErrorRecord) {
                 Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
                     CodeBlock 'pwsh' {
-                        $InputObject.ErrorRecord
+                        $InputObject.ErrorRecord -split [System.Environment]::NewLine
                     } -Execute
                 }
             } else {
