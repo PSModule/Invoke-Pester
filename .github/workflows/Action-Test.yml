@@ -63,6 +63,8 @@ jobs:
         continue-on-error: true
         with:
           WorkingDirectory: tests/1-Simple-Failure
+          StepSummary_Enabled: true
+          StepSummary_ShowTests: Full
 
       - name: Status
         shell: pwsh
@@ -92,7 +94,6 @@ jobs:
           WorkingDirectory: tests/1-Simple-Failure
           TestResult_TestSuiteName: 1-Simple-Failure
           StepSummary_Enabled: true
-          StepSummary_ShowTests: Failed
 
       - name: Status
         shell: pwsh
