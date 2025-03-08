@@ -830,9 +830,17 @@ filter Set-PesterReportSummary {
         [Parameter(Mandatory, ValueFromPipeline)]
         [Pester.Run] $TestResults,
 
-        # When specified, only failed tests will be included in the summary.
+        # Controls whether to show the test overview table in the summary.
         [Parameter()]
-        [switch] $FailedOnly
+        [bool] $ShowTestOverview = $true,
+
+        # Controls which tests to show in the summary. Allows "Full", "Failed", or "None".
+        [Parameter()]
+        [string] $ShowTestsMode = "Failed",
+
+        # Controls whether to show the configuration details in the summary.
+        [Parameter()]
+        [bool] $ShowConfiguration = $false
     )
 
     $testSuitName = $TestResults.Configuration.TestResult.TestSuiteName.Value
@@ -840,13 +848,23 @@ filter Set-PesterReportSummary {
     $formattedTestDuration = $testResults.Duration | Format-TimeSpan
 
     Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
-        $testResults | Set-PesterReportSummaryTable
+        # Show test overview table if enabled
+        if ($ShowTestOverview) {
+            $testResults | Set-PesterReportSummaryTable
+        }
 
-        $testResults.Containers | Set-PesterReportTestsSummary -FailedOnly:$FailedOnly
+        # Show tests based on the specified mode
+        if ($ShowTestsMode -ne "None") {
+            $showOnlyFailed = $ShowTestsMode -eq "Failed"
+            $testResults.Containers | Set-PesterReportTestsSummary -FailedOnly:$showOnlyFailed
+        }
 
         '----'
 
-        $testResults | Set-PesterReportConfigurationSummary
+        # Show configuration if enabled
+        if ($ShowConfiguration) {
+            $testResults | Set-PesterReportConfigurationSummary
+        }
     }
 }
 

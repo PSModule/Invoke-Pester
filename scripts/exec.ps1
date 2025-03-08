@@ -84,12 +84,21 @@ LogGroup 'Eval - Test results' {
 }
 
 LogGroup 'Eval - Test results summary' {
-    $showStepSummary = $env:PSMODULE_INVOKE_PESTER_INPUT_ShowStepSummary -eq 'true'
-    $onlyFailuresSummary = $env:PSMODULE_INVOKE_PESTER_INPUT_OnlyFailuresSummary -eq 'true'
+    $stepSummaryEnabled = $env:PSMODULE_INVOKE_PESTER_INPUT_StepSummary_Enabled -eq 'true'
+    $showTestOverview = $env:PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTestOverview -ne 'false'
+    $showTests = $env:PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTests
+    $showConfiguration = $env:PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowConfiguration -eq 'true'
 
-    if ($showStepSummary) {
+    if ($stepSummaryEnabled) {
         $PSStyle.OutputRendering = 'Host'
-        Set-GitHubStepSummary -Summary ($testResults | Set-PesterReportSummary -FailedOnly:$onlyFailuresSummary)
+        
+        $summaryParams = @{
+            ShowTestOverview   = $showTestOverview
+            ShowTestsMode      = $showTests
+            ShowConfiguration  = $showConfiguration
+        }
+        
+        Set-GitHubStepSummary -Summary ($testResults | Set-PesterReportSummary @summaryParams)
         $PSStyle.OutputRendering = 'Ansi'
     } else {
         Write-Verbose 'Step summary has been disabled'

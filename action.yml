@@ -15,14 +15,24 @@ inputs:
       Output generated reports in JSON format in addition to the configured format through Pester.
     required: false
     default: 'true'
-  ShowStepSummary:
+  StepSummary_Enabled:
     description: |
-      Enable GitHub step summary for test results.
+      Controls if a GitHub step summary should be shown.
     required: false
     default: 'false'
-  OnlyFailuresSummary:
+  StepSummary_ShowTestOverview:
     description: |
-      When set to true, the summary only shows failed tests.
+      Controls whether to show the test overview table in the GitHub step summary.
+    required: false
+    default: 'true'
+  StepSummary_ShowTests:
+    description: |
+      Controls which tests to show in the GitHub step summary. Allows "Full", "Failed", or "None".
+    required: false
+    default: 'Failed'
+  StepSummary_ShowConfiguration:
+    description: |
+      Controls whether to show the configuration details in the GitHub step summary.
     required: false
     default: 'false'
   Run_Path:
@@ -334,8 +344,10 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
-        PSMODULE_INVOKE_PESTER_INPUT_ShowStepSummary: ${{ inputs.ShowStepSummary }}
-        PSMODULE_INVOKE_PESTER_INPUT_OnlyFailuresSummary: ${{ inputs.OnlyFailuresSummary }}
+        PSMODULE_INVOKE_PESTER_INPUT_StepSummary_Enabled: ${{ inputs.StepSummary_Enabled }}
+        PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTestOverview: ${{ inputs.StepSummary_ShowTestOverview }}
+        PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTests: ${{ inputs.StepSummary_ShowTests }}
+        PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowConfiguration: ${{ inputs.StepSummary_ShowConfiguration }}
       id: test
       run: |
         # Invoke-Pester (exec)
