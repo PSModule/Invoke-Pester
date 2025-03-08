@@ -304,7 +304,7 @@ jobs:
             )
 
             # Display the table in the workflow logs
-            $jobs | Format-Table -AutoSize | Out-String
+            $jobs | Format-List | Out-String
 
             $passed = $true
             $jobs | ForEach-Object {
