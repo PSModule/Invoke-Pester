@@ -306,8 +306,84 @@ jobs:
 
 ### Outputs
 
-No outputs are provided directly by this action. Instead, use the step's **outcome** and **conclusion** properties along with the published outputs
-listed above to control the subsequent flow of your workflow.
+The action provides the following outputs:
 
-The provided example workflows demonstrate how you can use these outputs to control the flow. For instance, the **Status** steps in the test
-workflows print the `outcome` and `conclusion` values, and a later job aggregates these values to decide whether to continue or abort the workflow.
+| Output | Description |
+| ------ | ----------- |
+| `TestResults` | The test results in JSON format. This output can be used in subsequent workflow steps to process or display test results. |
+| `Outcome` | The outcome of the test run (`success` or `failure`). This can be used to conditionally execute steps based on test results. |
+| `Conclusion` | The conclusion of the test run (`success` or `failure`). Similar to Outcome but can be used for workflow control. |
+
+## Examples
+
+### Basic Usage
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Pester tests
+        uses: PSModule/Invoke-Pester@v1
+        with:
+          Path: './tests'
+```
+
+### Using Test Results in Subsequent Steps
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Pester tests
+        id: pester
+        uses: PSModule/Invoke-Pester@v1
+        with:
+          Path: './tests'
+          TestResult_Enabled: 'true'
+          TestResult_OutputPath: './test-results.xml'
+
+      - name: Process test results
+        if: always()
+        run: |
+          $testResults = '${{ steps.pester.outputs.TestResults }}' | ConvertFrom-Json
+          Write-Output "Total tests: $($testResults.TotalCount)"
+          Write-Output "Passed tests: $($testResults.PassedCount)"
+          Write-Output "Failed tests: $($testResults.FailedCount)"
+          Write-Output "Test outcome: ${{ steps.pester.outputs.Outcome }}"
+        shell: pwsh
+
+      - name: Take action based on test outcome
+        if: steps.pester.outputs.Outcome == 'success'
+        run: echo "All tests passed! Ready to proceed with deployment."
+```
+
+### With Code Coverage
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Pester tests with code coverage
+        id: pester
+        uses: PSModule/Invoke-Pester@v1
+        with:
+          Path: './tests'
+          CodeCoverage_Enabled: 'true'
+          CodeCoverage_Path: './src'
+          CodeCoverage_OutputPath: './coverage.xml'
+          CodeCoverage_OutputFormat: 'JaCoCo'
+```
+
+## See Also
+
+- [Pester Documentation](https://pester.dev/)
+- [PowerShell Documentation](https://docs.microsoft.com/en-us/powershell/)

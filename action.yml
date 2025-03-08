@@ -207,6 +207,20 @@ inputs:
     required: false
     default: '.'
 
+outputs:
+  TestResults:
+    description: |
+      The test results in JSON format.
+    value: ${{ steps.test.outputs.TestResults }}
+  Outcome:
+    description: |
+      The outcome of the test run.
+    value: ${{ steps.test.outcome }}
+  Conclusion:
+    description: |
+      The conclusion of the test run.
+    value: ${{ steps.test.conclusion }}
+
 runs:
   using: composite
   steps:
@@ -305,6 +319,7 @@ runs:
         PSMODULE_INVOKE_PESTER_INTERNAL_Outcome: ${{ steps.test.outcome }}
         PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion: ${{ steps.test.conclusion }}
       run: |
+        # Status
         $PSStyle.OutputRendering = 'Ansi'
         $testResults = $env:PSMODULE_INVOKE_PESTER_INTERNAL_TestResults | ConvertFrom-Json
         $outcome = $env:PSMODULE_INVOKE_PESTER_INTERNAL_Outcome
