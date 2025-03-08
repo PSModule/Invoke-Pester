@@ -202,10 +202,10 @@ jobs:
             $ActionTest1SimpleExecutionFailureConclusionExpected = 'success'
             $ActionTest1SimpleExecutionFailureConclusionResult = $ActionTest1SimpleExecutionFailureConclusion -eq $ActionTest1SimpleExecutionFailureConclusionExpected
             $ActionTest1SimpleExecutionFailureExecuted = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Executed }}'
-            $ActionTest1SimpleExecutionFailureExecutedExpected = 'True'
+            $ActionTest1SimpleExecutionFailureExecutedExpected = 'False'
             $ActionTest1SimpleExecutionFailureExecutedResult = $ActionTest1SimpleExecutionFailureExecuted -eq $ActionTest1SimpleExecutionFailureExecutedExpected
             $ActionTest1SimpleExecutionFailureResult = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Result }}'
-            $ActionTest1SimpleExecutionFailureResultExpected = 'Passed'
+            $ActionTest1SimpleExecutionFailureResultExpected = ''
             $ActionTest1SimpleExecutionFailurePassedResult = $ActionTest1SimpleExecutionFailureResult -eq $ActionTest1SimpleExecutionFailureResultExpected
 
             $ActionTest2StandardOutcome = '${{ needs.ActionTest2Standard.outputs.outcome }}'
