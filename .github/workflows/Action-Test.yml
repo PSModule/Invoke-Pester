@@ -54,7 +54,7 @@ jobs:
       - name: Action-Test [1-Simple-Failure]
         uses: ./
         id: action-test
-        # continue-on-error: true
+        continue-on-error: true
         with:
           WorkingDirectory: tests/1-Simple-Failure
 
@@ -78,7 +78,7 @@ jobs:
       - name: Action-Test [1-Simple-ExecutionFailure]
         uses: ./
         id: action-test
-        # continue-on-error: true
+        continue-on-error: true
         with:
           WorkingDirectory: tests/1-Simple-ExecutionFailure
 
