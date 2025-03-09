@@ -94,8 +94,13 @@ LogGroup 'Eval - Test results summary' {
             ShowConfiguration = $showConfiguration
         }
         [PSCustomObject]$summaryParams | Format-List | Out-String
+        $content = $testResults | Set-PesterReportSummary @summaryParams
 
-        Set-GitHubStepSummary -Summary ($testResults | Set-PesterReportSummary @summaryParams)
+        if ($content) {
+            Set-GitHubStepSummary -Summary $content
+        } else {
+            Write-Verbose 'No content to display in step summary'
+        }
         $PSStyle.OutputRendering = 'Ansi'
     } else {
         Write-Verbose 'Step summary has been disabled or no components are configured for display'
