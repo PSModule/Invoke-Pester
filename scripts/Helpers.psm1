@@ -1175,7 +1175,7 @@ function Invoke-ProcessTestDirectory {
             $containerFileName = ($testFile | Split-Path -Leaf).Replace('.Tests.ps1', '.Container.ps1')
             Write-Host "${indent}Init - Export containers - Generated - $containerFileName"
             Write-Host "${indent}Container configuration:"
-            Format-Hashtable -Hashtable $container
+            Write-Host (Format-Hashtable -Hashtable $container)
             Write-Host "${indent}Exporting container [$OutputPath/$containerFileName]"
             Export-Hashtable -Hashtable $container -Path "$OutputPath/$containerFileName"
             Write-Host "${indent}Added generated container for $($testFile.Name) to collection"
@@ -1200,8 +1200,6 @@ function Invoke-ProcessTestDirectory {
 
     Write-Host "${indent}=== Completed processing directory: [$Directory] ==="
     Write-Host "${indent}Total containers after processing [$Directory]: [$($Containers.Count)]"
-
-    Write-Host ($Containers | Format-Table | Out-String)
 
     $Containers
 }
