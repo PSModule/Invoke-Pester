@@ -832,7 +832,7 @@ filter Set-PesterReportSummary {
 
         # Controls whether to show the test overview table in the summary.
         [Parameter()]
-        [bool] $ShowTestOverview = $true,
+        [bool] $ShowTestOverview = $false,
 
         # Controls which tests to show in the summary. Allows "Full", "Failed", or "None".
         [Parameter()]
