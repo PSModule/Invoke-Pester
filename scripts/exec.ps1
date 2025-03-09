@@ -77,24 +77,33 @@ LogGroup 'Eval - Test results' {
 }
 
 LogGroup 'Eval - Test results summary' {
-    $stepSummaryEnabled = $env:PSMODULE_INVOKE_PESTER_INPUT_StepSummary_Enabled -eq 'true'
-    $showTestOverview = $env:PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTestOverview -ne 'false'
-    $showTests = $env:PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTests
+    $stepSummaryMode = $env:PSMODULE_INVOKE_PESTER_INPUT_StepSummary_Mode
+    $showTestOverview = $env:PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTestOverview -eq 'true'
     $showConfiguration = $env:PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowConfiguration -eq 'true'
 
-    if ($stepSummaryEnabled) {
+    # Only generate a step summary if the StepSummary setting is not 'None'
+    # AND at least one component is configured to be displayed
+    $generateSummary = $showTestOverview -or $showConfiguration -or ($stepSummaryMode -in @('Failed', 'Full'))
+
+    if ($generateSummary) {
         $PSStyle.OutputRendering = 'Host'
 
         $summaryParams = @{
             ShowTestOverview  = $showTestOverview
-            ShowTestsMode     = $showTests
+            ShowTestsMode     = $stepSummaryMode
             ShowConfiguration = $showConfiguration
         }
+        [PSCustomObject]$summaryParams | Format-List | Out-String
+        $content = $testResults | Set-PesterReportSummary @summaryParams
 
-        Set-GitHubStepSummary -Summary ($testResults | Set-PesterReportSummary @summaryParams)
+        if ($content) {
+            Set-GitHubStepSummary -Summary $content
+        } else {
+            Write-Verbose 'No content to display in step summary'
+        }
         $PSStyle.OutputRendering = 'Ansi'
     } else {
-        Write-Verbose 'Step summary has been disabled'
+        Write-Verbose 'Step summary has been disabled or no components are configured for display'
     }
 }
 

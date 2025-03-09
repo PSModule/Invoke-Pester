@@ -63,8 +63,8 @@ jobs:
         continue-on-error: true
         with:
           WorkingDirectory: tests/1-Simple-Failure
-          StepSummary_Enabled: true
-          StepSummary_ShowTests: Full
+          StepSummary_Mode: Full
+          StepSummary_ShowTestOverview: true
 
       - name: Status
         shell: pwsh
@@ -93,7 +93,7 @@ jobs:
         with:
           WorkingDirectory: tests/1-Simple-Failure
           TestResult_TestSuiteName: 1-Simple-Failure
-          StepSummary_Enabled: true
+          StepSummary_ShowConfiguration: true
 
       - name: Status
         shell: pwsh
@@ -148,8 +148,6 @@ jobs:
         with:
           WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
-          StepSummary_Enabled: true
-          StepSummary_ShowTests: Failed
 
       - name: Status
         shell: pwsh
@@ -205,6 +203,7 @@ jobs:
         with:
           Path: Pester.Configuration.ps1
           WorkingDirectory: tests/3-Advanced
+          StepSummary_Mode: None
 
       - name: Status
         shell: pwsh

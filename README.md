@@ -263,9 +263,8 @@ jobs:
 |--------------------------------------|--------------------------------------------------------------------------------------------------------|-------------|
 | `Path`                               | Path to where tests are located or a configuration file.                                               | *(none)*    |
 | `ReportAsJson`                       | Output generated reports in JSON format in addition to the configured format through Pester.           | `true`      |
-| `StepSummary_Enabled`                | Controls if a GitHub step summary should be shown.                                                     | `false`     |
-| `StepSummary_ShowTestOverview`       | Controls whether to show the test overview table in the GitHub step summary.                           | `true`      |
-| `StepSummary_ShowTests`              | Controls which tests to show in the GitHub step summary. Allows "Full", "Failed", or "None".           | `Failed`    |
+| `StepSummary_Mode`                   | Controls which tests to show in the GitHub step summary. Allows "Full" (all tests), "Failed" (only failed tests), or "None" (disable step summary). | `Failed`    |
+| `StepSummary_ShowTestOverview`       | Controls whether to show the test overview table in the GitHub step summary.                           | `false`     |
 | `StepSummary_ShowConfiguration`      | Controls whether to show the configuration details in the GitHub step summary.                         | `false`     |
 | `Run_Path`                           | Directories/files to be searched for tests.                                                            | *(none)*    |
 | `Run_ExcludePath`                    | Directories/files to exclude from the run.                                                             | *(none)*    |

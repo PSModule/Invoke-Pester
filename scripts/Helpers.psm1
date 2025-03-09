@@ -832,7 +832,7 @@ filter Set-PesterReportSummary {
 
         # Controls whether to show the test overview table in the summary.
         [Parameter()]
-        [bool] $ShowTestOverview = $true,
+        [bool] $ShowTestOverview = $false,
 
         # Controls which tests to show in the summary. Allows "Full", "Failed", or "None".
         [Parameter()]
@@ -847,23 +847,28 @@ filter Set-PesterReportSummary {
     $testSuitStatusIcon = $statusIcon[$TestResults.Result]
     $formattedTestDuration = $testResults.Duration | Format-TimeSpan
 
-    Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
-        # Show test overview table if enabled
-        if ($ShowTestOverview) {
-            $testResults | Set-PesterReportSummaryTable
-        }
+    # Show test overview table if enabled
+    if ($ShowTestOverview) {
+        $tableOverview = $testResults | Set-PesterReportSummaryTable
+    }
 
-        # Show tests based on the specified mode
-        if ($ShowTestsMode -ne 'None') {
-            $showOnlyFailed = $ShowTestsMode -eq 'Failed'
-            $testResults.Containers | Set-PesterReportTestsSummary -FailedOnly:$showOnlyFailed
-        }
+    # Show tests based on the specified mode
+    if ($ShowTestsMode -ne 'None') {
+        $showOnlyFailed = $ShowTestsMode -eq 'Failed'
+        $testTree = $testResults.Containers | Set-PesterReportTestsSummary -FailedOnly:$showOnlyFailed
+    }
 
-        '----'
+    # Show configuration if enabled
+    if ($ShowConfiguration) {
+        $configOverview = $testResults | Set-PesterReportConfigurationSummary
+    }
 
-        # Show configuration if enabled
-        if ($ShowConfiguration) {
-            $testResults | Set-PesterReportConfigurationSummary
+    if ($tableOverview -or $testTree -or $configOverview) {
+        Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
+            $tableOverview | Out-String
+            $testTree | Out-String
+            '----'
+            $configOverview | Out-String
         }
     }
 }
