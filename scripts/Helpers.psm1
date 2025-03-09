@@ -1193,15 +1193,15 @@ function Invoke-ProcessTestDirectory {
         Write-Host "${indent}Beginning recursive processing of $subdirCount subdirectories..."
     }
 
-    $currentSubdir = 0
     foreach ($subdir in $subdirectories) {
-        $currentSubdir++
         Write-Host "${indent}Processing subdirectory - [$($subdir.Name)]"
         $Containers = Invoke-ProcessTestDirectory -Directory $subdir.FullName -OutputPath $OutputPath -Containers $Containers -RecursionLevel ($RecursionLevel + 1)
     }
 
     Write-Host "${indent}=== Completed processing directory: [$Directory] ==="
     Write-Host "${indent}Total containers after processing [$Directory]: [$($Containers.Count)]"
+
+    Write-Host ($Containers | Format-Table | Out-String)
 
     $Containers
 }
