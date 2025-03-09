@@ -5,8 +5,24 @@ $PSStyle.OutputRendering = 'Ansi'
 
 '::group::Exec - Setup prerequisites'
 'Pester' | ForEach-Object {
-    Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
-    Import-Module -Name $_
+    $name = $_
+    Write-Output "Installing module: $name"
+    $retryCount = 5
+    $retryDelay = 10
+    for ($i = 0; $i -lt $retryCount; $i++) {
+        try {
+            Install-PSResource -Name $name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+            break
+        } catch {
+            Write-Warning "Installation of $name failed with error: $_"
+            if ($i -eq $retryCount - 1) {
+                throw
+            }
+            Write-Warning "Retrying in $retryDelay seconds..."
+            Start-Sleep -Seconds $retryDelay
+        }
+    }
+    Import-Module -Name $name
 }
 Import-Module "$PSScriptRoot/Helpers.psm1"
 '::endgroup::'
@@ -59,8 +75,24 @@ $testResults = Invoke-Pester -Configuration $configuration
 
 LogGroup 'Eval - Setup prerequisites' {
     'Pester', 'Hashtable', 'TimeSpan', 'Markdown' | ForEach-Object {
-        Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
-        Import-Module -Name $_ -Verbose:$false
+        $name = $_
+        Write-Output "Installing module: $name"
+        $retryCount = 5
+        $retryDelay = 10
+        for ($i = 0; $i -lt $retryCount; $i++) {
+            try {
+                Install-PSResource -Name $name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+                break
+            } catch {
+                Write-Warning "Installation of $name failed with error: $_"
+                if ($i -eq $retryCount - 1) {
+                    throw
+                }
+                Write-Warning "Retrying in $retryDelay seconds..."
+                Start-Sleep -Seconds $retryDelay
+            }
+        }
+        Import-Module -Name $name
     }
     Import-Module "$PSScriptRoot/Helpers.psm1"
 }
