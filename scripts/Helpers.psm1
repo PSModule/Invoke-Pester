@@ -858,8 +858,6 @@ filter Set-PesterReportSummary {
         $testTree = $testResults.Containers | Set-PesterReportTestsSummary -FailedOnly:$showOnlyFailed
     }
 
-    '----'
-
     # Show configuration if enabled
     if ($ShowConfiguration) {
         $configOverview = $testResults | Set-PesterReportConfigurationSummary
@@ -869,10 +867,10 @@ filter Set-PesterReportSummary {
         -not [string]::IsNullOrEmpty($configOverview)) {
 
         Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
-            $tableOverview
-            $testTree
+            $tableOverview | Out-String
+            $testTree | Out-String
             '----'
-            $configOverview
+            $configOverview | Out-String
         }
     }
 }
