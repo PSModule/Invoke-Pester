@@ -1132,7 +1132,7 @@ function Invoke-ProcessTestDirectory {
 
     # First check for container files in this directory (non-recursive)
     Write-Host "${indent}Looking for container files in current directory (non-recursive)..."
-    $containerFiles = Get-ChildItem -Path $Directory -Filter *.Container.* -File -Depth 0
+    $containerFiles = Get-ChildItem -Path $Directory -Filter *.Container.* -File
     $containerFilesFound = $containerFiles.Count -gt 0
 
     Write-Host "${indent}Container files found in [$Directory]: [$($containerFiles.Count)]"
@@ -1158,7 +1158,7 @@ function Invoke-ProcessTestDirectory {
     } else {
         # If no container files, look for test files in this directory only (non-recursive)
         Write-Host "${indent}No container files found - looking for test files..."
-        $testFiles = Get-ChildItem -Path $Directory -Filter *.Tests.ps1 -File -Depth 0
+        $testFiles = Get-ChildItem -Path $Directory -Filter *.Tests.ps1 -File
         Write-Host "${indent}Test files found in [$Directory]: [$($testFiles.Count)]"
 
         if ($testFiles.Count -gt 0) {
