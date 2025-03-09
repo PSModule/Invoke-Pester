@@ -183,7 +183,7 @@ LogGroup 'Init - Export containers' {
     Write-Output "Containers from configuration: [$($containers.Count)]"
 
     # Create temp directory for container output
-    $path = New-Item -Path . -ItemType Directory -Name 'temp' -Force
+    $path = New-Item -Path . -ItemType Directory -Name '.temp' -Force
 
     # Process each input path
     foreach ($testDir in $inputs.Path) {
