@@ -1112,6 +1112,11 @@ filter Show-Input {
 }
 
 function Invoke-ProcessTestDirectory {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '',
+        Justification = 'Log to the GitHub Action runner'
+    )]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [string]$Directory,
@@ -1195,7 +1200,13 @@ function Invoke-ProcessTestDirectory {
 
     foreach ($subdir in $subdirectories) {
         Write-Host "${indent}Processing subdirectory - [$($subdir.Name)]"
-        $Containers = Invoke-ProcessTestDirectory -Directory $subdir.FullName -OutputPath $OutputPath -Containers $Containers -RecursionLevel ($RecursionLevel + 1)
+        $params = @{
+            Directory      = $subdir.FullName
+            OutputPath     = $OutputPath
+            Containers     = $Containers
+            RecursionLevel = ($RecursionLevel + 1)
+        }
+        $Containers = Invoke-ProcessTestDirectory @params
     }
 
     Write-Host "${indent}=== Completed processing directory: [$Directory] ==="
