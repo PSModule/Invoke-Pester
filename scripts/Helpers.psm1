@@ -1127,7 +1127,7 @@ function Invoke-ProcessTestDirectory {
     )
 
     # Create indent for better log readability based on recursion level
-    $indent = "  " * $RecursionLevel
+    $indent = '  ' * $RecursionLevel
     Write-Output "${indent}=== Examining directory: [$Directory] (Level: $RecursionLevel) ==="
 
     # First check for container files in this directory (non-recursive)
