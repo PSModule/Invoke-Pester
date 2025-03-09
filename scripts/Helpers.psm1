@@ -1110,3 +1110,65 @@ filter Show-Input {
     }
     [pscustomobject]$new | Format-List | Out-String
 }
+
+# Helper function to process a directory and its subdirectories recursively
+function Invoke-ProcessTestDirectory {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Directory,
+
+        [Parameter(Mandatory)]
+        [string]$OutputPath,
+
+        [Parameter()]
+        [array]$Containers = @()
+    )
+
+    Write-Output "Examining directory: [$Directory]"
+
+    # First check for container files in this directory (non-recursive)
+    $containerFiles = Get-ChildItem -Path $Directory -Filter *.Container.* -File -Depth 0
+    $containerFilesFound = $containerFiles.Count -gt 0
+
+    Write-Output "Container files found in [$Directory]: [$($containerFiles.Count)]"
+
+    if ($containerFilesFound) {
+        # If container files exist, use those for this directory
+        foreach ($containerFile in $containerFiles) {
+            $container = Import-Hashtable $containerFile
+            $containerFileName = $containerFile | Split-Path -Leaf
+            LogGroup "Init - Export containers - $containerFileName" {
+                Format-Hashtable -Hashtable $container
+                Write-Output "Exporting container [$OutputPath/$containerFileName]"
+                Export-Hashtable -Hashtable $container -Path "$OutputPath/$containerFileName"
+            }
+            $Containers += $container
+        }
+    } else {
+        # If no container files, look for test files in this directory only (non-recursive)
+        $testFiles = Get-ChildItem -Path $Directory -Filter *.Tests.ps1 -File -Depth 0
+        Write-Output "Test files found in [$Directory]: [$($testFiles.Count)]"
+
+        # Create containers for test files in this directory
+        foreach ($testFile in $testFiles) {
+            $container = @{
+                Path = $testFile.FullName
+            }
+            $containerFileName = ($testFile | Split-Path -Leaf).Replace('.Tests.ps1', '.Container.ps1')
+            LogGroup "Init - Export containers - Generated - $containerFileName" {
+                Write-Output "Exporting container [$OutputPath/$containerFileName]"
+                Export-Hashtable -Hashtable $container -Path "$OutputPath/$containerFileName"
+            }
+            $Containers += $container
+        }
+    }
+
+    # Now process subdirectories recursively
+    $subdirectories = Get-ChildItem -Path $Directory -Directory
+    foreach ($subdir in $subdirectories) {
+        Write-Output "Processing subdirectory: [$($subdir.FullName)]"
+        $Containers = Invoke-ProcessTestDirectory -Directory $subdir.FullName -OutputPath $OutputPath -Containers $Containers
+    }
+
+    return $Containers
+}

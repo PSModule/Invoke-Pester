@@ -181,61 +181,24 @@ LogGroup 'Init - Export containers' {
         }
     }
     Write-Output "Containers from configuration: [$($containers.Count)]"
-    # Search for "*.Container.*" files in each Run.Path directory
-    Write-Output 'Searching for containers in same location as config.'
+
+    # Create temp directory for container output
     $path = New-Item -Path . -ItemType Directory -Name 'temp' -Force
+
+    # Process each input path
     foreach ($testDir in $inputs.Path) {
-        #If testDir is a file, get the directory
+        # If testDir is a file, get the directory
         $testItem = Get-Item -Path $testDir
         if ($testItem.PSIsContainer -eq $false) {
             $testDir = $testItem.DirectoryName
         }
 
-        $containerFiles = Get-ChildItem -Path $testDir -Filter *.Container.* -Recurse
-        Write-Output "Containers found in [$testDir]: [$($containerFiles.Count)]"
-        if ($containerFiles.Count -eq 0) {
-            # First, look for test files directly in the test directory (non-recursive)
-            $rootTestFiles = Get-ChildItem -Path $testDir -Filter *.Tests.ps1 -File
-            Write-Output "Root level test files found in [$testDir]: [$($rootTestFiles.Count)]"
+        Write-Output "Processing test directory: [$testDir]"
 
-            # Then, look for test files in subdirectories
-            $subfolderTestFiles = Get-ChildItem -Path $testDir -Filter *.Tests.ps1 -Recurse -File |
-                Where-Object { $_.DirectoryName -ne $testDir }
-            Write-Output "Subfolder test files found in [$testDir]: [$($subfolderTestFiles.Count)]"
+        # Process the root directory and all subdirectories recursively
+        $containers += Invoke-ProcessTestDirectory -Directory $testDir -OutputPath $path
 
-            # Combine all test files using a generic List
-            $testFiles = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
-            if ($rootTestFiles) {
-                $rootTestFiles | ForEach-Object { $testFiles.Add($_) }
-            }
-            if ($subfolderTestFiles) {
-                $subfolderTestFiles | ForEach-Object { $testFiles.Add($_) }
-            }
-            Write-Output "Total test files found in [$testDir]: [$($testFiles.Count)]"
-
-            foreach ($testFile in $testFiles) {
-                $container = @{
-                    Path = $testFile.FullName
-                }
-                $containerFileName = ($testFile | Split-Path -Leaf).Replace('.Tests.ps1', '.Container.ps1')
-                LogGroup "Init - Export containers - Generated - $containerFileName" {
-                    Write-Output "Exporting container [$path/$containerFileName]"
-                    Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
-                }
-                $containers += $container
-            }
-            Write-Output "Containers created from test files: [$($containers.Count)]"
-        }
-        foreach ($containerFile in $containerFiles) {
-            $container = Import-Hashtable $containerFile
-            $containerFileName = $containerFile | Split-Path -Leaf
-            LogGroup "Init - Export containers - $containerFileName" {
-                Format-Hashtable -Hashtable $container
-                Write-Output "Exporting container [$path/$containerFileName]"
-                Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
-            }
-            $containers += $container
-        }
+        Write-Output "Total containers after processing [$testDir]: [$($containers.Count)]"
     }
     $configuration.Run.Container = @()
 }
