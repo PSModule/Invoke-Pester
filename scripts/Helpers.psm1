@@ -1198,7 +1198,7 @@ function Invoke-ProcessTestDirectory {
     $currentSubdir = 0
     foreach ($subdir in $subdirectories) {
         $currentSubdir++
-        Write-Host "${indent}Processing subdirectory [$currentSubdir/$subdirCount]: [$($subdir.Name)]"
+        Start-GitHubLogGroup -Name "${indent}Processing subdirectory - [$($subdir.Name)]"
         $Containers = Invoke-ProcessTestDirectory -Directory $subdir.FullName -OutputPath $OutputPath -Containers $Containers -RecursionLevel ($RecursionLevel + 1)
     }
 
