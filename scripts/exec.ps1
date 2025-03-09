@@ -4,11 +4,8 @@ param()
 $PSStyle.OutputRendering = 'Ansi'
 
 '::group::Exec - Setup prerequisites'
-'Pester' | ForEach-Object {
-    Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
-    Import-Module -Name $_
-}
 Import-Module "$PSScriptRoot/Helpers.psm1"
+'Pester' | Install-PSResourceWithRetry
 '::endgroup::'
 
 '::group::Exec - Get test kit versions'
@@ -21,7 +18,7 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 '::endgroup::'
 
 '::group::Exec - Info about environment'
-$path = Join-Path -Path $pwd.Path -ChildPath 'temp'
+$path = Join-Path -Path $pwd.Path -ChildPath '.temp'
 Test-Path -Path $path
 Get-ChildItem -Path $path -Recurse | Sort-Object FullName | Format-Table -AutoSize | Out-String
 
@@ -58,11 +55,7 @@ $configuration = New-PesterConfiguration -Hashtable $configuration
 $testResults = Invoke-Pester -Configuration $configuration
 
 LogGroup 'Eval - Setup prerequisites' {
-    'Pester', 'Hashtable', 'TimeSpan', 'Markdown' | ForEach-Object {
-        Install-PSResource -Name $_ -Verbose:$false -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
-        Import-Module -Name $_ -Verbose:$false
-    }
-    Import-Module "$PSScriptRoot/Helpers.psm1"
+    'Pester', 'Hashtable', 'TimeSpan', 'Markdown' | Install-PSResourceWithRetry
 }
 
 LogGroup 'Eval - Get test kit versions' {

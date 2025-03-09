@@ -1110,3 +1110,209 @@ filter Show-Input {
     }
     [pscustomobject]$new | Format-List | Out-String
 }
+
+function Invoke-ProcessTestDirectory {
+    <#
+        .SYNOPSIS
+        Processes a directory to find and handle test and container files.
+
+        .DESCRIPTION
+        This function scans a given directory for container and test files, processing them accordingly.
+        If container files are found, they are imported and exported to the specified output path.
+        If no container files exist, test files are used to generate new container files.
+        The function supports recursive processing of subdirectories.
+
+        .EXAMPLE
+        Invoke-ProcessTestDirectory -Directory 'C:\Tests' -OutputPath 'C:\Output'
+
+        Output:
+        ```powershell
+        === Examining directory: [C:\Tests] (Level: 0) ===
+        Looking for container files in current directory (non-recursive)...
+        Container files found in [C:\Tests]: [2]
+        Processing container file: [Test1.Container.ps1]
+        Processing container file: [Test2.Container.ps1]
+        Exporting container [C:\Output\Test1.Container.ps1]
+        Exporting container [C:\Output\Test2.Container.ps1]
+        === Completed processing directory: [C:\Tests] ===
+        ```
+
+        Processes test container files in 'C:\Tests' and exports them to 'C:\Output'.
+
+        .EXAMPLE
+        Invoke-ProcessTestDirectory -Directory 'C:\Tests' -OutputPath 'C:\Output' -RecursionLevel 1
+
+        Output:
+        ```powershell
+        === Examining directory: [C:\Tests] (Level: 1) ===
+        Looking for container files in current directory (non-recursive)...
+        No container files found - looking for test files...
+        Test files found in [C:\Tests]: [3]
+        Creating container for test file: [TestA.Tests.ps1]
+        Creating container for test file: [TestB.Tests.ps1]
+        Exporting container [C:\Output\TestA.Container.ps1]
+        Exporting container [C:\Output\TestB.Container.ps1]
+        === Completed processing directory: [C:\Tests] ===
+        ```
+
+        Generates and exports container files for test scripts found in 'C:\Tests' at recursion level 1.
+
+        .OUTPUTS
+        array
+
+        .NOTES
+        A list of processed container hashtables.
+        Each container represents a test file or an imported container configuration.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '',
+        Justification = 'Log to the GitHub Action runner'
+    )]
+    [CmdletBinding()]
+    param(
+        # The directory to process for container and test files.
+        [Parameter(Mandatory)]
+        [string]$Directory,
+
+        # The path where container files should be exported.
+        [Parameter(Mandatory)]
+        [string]$OutputPath,
+
+        # A collection of processed containers, used for recursive directory processing.
+        [Parameter()]
+        [array]$Containers = @(),
+
+        # The current recursion level, used for logging indentation.
+        [Parameter()]
+        [int]$RecursionLevel = 0
+    )
+
+    # Create indent for better log readability based on recursion level
+    $indent = '  ' * $RecursionLevel
+    Write-Host "${indent}=== Examining directory: [$Directory] (Level: $RecursionLevel) ==="
+
+    # First check for container files in this directory (non-recursive)
+    Write-Host "${indent}Looking for container files in current directory (non-recursive)..."
+    $containerFiles = Get-ChildItem -Path $Directory -Filter *.Container.* -File
+    $containerFilesFound = $containerFiles.Count -gt 0
+
+    Write-Host "${indent}Container files found in [$Directory]: [$($containerFiles.Count)]"
+    if ($containerFilesFound) {
+        Write-Host "${indent}Container files detected - will process them directly"
+    }
+
+    if ($containerFilesFound) {
+        # If container files exist, use those for this directory
+        foreach ($containerFile in $containerFiles) {
+            Write-Host "${indent}Processing container file: [$($containerFile.Name)]"
+            $container = Import-Hashtable $containerFile
+            $containerFileName = $containerFile | Split-Path -Leaf
+            Write-Host "${indent}Init - Export containers - $containerFileName"
+            Write-Host "${indent}Container configuration:"
+            Write-Host (Format-Hashtable -Hashtable $container)
+            Write-Host "${indent}Exporting container [$OutputPath/$containerFileName]"
+            Export-Hashtable -Hashtable $container -Path "$OutputPath/$containerFileName"
+            Write-Host "${indent}Added container from $containerFileName to collection"
+            $Containers += $container
+        }
+    } else {
+        # If no container files, look for test files in this directory only (non-recursive)
+        Write-Host "${indent}No container files found - looking for test files..."
+        $testFiles = Get-ChildItem -Path $Directory -Filter *.Tests.ps1 -File
+        Write-Host "${indent}Test files found in [$Directory]: [$($testFiles.Count)]"
+
+        if ($testFiles.Count -gt 0) {
+            Write-Host "${indent}Will generate containers for each test file"
+        } else {
+            Write-Host "${indent}No test files found in this directory"
+        }
+
+        # Create containers for test files in this directory
+        foreach ($testFile in $testFiles) {
+            Write-Host "${indent}Creating container for test file: [$($testFile.Name)]"
+            $container = @{
+                Path = $testFile.FullName
+            }
+            $containerFileName = ($testFile | Split-Path -Leaf).Replace('.Tests.ps1', '.Container.ps1')
+            Write-Host "${indent}Init - Export containers - Generated - $containerFileName"
+            Write-Host "${indent}Container configuration:"
+            Write-Host (Format-Hashtable -Hashtable $container)
+            Write-Host "${indent}Exporting container [$OutputPath/$containerFileName]"
+            Export-Hashtable -Hashtable $container -Path "$OutputPath/$containerFileName"
+            Write-Host "${indent}Added generated container for $($testFile.Name) to collection"
+            $Containers += $container
+        }
+    }
+
+    # Now process subdirectories recursively
+    Write-Host "${indent}Checking for subdirectories in [$Directory]..."
+    $subdirectories = Get-ChildItem -Path $Directory -Directory
+    $subdirCount = $subdirectories.Count
+    Write-Host "${indent}Found $subdirCount subdirectories to process"
+
+    if ($subdirCount -gt 0) {
+        Write-Host "${indent}Beginning recursive processing of $subdirCount subdirectories..."
+    }
+
+    foreach ($subdir in $subdirectories) {
+        Write-Host "${indent}Processing subdirectory - [$($subdir.Name)]"
+        $params = @{
+            Directory      = $subdir.FullName
+            OutputPath     = $OutputPath
+            Containers     = $Containers
+            RecursionLevel = ($RecursionLevel + 1)
+        }
+        $Containers = Invoke-ProcessTestDirectory @params
+    }
+
+    Write-Host "${indent}=== Completed processing directory: [$Directory] ==="
+    Write-Host "${indent}Total containers after processing [$Directory]: [$($Containers.Count)]"
+
+    $Containers
+}
+
+function Install-PSResourceWithRetry {
+    <#
+        .SYNOPSIS
+        Installs a PowerShell module with retry mechanism
+
+        .DESCRIPTION
+        Attempts to install a PowerShell module multiple times in case of failure
+    #>
+    [CmdletBinding()]
+    param (
+        # Name of the module to install
+        [Parameter(
+            Mandatory,
+            Position = 0,
+            ValueFromPipeline
+        )]
+        [string] $Name,
+
+        # Number of times to retry installation, default is 5
+        [Parameter()]
+        [int] $RetryCount = 5,
+
+        # Delay in seconds between retries, default is 10
+        [Parameter()]
+        [int] $RetryDelay = 10
+    )
+
+    process {
+        Write-Output "Installing module: $Name"
+        for ($i = 0; $i -lt $RetryCount; $i++) {
+            try {
+                Install-PSResource -Name $Name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+                break
+            } catch {
+                Write-Warning "Installation of $Name failed with error: $_"
+                if ($i -eq $RetryCount - 1) {
+                    throw
+                }
+                Write-Warning "Retrying in $RetryDelay seconds..."
+                Start-Sleep -Seconds $RetryDelay
+            }
+        }
+        Import-Module -Name $Name
+    }
+}
