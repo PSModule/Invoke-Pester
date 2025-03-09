@@ -230,7 +230,7 @@ jobs:
                 Write-Output "Installing module: $name"
                 $retryCount = 5
                 $retryDelay = 10
-                for ($i -lt $retryCount; $i++) {
+                for ($i = 0; $i -lt $retryCount; $i++) {
                     try {
                         Install-PSResource -Name $name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
                         break
