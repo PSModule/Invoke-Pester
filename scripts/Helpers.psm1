@@ -1148,7 +1148,7 @@ function Invoke-ProcessTestDirectory {
             $containerFileName = $containerFile | Split-Path -Leaf
             Write-Host "${indent}Init - Export containers - $containerFileName"
             Write-Host "${indent}Container configuration:"
-            Format-Hashtable -Hashtable $container
+            Write-Host (Format-Hashtable -Hashtable $container)
             Write-Host "${indent}Exporting container [$OutputPath/$containerFileName]"
             Export-Hashtable -Hashtable $container -Path "$OutputPath/$containerFileName"
             Write-Host "${indent}Added container from $containerFileName to collection"
