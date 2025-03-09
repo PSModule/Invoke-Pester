@@ -1128,82 +1128,83 @@ function Invoke-ProcessTestDirectory {
 
     # Create indent for better log readability based on recursion level
     $indent = '  ' * $RecursionLevel
-    Write-Host "${indent}=== Examining directory: [$Directory] (Level: $RecursionLevel) ==="
+    LogGroup "${indent}Processing [$Directory]" {
+        Write-Host "${indent}=== Examining directory: [$Directory] (Level: $RecursionLevel) ==="
 
-    # First check for container files in this directory (non-recursive)
-    Write-Host "${indent}Looking for container files in current directory (non-recursive)..."
-    $containerFiles = Get-ChildItem -Path $Directory -Filter *.Container.* -File
-    $containerFilesFound = $containerFiles.Count -gt 0
+        # First check for container files in this directory (non-recursive)
+        Write-Host "${indent}Looking for container files in current directory (non-recursive)..."
+        $containerFiles = Get-ChildItem -Path $Directory -Filter *.Container.* -File
+        $containerFilesFound = $containerFiles.Count -gt 0
 
-    Write-Host "${indent}Container files found in [$Directory]: [$($containerFiles.Count)]"
-    if ($containerFilesFound) {
-        Write-Host "${indent}Container files detected - will process them directly"
-    }
-
-    if ($containerFilesFound) {
-        # If container files exist, use those for this directory
-        foreach ($containerFile in $containerFiles) {
-            Write-Host "${indent}Processing container file: [$($containerFile.Name)]"
-            $container = Import-Hashtable $containerFile
-            $containerFileName = $containerFile | Split-Path -Leaf
-            LogGroup "${indent}Init - Export containers - $containerFileName" {
-                Write-Host "${indent}Container configuration:"
-                Format-Hashtable -Hashtable $container
-                Write-Host "${indent}Exporting container [$OutputPath/$containerFileName]"
-                Export-Hashtable -Hashtable $container -Path "$OutputPath/$containerFileName"
-            }
-            Write-Host "${indent}Added container from $containerFileName to collection"
-            $Containers += $container
+        Write-Host "${indent}Container files found in [$Directory]: [$($containerFiles.Count)]"
+        if ($containerFilesFound) {
+            Write-Host "${indent}Container files detected - will process them directly"
         }
-    } else {
-        # If no container files, look for test files in this directory only (non-recursive)
-        Write-Host "${indent}No container files found - looking for test files..."
-        $testFiles = Get-ChildItem -Path $Directory -Filter *.Tests.ps1 -File
-        Write-Host "${indent}Test files found in [$Directory]: [$($testFiles.Count)]"
 
-        if ($testFiles.Count -gt 0) {
-            Write-Host "${indent}Will generate containers for each test file"
+        if ($containerFilesFound) {
+            # If container files exist, use those for this directory
+            foreach ($containerFile in $containerFiles) {
+                Write-Host "${indent}Processing container file: [$($containerFile.Name)]"
+                $container = Import-Hashtable $containerFile
+                $containerFileName = $containerFile | Split-Path -Leaf
+                LogGroup "${indent}Init - Export containers - $containerFileName" {
+                    Write-Host "${indent}Container configuration:"
+                    Format-Hashtable -Hashtable $container
+                    Write-Host "${indent}Exporting container [$OutputPath/$containerFileName]"
+                    Export-Hashtable -Hashtable $container -Path "$OutputPath/$containerFileName"
+                }
+                Write-Host "${indent}Added container from $containerFileName to collection"
+                $Containers += $container
+            }
         } else {
-            Write-Host "${indent}No test files found in this directory"
-        }
+            # If no container files, look for test files in this directory only (non-recursive)
+            Write-Host "${indent}No container files found - looking for test files..."
+            $testFiles = Get-ChildItem -Path $Directory -Filter *.Tests.ps1 -File
+            Write-Host "${indent}Test files found in [$Directory]: [$($testFiles.Count)]"
 
-        # Create containers for test files in this directory
-        foreach ($testFile in $testFiles) {
-            Write-Host "${indent}Creating container for test file: [$($testFile.Name)]"
-            $container = @{
-                Path = $testFile.FullName
+            if ($testFiles.Count -gt 0) {
+                Write-Host "${indent}Will generate containers for each test file"
+            } else {
+                Write-Host "${indent}No test files found in this directory"
             }
-            $containerFileName = ($testFile | Split-Path -Leaf).Replace('.Tests.ps1', '.Container.ps1')
-            LogGroup "${indent}Init - Export containers - Generated - $containerFileName" {
+
+            # Create containers for test files in this directory
+            foreach ($testFile in $testFiles) {
+                Write-Host "${indent}Creating container for test file: [$($testFile.Name)]"
+                $container = @{
+                    Path = $testFile.FullName
+                }
+                $containerFileName = ($testFile | Split-Path -Leaf).Replace('.Tests.ps1', '.Container.ps1')
+                Write-Host "${indent}Init - Export containers - Generated - $containerFileName"
                 Write-Host "${indent}Container configuration:"
                 Format-Hashtable -Hashtable $container
                 Write-Host "${indent}Exporting container [$OutputPath/$containerFileName]"
                 Export-Hashtable -Hashtable $container -Path "$OutputPath/$containerFileName"
+                Write-Host "${indent}Added generated container for $($testFile.Name) to collection"
+                $Containers += $container
             }
-            Write-Host "${indent}Added generated container for $($testFile.Name) to collection"
-            $Containers += $container
         }
+
+        # Now process subdirectories recursively
+        Write-Host "${indent}Checking for subdirectories in [$Directory]..."
+        $subdirectories = Get-ChildItem -Path $Directory -Directory
+        $subdirCount = $subdirectories.Count
+        Write-Host "${indent}Found $subdirCount subdirectories to process"
+
+        if ($subdirCount -gt 0) {
+            Write-Host "${indent}Beginning recursive processing of $subdirCount subdirectories..."
+        }
+
+        $currentSubdir = 0
+        foreach ($subdir in $subdirectories) {
+            $currentSubdir++
+            Write-Host "${indent}Processing subdirectory - [$($subdir.Name)]"
+            $Containers = Invoke-ProcessTestDirectory -Directory $subdir.FullName -OutputPath $OutputPath -Containers $Containers -RecursionLevel ($RecursionLevel + 1)
+        }
+
+        Write-Host "${indent}=== Completed processing directory: [$Directory] ==="
+        Write-Host "${indent}Total containers after processing [$Directory]: [$($Containers.Count)]"
+
+        $Containers
     }
-
-    # Now process subdirectories recursively
-    Write-Host "${indent}Checking for subdirectories in [$Directory]..."
-    $subdirectories = Get-ChildItem -Path $Directory -Directory
-    $subdirCount = $subdirectories.Count
-    Write-Host "${indent}Found $subdirCount subdirectories to process"
-
-    if ($subdirCount -gt 0) {
-        Write-Host "${indent}Beginning recursive processing of $subdirCount subdirectories..."
-    }
-
-    $currentSubdir = 0
-    foreach ($subdir in $subdirectories) {
-        $currentSubdir++
-        Start-GitHubLogGroup -Name "${indent}Processing subdirectory - [$($subdir.Name)]"
-        $Containers = Invoke-ProcessTestDirectory -Directory $subdir.FullName -OutputPath $OutputPath -Containers $Containers -RecursionLevel ($RecursionLevel + 1)
-    }
-
-    Write-Host "${indent}=== Completed processing directory: [$Directory] ==="
-    Write-Host "${indent}Total containers after processing [$Directory]: [$($Containers.Count)]"
-
-    return $Containers
 }
