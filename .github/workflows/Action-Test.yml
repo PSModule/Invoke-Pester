@@ -201,6 +201,7 @@ jobs:
         with:
           Path: Pester.Configuration.ps1
           WorkingDirectory: tests/3-Advanced
+          StepSummary_Mode: None
 
       - name: Status
         shell: pwsh
