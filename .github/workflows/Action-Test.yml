@@ -63,8 +63,7 @@ jobs:
         continue-on-error: true
         with:
           WorkingDirectory: tests/1-Simple-Failure
-          StepSummary_Enabled: true
-          StepSummary_ShowTests: Full
+          StepSummary_Mode: Full
 
       - name: Status
         shell: pwsh
@@ -93,7 +92,6 @@ jobs:
         with:
           WorkingDirectory: tests/1-Simple-Failure
           TestResult_TestSuiteName: 1-Simple-Failure
-          StepSummary_Enabled: true
 
       - name: Status
         shell: pwsh
@@ -148,8 +146,6 @@ jobs:
         with:
           WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
-          StepSummary_Enabled: true
-          StepSummary_ShowTests: Failed
 
       - name: Status
         shell: pwsh
@@ -234,7 +230,7 @@ jobs:
                 Write-Output "Installing module: $name"
                 $retryCount = 5
                 $retryDelay = 10
-                for ($i = 0; $i -lt $retryCount; $i++) {
+                for ($i -lt $retryCount; $i++) {
                     try {
                         Install-PSResource -Name $name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
                         break
