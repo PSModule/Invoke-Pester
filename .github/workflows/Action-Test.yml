@@ -64,6 +64,7 @@ jobs:
         with:
           WorkingDirectory: tests/1-Simple-Failure
           StepSummary_Mode: Full
+          StepSummary_ShowTestOverview: true
 
       - name: Status
         shell: pwsh
@@ -92,6 +93,7 @@ jobs:
         with:
           WorkingDirectory: tests/1-Simple-Failure
           TestResult_TestSuiteName: 1-Simple-Failure
+          StepSummary_ShowConfiguration: true
 
       - name: Status
         shell: pwsh
