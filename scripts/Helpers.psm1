@@ -862,10 +862,8 @@ filter Set-PesterReportSummary {
     if ($ShowConfiguration) {
         $configOverview = $testResults | Set-PesterReportConfigurationSummary
     }
-    if (-not [string]::IsNullOrEmpty($tableOverview) -or
-        -not [string]::IsNullOrEmpty($testTree) -or
-        -not [string]::IsNullOrEmpty($configOverview)) {
 
+    if ($tableOverview -or $testTree -or $configOverview) {
         Details "$testSuitStatusIcon - $testSuitName ($formattedTestDuration)" {
             $tableOverview | Out-String
             $testTree | Out-String
