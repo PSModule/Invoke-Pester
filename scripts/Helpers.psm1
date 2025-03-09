@@ -1112,21 +1112,77 @@ filter Show-Input {
 }
 
 function Invoke-ProcessTestDirectory {
+    <#
+        .SYNOPSIS
+        Processes a directory to find and handle test and container files.
+
+        .DESCRIPTION
+        This function scans a given directory for container and test files, processing them accordingly.
+        If container files are found, they are imported and exported to the specified output path.
+        If no container files exist, test files are used to generate new container files.
+        The function supports recursive processing of subdirectories.
+
+        .EXAMPLE
+        Invoke-ProcessTestDirectory -Directory 'C:\Tests' -OutputPath 'C:\Output'
+
+        Output:
+        ```powershell
+        === Examining directory: [C:\Tests] (Level: 0) ===
+        Looking for container files in current directory (non-recursive)...
+        Container files found in [C:\Tests]: [2]
+        Processing container file: [Test1.Container.ps1]
+        Processing container file: [Test2.Container.ps1]
+        Exporting container [C:\Output\Test1.Container.ps1]
+        Exporting container [C:\Output\Test2.Container.ps1]
+        === Completed processing directory: [C:\Tests] ===
+        ```
+
+        Processes test container files in 'C:\Tests' and exports them to 'C:\Output'.
+
+        .EXAMPLE
+        Invoke-ProcessTestDirectory -Directory 'C:\Tests' -OutputPath 'C:\Output' -RecursionLevel 1
+
+        Output:
+        ```powershell
+        === Examining directory: [C:\Tests] (Level: 1) ===
+        Looking for container files in current directory (non-recursive)...
+        No container files found - looking for test files...
+        Test files found in [C:\Tests]: [3]
+        Creating container for test file: [TestA.Tests.ps1]
+        Creating container for test file: [TestB.Tests.ps1]
+        Exporting container [C:\Output\TestA.Container.ps1]
+        Exporting container [C:\Output\TestB.Container.ps1]
+        === Completed processing directory: [C:\Tests] ===
+        ```
+
+        Generates and exports container files for test scripts found in 'C:\Tests' at recursion level 1.
+
+        .OUTPUTS
+        array
+
+        .NOTES
+        A list of processed container hashtables.
+        Each container represents a test file or an imported container configuration.
+    #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSAvoidUsingWriteHost', '',
         Justification = 'Log to the GitHub Action runner'
     )]
     [CmdletBinding()]
     param(
+        # The directory to process for container and test files.
         [Parameter(Mandatory)]
         [string]$Directory,
 
+        # The path where container files should be exported.
         [Parameter(Mandatory)]
         [string]$OutputPath,
 
+        # A collection of processed containers, used for recursive directory processing.
         [Parameter()]
         [array]$Containers = @(),
 
+        # The current recursion level, used for logging indentation.
         [Parameter()]
         [int]$RecursionLevel = 0
     )
