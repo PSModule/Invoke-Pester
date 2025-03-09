@@ -1270,3 +1270,49 @@ function Invoke-ProcessTestDirectory {
 
     $Containers
 }
+
+function Install-PSResourceWithRetry {
+    <#
+        .SYNOPSIS
+        Installs a PowerShell module with retry mechanism
+
+        .DESCRIPTION
+        Attempts to install a PowerShell module multiple times in case of failure
+    #>
+    [CmdletBinding()]
+    param (
+        # Name of the module to install
+        [Parameter(
+            Mandatory,
+            Position = 0,
+            ValueFromPipeline
+        )]
+        [string] $Name,
+
+        # Number of times to retry installation, default is 5
+        [Parameter()]
+        [int] $RetryCount = 5,
+
+        # Delay in seconds between retries, default is 10
+        [Parameter()]
+        [int] $RetryDelay = 10
+    )
+
+    process {
+        Write-Output "Installing module: $Name"
+        for ($i = 0; $i -lt $RetryCount; $i++) {
+            try {
+                Install-PSResource -Name $Name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+                break
+            } catch {
+                Write-Warning "Installation of $Name failed with error: $_"
+                if ($i -eq $RetryCount - 1) {
+                    throw
+                }
+                Write-Warning "Retrying in $RetryDelay seconds..."
+                Start-Sleep -Seconds $RetryDelay
+            }
+        }
+        Import-Module -Name $Name
+    }
+}
