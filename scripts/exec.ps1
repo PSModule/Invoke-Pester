@@ -107,57 +107,57 @@ if ($generateSummary) {
 }
 '::endgroup::'
 
-'::group::Eval - Set outputs' {
-    $testResultOutputFolderPath = $testResults.Configuration.TestResult.OutputPath.Value | Split-Path -Parent
-    $codeCoverageOutputFolderPath = $testResults.Configuration.CodeCoverage.OutputPath.Value | Split-Path -Parent
-    [pscustomobject]@{
-        TestSuiteName          = $testResults.Configuration.TestResult.TestSuiteName.Value
-        TestResultEnabled      = $testResults.Configuration.TestResult.Enabled.Value
-        TestResultOutputPath   = $testResultOutputFolderPath
-        CodeCoverageEnabled    = $testResults.Configuration.CodeCoverage.Enabled.Value
-        CodeCoverageOutputPath = $codeCoverageOutputFolderPath
-    } | Format-List | Out-String
-    "TestSuiteName=$($testResults.Configuration.TestResult.TestSuiteName.Value)" >> $env:GITHUB_OUTPUT
-    "TestResultEnabled=$($testResults.Configuration.TestResult.Enabled.Value)" >> $env:GITHUB_OUTPUT
-    "TestResultOutputPath=$($testResultOutputFolderPath)" >> $env:GITHUB_OUTPUT
-    "CodeCoverageEnabled=$($testResults.Configuration.CodeCoverage.Enabled.Value)" >> $env:GITHUB_OUTPUT
-    "CodeCoverageOutputPath=$($codeCoverageOutputFolderPath)" >> $env:GITHUB_OUTPUT
-    "Executed=$($testResults.Executed)" >> $env:GITHUB_OUTPUT
-    "Result=$($testResults.Result)" >> $env:GITHUB_OUTPUT
-    "FailedCount=$($testResults.FailedCount)" >> $env:GITHUB_OUTPUT
-    "FailedBlocksCount=$($testResults.FailedBlocksCount)" >> $env:GITHUB_OUTPUT
-    "FailedContainersCount=$($testResults.FailedContainersCount)" >> $env:GITHUB_OUTPUT
-    "PassedCount=$($testResults.PassedCount)" >> $env:GITHUB_OUTPUT
-    "SkippedCount=$($testResults.SkippedCount)" >> $env:GITHUB_OUTPUT
-    "InconclusiveCount=$($testResults.InconclusiveCount)" >> $env:GITHUB_OUTPUT
-    "NotRunCount=$($testResults.NotRunCount)" >> $env:GITHUB_OUTPUT
-    "TotalCount=$($testResults.TotalCount)" >> $env:GITHUB_OUTPUT
+'::group::Eval - Set outputs'
+$testResultOutputFolderPath = $testResults.Configuration.TestResult.OutputPath.Value | Split-Path -Parent
+$codeCoverageOutputFolderPath = $testResults.Configuration.CodeCoverage.OutputPath.Value | Split-Path -Parent
+[pscustomobject]@{
+    TestSuiteName          = $testResults.Configuration.TestResult.TestSuiteName.Value
+    TestResultEnabled      = $testResults.Configuration.TestResult.Enabled.Value
+    TestResultOutputPath   = $testResultOutputFolderPath
+    CodeCoverageEnabled    = $testResults.Configuration.CodeCoverage.Enabled.Value
+    CodeCoverageOutputPath = $codeCoverageOutputFolderPath
+} | Format-List | Out-String
+"TestSuiteName=$($testResults.Configuration.TestResult.TestSuiteName.Value)" >> $env:GITHUB_OUTPUT
+"TestResultEnabled=$($testResults.Configuration.TestResult.Enabled.Value)" >> $env:GITHUB_OUTPUT
+"TestResultOutputPath=$($testResultOutputFolderPath)" >> $env:GITHUB_OUTPUT
+"CodeCoverageEnabled=$($testResults.Configuration.CodeCoverage.Enabled.Value)" >> $env:GITHUB_OUTPUT
+"CodeCoverageOutputPath=$($codeCoverageOutputFolderPath)" >> $env:GITHUB_OUTPUT
+"Executed=$($testResults.Executed)" >> $env:GITHUB_OUTPUT
+"Result=$($testResults.Result)" >> $env:GITHUB_OUTPUT
+"FailedCount=$($testResults.FailedCount)" >> $env:GITHUB_OUTPUT
+"FailedBlocksCount=$($testResults.FailedBlocksCount)" >> $env:GITHUB_OUTPUT
+"FailedContainersCount=$($testResults.FailedContainersCount)" >> $env:GITHUB_OUTPUT
+"PassedCount=$($testResults.PassedCount)" >> $env:GITHUB_OUTPUT
+"SkippedCount=$($testResults.SkippedCount)" >> $env:GITHUB_OUTPUT
+"InconclusiveCount=$($testResults.InconclusiveCount)" >> $env:GITHUB_OUTPUT
+"NotRunCount=$($testResults.NotRunCount)" >> $env:GITHUB_OUTPUT
+"TotalCount=$($testResults.TotalCount)" >> $env:GITHUB_OUTPUT
 
-    if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
-        $jsonOutputPath = $testResults.Configuration.TestResult.OutputPath.Value -Replace '\.xml$', '.json'
-        Write-Output "Exporting test results to [$jsonOutputPath]"
-        $testResults | Get-PesterTestTree | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
-    }
+if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
+    $jsonOutputPath = $testResults.Configuration.TestResult.OutputPath.Value -Replace '\.xml$', '.json'
+    Write-Output "Exporting test results to [$jsonOutputPath]"
+    $testResults | Get-PesterTestTree | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
+}
 
-    if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.CodeCoverage.Enabled.Value) {
-        $jsonOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value -Replace '\.xml$', '.json'
-        Write-Output "Exporting code coverage results to [$jsonOutputPath]"
-        $testResults.CodeCoverage | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
-    }
-    '::endgroup::'
+if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.CodeCoverage.Enabled.Value) {
+    $jsonOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value -Replace '\.xml$', '.json'
+    Write-Output "Exporting code coverage results to [$jsonOutputPath]"
+    $testResults.CodeCoverage | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
+}
+'::endgroup::'
 
-    '::group::Exit'
-    if ($testResults.Result -eq 'Passed') {
-        '::notice::✅ All tests passed.'
-        $script:exit = 0
+'::group::Exit'
+if ($testResults.Result -eq 'Passed') {
+    '::notice::✅ All tests passed.'
+    $script:exit = 0
+} else {
+    if ($failedTests -gt 0) {
+        "::error::❌ Some [$failedTests] tests failed."
+        $script:exit = $failedTests
     } else {
-        if ($failedTests -gt 0) {
-            "::error::❌ Some [$failedTests] tests failed."
-            $script:exit = $failedTests
-        } else {
-            '::error::❌ Some tests failed.'
-            $script:exit = 1
-        }
+        '::error::❌ Some tests failed.'
+        $script:exit = 1
     }
+}
 
-    exit $script:exit
+exit $script:exit
