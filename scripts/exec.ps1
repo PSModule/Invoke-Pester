@@ -69,7 +69,7 @@ $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Versio
 
 '::group::Eval - Test results'
 if ($null -eq $testResults) {
-    Write-GitHubError '❌ No test results were returned.'
+    '::error::❌ No test results were returned.'
     exit 1
 }
 
