@@ -994,7 +994,10 @@ filter Set-PesterReportTestsSummary {
             if ($InputObject.ErrorRecord) {
                 Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
                     CodeBlock 'pwsh' {
-                        $InputObject.ErrorRecord | Select-Object * | Format-List -Force | Out-String
+                        'Error:'
+                        $InputObject.ErrorRecord.DisplayErrorMessage
+                        'StackTrace:'
+                        $InputObject.ErrorRecord.DisplayStackTrace
                     } -Execute
                 }
             } else {
