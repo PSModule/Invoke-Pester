@@ -667,7 +667,7 @@ filter Get-PesterTestTree {
 
         # Path to this node.
         [Parameter()]
-        [string[]] $Path
+        [string[]] $Path = @()
     )
 
     $children = [System.Collections.Generic.List[object]]::new()
@@ -675,14 +675,14 @@ filter Get-PesterTestTree {
     switch ($InputObject.GetType().Name) {
         'Run' {
             $Name = $InputObject.Configuration.TestResult.TestSuiteName.Value
-            $childPath = @($Path, $Name)
+            $childPath = , $Name
             $children.Add(($InputObject.Containers | Get-PesterTestTree -Path $childPath))
             $configuration = $InputObject.Configuration | ConvertFrom-PesterConfiguration
             [pscustomobject]@{
                 Depth                 = 0
                 ItemType              = 'TestSuite'
                 Name                  = $Name
-                Path                  = @()
+                Path                  = $null
                 Children              = $children
                 Result                = $InputObject.Result
                 FailedCount           = $InputObject.FailedCount
@@ -709,7 +709,7 @@ filter Get-PesterTestTree {
         }
         'Container' {
             $Name = (Split-Path $InputObject.Name -Leaf) -replace '.Tests.ps1'
-            $childPath = @($Path, $Name)
+            $childPath = $Path + $Name
             $children.Add(($InputObject.Blocks | Get-PesterTestTree -Path $childPath))
             [pscustomobject]@{
                 Depth                 = 1
@@ -741,7 +741,7 @@ filter Get-PesterTestTree {
         }
         'Block' {
             $Name = ($InputObject.ExpandedName)
-            $childPath = @($Path, $Name)
+            $childPath = $Path + $Name
             $children.Add(($InputObject.Order | Get-PesterTestTree -Path $childPath))
             [pscustomobject]@{
                 Depth                 = ($InputObject.Path.Count + 1)
@@ -994,7 +994,8 @@ filter Set-PesterReportTestsSummary {
             if ($InputObject.ErrorRecord) {
                 Details "$itemIndent$testStatusIcon - $testName ($formattedTestDuration)" {
                     CodeBlock 'pwsh' {
-                        $InputObject.ErrorRecord -split [System.Environment]::NewLine
+                        $InputObject.ErrorRecord.DisplayErrorMessage
+                        $InputObject.ErrorRecord.DisplayStackTrace
                     } -Execute
                 }
             } else {
