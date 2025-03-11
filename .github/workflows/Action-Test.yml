@@ -43,6 +43,34 @@ jobs:
           Write-Host "Outcome: ${{ steps.action-test.outcome }}"
           Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
 
+  ActionTest1SimpleFile:
+    name: Action-Test - [1-Simple-File]
+    runs-on: ubuntu-latest
+    outputs:
+      Outcome: ${{ steps.action-test.outcome }}
+      Conclusion: ${{ steps.action-test.conclusion }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
+
+    steps:
+      # Need to check out as part of the test, as its a local action
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Action-Test [1-Simple-File]
+        uses: ./
+        id: action-test
+        with:
+          WorkingDirectory: tests/1-Simple
+          Path: Emoji.Tests.ps1
+          Run_Path: Emoji
+
+      - name: Status
+        shell: pwsh
+        run: |
+          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
+          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+
   ActionTest1SimpleFailure:
     name: Action-Test - [1-Simple-Failure]
     runs-on: ubuntu-latest
@@ -215,6 +243,7 @@ jobs:
     name: Catch Job - Aggregate Status
     needs:
       - ActionTest1Simple
+      - ActionTest1SimpleFile
       - ActionTest1SimpleFailure
       - ActionTest1SimpleFailureOnlyFailedSummary
       - ActionTest1SimpleExecutionFailure
@@ -250,10 +279,10 @@ jobs:
             }
 
             # Build an array of objects for each job
-            $ActionTest1SimpleOutcome = '${{ needs.ActionTest1Simple.outputs.outcome }}'
+            $ActionTest1SimpleOutcome = '${{ needs.ActionTest1Simple.outputs.Outcome }}'
             $ActionTest1SimpleOutcomeExpected = 'success'
             $ActionTest1SimpleOutcomeResult = $ActionTest1SimpleOutcome -eq $ActionTest1SimpleOutcomeExpected
-            $ActionTest1SimpleConclusion = '${{ needs.ActionTest1Simple.outputs.conclusion }}'
+            $ActionTest1SimpleConclusion = '${{ needs.ActionTest1Simple.outputs.Conclusion }}'
             $ActionTest1SimpleConclusionExpected = 'success'
             $ActionTest1SimpleConclusionResult = $ActionTest1SimpleConclusion -eq $ActionTest1SimpleConclusionExpected
             $ActionTest1SimpleExecuted = '${{ needs.ActionTest1Simple.outputs.Executed }}'
@@ -263,10 +292,23 @@ jobs:
             $ActionTest1SimpleResultExpected = 'Passed'
             $ActionTest1SimpleResultResult = $ActionTest1SimpleResult -eq $ActionTest1SimpleResultExpected
 
-            $ActionTest1SimpleFailureOutcome = '${{ needs.ActionTest1SimpleFailure.outputs.outcome }}'
+            $ActionTest1SimpleFileOutcome = '${{ needs.ActionTest1SimpleFile.outputs.Outcome }}'
+            $ActionTest1SimpleFileOutcomeExpected = 'success'
+            $ActionTest1SimpleFileOutcomeResult = $ActionTest1SimpleFileOutcome -eq $ActionTest1SimpleFileOutcomeExpected
+            $ActionTest1SimpleFileConclusion = '${{ needs.ActionTest1SimpleFile.outputs.Conclusion }}'
+            $ActionTest1SimpleFileConclusionExpected = 'success'
+            $ActionTest1SimpleFileConclusionResult = $ActionTest1SimpleFileConclusion -eq $ActionTest1SimpleFileConclusionExpected
+            $ActionTest1SimpleFileExecuted = '${{ needs.ActionTest1SimpleFile.outputs.Executed }}'
+            $ActionTest1SimpleFileExecutedExpected = 'True'
+            $ActionTest1SimpleFileExecutedResult = $ActionTest1SimpleFileExecuted -eq $ActionTest1SimpleFileExecutedExpected
+            $ActionTest1SimpleFileResult = '${{ needs.ActionTest1SimpleFile.outputs.Result }}'
+            $ActionTest1SimpleFileResultExpected = 'Passed'
+            $ActionTest1SimpleFileResultResult = $ActionTest1SimpleFileResult -eq $ActionTest1SimpleFileResultExpected
+
+            $ActionTest1SimpleFailureOutcome = '${{ needs.ActionTest1SimpleFailure.outputs.Outcome }}'
             $ActionTest1SimpleFailureOutcomeExpected = 'failure'
             $ActionTest1SimpleFailureOutcomeResult = $ActionTest1SimpleFailureOutcome -eq $ActionTest1SimpleFailureOutcomeExpected
-            $ActionTest1SimpleFailureConclusion = '${{ needs.ActionTest1SimpleFailure.outputs.conclusion }}'
+            $ActionTest1SimpleFailureConclusion = '${{ needs.ActionTest1SimpleFailure.outputs.Conclusion }}'
             $ActionTest1SimpleFailureConclusionExpected = 'success'
             $ActionTest1SimpleFailureConclusionResult = $ActionTest1SimpleFailureConclusion -eq $ActionTest1SimpleFailureConclusionExpected
             $ActionTest1SimpleFailureExecuted = '${{ needs.ActionTest1SimpleFailure.outputs.Executed }}'
@@ -276,10 +318,10 @@ jobs:
             $ActionTest1SimpleFailureResultExpected = 'Failed'
             $ActionTest1SimpleFailureResultResult = $ActionTest1SimpleFailureResult -eq $ActionTest1SimpleFailureResultExpected
 
-            $ActionTest1SimpleFailureOnlyFailedSummaryOutcome = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.outcome }}'
+            $ActionTest1SimpleFailureOnlyFailedSummaryOutcome = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Outcome }}'
             $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeExpected = 'failure'
             $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeResult = $ActionTest1SimpleFailureOnlyFailedSummaryOutcome -eq $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeExpected
-            $ActionTest1SimpleFailureOnlyFailedSummaryConclusion = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.conclusion }}'
+            $ActionTest1SimpleFailureOnlyFailedSummaryConclusion = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Conclusion }}'
             $ActionTest1SimpleFailureOnlyFailedSummaryonclusionExpected = 'success'
             $ActionTest1SimpleFailureOnlyFailedSummaryonclusionResult = $ActionTest1SimpleFailureOnlyFailedSummaryConclusion -eq $ActionTest1SimpleFailureOnlyFailedSummaryonclusionExpected
             $ActionTest1SimpleFailureOnlyFailedSummaryExecuted = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Executed }}'
@@ -289,10 +331,10 @@ jobs:
             $ActionTest1SimpleFailureOnlyFailedSummaryResultExpected = 'Failed'
             $ActionTest1SimpleFailureOnlyFailedSummaryResultResult = $ActionTest1SimpleFailureOnlyFailedSummaryResult -eq $ActionTest1SimpleFailureOnlyFailedSummaryResultExpected
 
-            $ActionTest1SimpleExecutionFailureOutcome = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.outcome }}'
+            $ActionTest1SimpleExecutionFailureOutcome = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Outcome }}'
             $ActionTest1SimpleExecutionFailureOutcomeExpected = 'failure'
             $ActionTest1SimpleExecutionFailureOutcomeResult = $ActionTest1SimpleExecutionFailureOutcome -eq $ActionTest1SimpleExecutionFailureOutcomeExpected
-            $ActionTest1SimpleExecutionFailureConclusion = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.conclusion }}'
+            $ActionTest1SimpleExecutionFailureConclusion = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Conclusion }}'
             $ActionTest1SimpleExecutionFailureConclusionExpected = 'success'
             $ActionTest1SimpleExecutionFailureConclusionResult = $ActionTest1SimpleExecutionFailureConclusion -eq $ActionTest1SimpleExecutionFailureConclusionExpected
             $ActionTest1SimpleExecutionFailureExecuted = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Executed }}'
@@ -302,10 +344,10 @@ jobs:
             $ActionTest1SimpleExecutionFailureResultExpected = ''
             $ActionTest1SimpleExecutionFailureResultResult = $ActionTest1SimpleExecutionFailureResult -eq $ActionTest1SimpleExecutionFailureResultExpected
 
-            $ActionTest2StandardOutcome = '${{ needs.ActionTest2Standard.outputs.outcome }}'
+            $ActionTest2StandardOutcome = '${{ needs.ActionTest2Standard.outputs.Outcome }}'
             $ActionTest2StandardOutcomeExpected = 'success'
             $ActionTest2StandardOutcomeResult = $ActionTest2StandardOutcome -eq $ActionTest2StandardOutcomeExpected
-            $ActionTest2StandardConclusion = '${{ needs.ActionTest2Standard.outputs.conclusion }}'
+            $ActionTest2StandardConclusion = '${{ needs.ActionTest2Standard.outputs.Conclusion }}'
             $ActionTest2StandardConclusionExpected = 'success'
             $ActionTest2StandardConclusionResult = $ActionTest2StandardConclusion -eq $ActionTest2StandardConclusionExpected
             $ActionTest2StandardExecuted = '${{ needs.ActionTest2Standard.outputs.Executed }}'
@@ -315,10 +357,10 @@ jobs:
             $ActionTest2StandardResultExpected = 'Passed'
             $ActionTest2StandardResultResult = $ActionTest2StandardResult -eq $ActionTest2StandardResultExpected
 
-            $ActionTest2StandardNoSummaryOutcome = '${{ needs.ActionTest2StandardNoSummary.outputs.outcome }}'
+            $ActionTest2StandardNoSummaryOutcome = '${{ needs.ActionTest2StandardNoSummary.outputs.Outcome }}'
             $ActionTest2StandardNoSummaryOutcomeExpected = 'success'
             $ActionTest2StandardNoSummaryOutcomeResult = $ActionTest2StandardNoSummaryOutcome -eq $ActionTest2StandardNoSummaryOutcomeExpected
-            $ActionTest2StandardNoSummaryConclusion = '${{ needs.ActionTest2StandardNoSummary.outputs.conclusion }}'
+            $ActionTest2StandardNoSummaryConclusion = '${{ needs.ActionTest2StandardNoSummary.outputs.Conclusion }}'
             $ActionTest2StandardNoSummaryConclusionExpected = 'success'
             $ActionTest2StandardNoSummaryConclusionResult = $ActionTest2StandardNoSummaryConclusion -eq $ActionTest2StandardNoSummaryConclusionExpected
             $ActionTest2StandardNoSummaryExecuted = '${{ needs.ActionTest2StandardNoSummary.outputs.Executed }}'
@@ -328,10 +370,10 @@ jobs:
             $ActionTest2StandardNoSummaryResultExpected = 'Passed'
             $ActionTest2StandardNoSummaryResultResult = $ActionTest2StandardNoSummaryResult -eq $ActionTest2StandardNoSummaryResultExpected
 
-            $ActionTest3AdvancedOutcome = '${{ needs.ActionTest3Advanced.outputs.outcome }}'
+            $ActionTest3AdvancedOutcome = '${{ needs.ActionTest3Advanced.outputs.Outcome }}'
             $ActionTest3AdvancedOutcomeExpected = 'success'
             $ActionTest3AdvancedOutcomeResult = $ActionTest3AdvancedOutcome -eq $ActionTest3AdvancedOutcomeExpected
-            $ActionTest3AdvancedConclusion = '${{ needs.ActionTest3Advanced.outputs.conclusion }}'
+            $ActionTest3AdvancedConclusion = '${{ needs.ActionTest3Advanced.outputs.Conclusion }}'
             $ActionTest3AdvancedConclusionExpected = 'success'
             $ActionTest3AdvancedConclusionResult = $ActionTest3AdvancedConclusion -eq $ActionTest3AdvancedConclusionExpected
             $ActionTest3AdvancedExecuted = '${{ needs.ActionTest3Advanced.outputs.Executed }}'
@@ -356,6 +398,21 @@ jobs:
                 Result             = $ActionTest1SimpleResult
                 ResultExpected     = $ActionTest1SimpleResultExpected
                 ResultResult       = $ActionTest1SimpleResultResult
+              },
+              [PSCustomObject]@{
+                Name               = "Action-Test - [1-Simple-File]"
+                Outcome            = $ActionTest1SimpleFileOutcome
+                OutcomeExpected    = $ActionTest1SimpleFileOutcomeExpected
+                OutcomeResult      = $ActionTest1SimpleFileOutcomeResult
+                Conclusion         = $ActionTest1SimpleFileConclusion
+                ConclusionExpected = $ActionTest1SimpleFileConclusionExpected
+                ConclusionResult   = $ActionTest1SimpleFileConclusionResult
+                Executed           = $ActionTest1SimpleFileExecuted
+                ExecutedExpected   = $ActionTest1SimpleFileExecutedExpected
+                ExecutedResult     = $ActionTest1SimpleFileExecutedResult
+                Result             = $ActionTest1SimpleFileResult
+                ResultExpected     = $ActionTest1SimpleFileResultExpected
+                ResultResult       = $ActionTest1SimpleFileResultResult
               },
               [PSCustomObject]@{
                 Name               = "Action-Test - [1-Simple-Failure]"

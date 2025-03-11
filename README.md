@@ -342,7 +342,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Run Pester tests
         uses: PSModule/Invoke-Pester@v1
@@ -357,7 +357,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Run Pester tests
         uses: PSModule/Invoke-Pester@v3
@@ -390,7 +390,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Run Pester tests with code coverage
         id: pester
