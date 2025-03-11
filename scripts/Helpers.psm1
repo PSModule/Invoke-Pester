@@ -58,8 +58,8 @@ function Get-PesterConfiguration {
 
         .DESCRIPTION
         This function checks the specified path for a Pester configuration file. If the path is a directory,
-        it searches for files matching the pattern `*.Configuration.ps1`. If multiple configuration files
-        are found, an error is thrown. The function only supports `.ps1` configuration files.
+        it searches for files matching the pattern `*.Configuration.*`. If multiple configuration files
+        are found, an error is thrown. The function supports `.ps1` and `.psd1` files and imports them.
 
         .EXAMPLE
         Get-PesterConfiguration -Path "C:\\Pester\\Config"
@@ -96,7 +96,7 @@ function Get-PesterConfiguration {
 
     if ($item.PSIsContainer) {
         Write-Verbose 'Path is a directory. Searching for configuration files...'
-        $file = Get-ChildItem -Path $Path -Filter *.Configuration.ps1 -Recurse
+        $file = Get-ChildItem -Path $Path -Filter *.Configuration.* -Recurse
         Write-Verbose "Found $($file.Count) configuration files."
         if ($file.Count -eq 0) {
             Write-Verbose "No configuration files found in path: [$Path]"
@@ -107,7 +107,7 @@ function Get-PesterConfiguration {
         }
     } else {
         # Check if the provided file matches the required pattern
-        if ($item.Name -notlike '*.Configuration.ps1') {
+        if ($item.Name -notlike '*.Configuration.*') {
             return @{}
         }
         $file = $item
