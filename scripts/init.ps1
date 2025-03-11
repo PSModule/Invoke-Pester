@@ -184,16 +184,56 @@ LogGroup 'Init - Export containers' {
 
     # Process each input path
     foreach ($testDir in $inputs.Path) {
-        # If testDir is a file, get the directory
-        $testItem = Get-Item -Path $testDir
-        if ($testItem.PSIsContainer -eq $false) {
-            $testDir = $testItem.DirectoryName
+        # Check if testDir is a file or directory
+        $testItem = Get-Item -Path $testDir -ErrorAction SilentlyContinue
+        if ($null -eq $testItem) {
+            Write-Output "Path not found: [$testDir]"
+            continue
         }
 
-        Write-Output "Processing test directory: [$testDir]"
-
-        # Process the root directory and all subdirectories recursively
-        $containers += Invoke-ProcessTestDirectory -Directory $testDir -OutputPath $path
+        if ($testItem.PSIsContainer -eq $false) {
+            # Handle single file
+            $fileExtension = $testItem.Extension
+            $fileName = $testItem.Name
+            
+            if ($fileName -like "*.Container.ps1") {
+                # If it's a container file, use it directly
+                Write-Output "Processing container file: [$fileName]"
+                $containerFile = $testItem.FullName
+                $container = Import-Hashtable -Path $containerFile
+                $containerFileName = $fileName
+                Write-Output "Container configuration from file:"
+                Write-Output (Format-Hashtable -Hashtable $container | Out-String)
+                Write-Output "Exporting container [$path/$containerFileName]"
+                Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
+                $containers += $container
+            } 
+            elseif ($fileName -like "*.Tests.ps1") {
+                # If it's a test file, create a container for it
+                Write-Output "Creating container for test file: [$fileName]"
+                $container = @{
+                    Path = $testItem.FullName
+                }
+                $containerFileName = $fileName.Replace('.Tests.ps1', '.Container.ps1')
+                Write-Output "Generated container configuration:"
+                Write-Output (Format-Hashtable -Hashtable $container | Out-String)
+                Write-Output "Exporting container [$path/$containerFileName]"
+                Export-Hashtable -Hashtable $container -Path "$path/$containerFileName"
+                $containers += $container
+            }
+            else {
+                Write-Output "File [$fileName] is not a .Container.ps1 or .Tests.ps1 file. Processing parent directory."
+                $testDir = $testItem.DirectoryName
+                Write-Output "Processing test directory: [$testDir]"
+                # Process the directory recursively
+                $containers += Invoke-ProcessTestDirectory -Directory $testDir -OutputPath $path
+            }
+        } 
+        else {
+            Write-Output "Processing test directory: [$testDir]"
+            # Process the directory recursively
+            $containers += Invoke-ProcessTestDirectory -Directory $testDir -OutputPath $path
+        }
 
         Write-Output "Total containers after processing [$testDir]: [$($containers.Count)]"
     }
