@@ -63,6 +63,7 @@ jobs:
         with:
           WorkingDirectory: tests/1-Simple
           Path: Emoji.Tests.ps1
+          Run_Path: Emoji
 
       - name: Status
         shell: pwsh

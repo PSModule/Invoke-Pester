@@ -10,7 +10,7 @@
 param()
 
 BeforeAll {
-    . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
+    . "$PSScriptRoot/Emoji/Emoji.ps1"
 }
 
 Describe 'Get-Emoji' {
