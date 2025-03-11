@@ -7,10 +7,7 @@
     Justification = 'Required for Pester tests'
 )]
 [CmdletBinding()]
-param(
-    [Parameter(Mandatory)]
-    [string] $Path
-)
+param()
 
 BeforeAll {
     $script:CarsSettings = @{
