@@ -370,9 +370,18 @@ runs:
       id: status
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
-        PSMODULE_INVOKE_PESTER_INTERNAL_Executed: ${{ steps.test.outputs.Executed }}
         PSMODULE_INVOKE_PESTER_INTERNAL_Outcome: ${{ steps.test.outcome }}
         PSMODULE_INVOKE_PESTER_INTERNAL_Conclusion: ${{ steps.test.conclusion }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_Executed: ${{ steps.test.outputs.Executed }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_Result: ${{ steps.test.outputs.Result }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_FailedCount: ${{ steps.test.outputs.FailedCount }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_FailedBlocksCount: ${{ steps.test.outputs.FailedBlocksCount }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_FailedContainersCount: ${{ steps.test.outputs.FailedContainersCount }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_PassedCount: ${{ steps.test.outputs.PassedCount }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_SkippedCount: ${{ steps.test.outputs.SkippedCount }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_InconclusiveCount: ${{ steps.test.outputs.InconclusiveCount }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_NotRunCount: ${{ steps.test.outputs.NotRunCount }}
+        PSMODULE_INVOKE_PESTER_INTERNAL_TotalCount: ${{ steps.test.outputs.TotalCount }}
       run: |
         # Status
         ${{ github.action_path }}/scripts/status.ps1
