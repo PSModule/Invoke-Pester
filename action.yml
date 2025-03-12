@@ -15,6 +15,10 @@ inputs:
       Output generated reports in JSON format in addition to the configured format through Pester.
     required: false
     default: 'true'
+  Prescript:
+    description: |
+      Script to be executed before the test run. This script is executed in the same context as the test run.
+    required: false
   StepSummary_Mode:
     description: |
       Controls which tests to show in the GitHub step summary. Allows "Full" (show all tests), "Failed" (only failed tests), or "None" (disable step summary).
@@ -345,6 +349,7 @@ runs:
       id: test
       run: |
         # Invoke-Pester (exec)
+        ${{ inputs.Prescript }}
         ${{ github.action_path }}/scripts/exec.ps1
 
     - name: Upload test results - [${{ steps.test.outputs.TestSuiteName }}-TestResults]

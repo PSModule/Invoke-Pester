@@ -176,6 +176,9 @@ jobs:
         with:
           WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
+          Prescript: |
+            Write-Host "This is a prescript"
+            Write-Host "We are running on ${{ runner.os }}"
 
       - name: Status
         shell: pwsh
