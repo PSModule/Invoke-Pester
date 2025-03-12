@@ -122,6 +122,9 @@ jobs:
           WorkingDirectory: tests/1-Simple-Failure
           TestResult_TestSuiteName: 1-Simple-Failure
           StepSummary_ShowConfiguration: true
+          Prescript: |
+            Write-Host "This is a prescript"
+            Write-Host "We are running on ${{ runner.os }}"
 
       - name: Status
         shell: pwsh
