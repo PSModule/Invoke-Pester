@@ -26,9 +26,9 @@ LogGroup 'Init - Load inputs' {
         Run_ScriptBlock                    = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_ScriptBlock
         Run_Container                      = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_Container
         Run_TestExtension                  = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_TestExtension
-        Run_Exit                           = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_Exit
-        Run_Throw                          = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_Throw
-        Run_SkipRun                        = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_SkipRun
+        Run_Exit                           = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_Exit -eq 'true'
+        Run_Throw                          = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_Throw -eq 'true'
+        Run_SkipRun                        = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_SkipRun -eq 'true'
         Run_SkipRemainingOnFailure         = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_SkipRemainingOnFailure
 
         Filter_Tag                         = $env:PSMODULE_INVOKE_PESTER_INPUT_Filter_Tag
@@ -37,18 +37,18 @@ LogGroup 'Init - Load inputs' {
         Filter_ExcludeLine                 = $env:PSMODULE_INVOKE_PESTER_INPUT_Filter_ExcludeLine
         Filter_FullName                    = $env:PSMODULE_INVOKE_PESTER_INPUT_Filter_FullName
 
-        CodeCoverage_Enabled               = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_Enabled
+        CodeCoverage_Enabled               = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_Enabled -eq 'true'
         CodeCoverage_OutputFormat          = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_OutputFormat
         CodeCoverage_OutputPath            = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_OutputPath
         CodeCoverage_OutputEncoding        = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_OutputEncoding
         CodeCoverage_Path                  = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_Path
-        CodeCoverage_ExcludeTests          = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_ExcludeTests
-        CodeCoverage_RecursePaths          = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_RecursePaths
-        CodeCoverage_CoveragePercentTarget = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_CoveragePercentTarget
-        CodeCoverage_UseBreakpoints        = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_UseBreakpoints
-        CodeCoverage_SingleHitBreakpoints  = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_SingleHitBreakpoints
+        CodeCoverage_ExcludeTests          = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_ExcludeTests -eq 'true'
+        CodeCoverage_RecursePaths          = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_RecursePaths -eq 'true'
+        CodeCoverage_CoveragePercentTarget = [decimal]$env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_CoveragePercentTarget
+        CodeCoverage_UseBreakpoints        = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_UseBreakpoints -eq 'true'
+        CodeCoverage_SingleHitBreakpoints  = $env:PSMODULE_INVOKE_PESTER_INPUT_CodeCoverage_SingleHitBreakpoints -eq 'true'
 
-        TestResult_Enabled                 = $env:PSMODULE_INVOKE_PESTER_INPUT_TestResult_Enabled
+        TestResult_Enabled                 = $env:PSMODULE_INVOKE_PESTER_INPUT_TestResult_Enabled -eq 'true'
         TestResult_OutputFormat            = $env:PSMODULE_INVOKE_PESTER_INPUT_TestResult_OutputFormat
         TestResult_OutputPath              = $env:PSMODULE_INVOKE_PESTER_INPUT_TestResult_OutputPath
         TestResult_OutputEncoding          = $env:PSMODULE_INVOKE_PESTER_INPUT_TestResult_OutputEncoding
@@ -56,11 +56,11 @@ LogGroup 'Init - Load inputs' {
 
         Should_ErrorAction                 = $env:PSMODULE_INVOKE_PESTER_INPUT_Should_ErrorAction
 
-        Debug_ShowFullErrors               = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug_ShowFullErrors
-        Debug_WriteDebugMessages           = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug_WriteDebugMessages
+        Debug_ShowFullErrors               = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug_ShowFullErrors -eq 'true'
+        Debug_WriteDebugMessages           = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug_WriteDebugMessages -eq 'true'
         Debug_WriteDebugMessagesFrom       = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug_WriteDebugMessagesFrom
-        Debug_ShowNavigationMarkers        = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug_ShowNavigationMarkers
-        Debug_ReturnRawResultObject        = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug_ReturnRawResultObject
+        Debug_ShowNavigationMarkers        = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug_ShowNavigationMarkers -eq 'true'
+        Debug_ReturnRawResultObject        = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug_ReturnRawResultObject -eq 'true'
 
         Output_Verbosity                   = $env:PSMODULE_INVOKE_PESTER_INPUT_Output_Verbosity
         Output_StackTraceVerbosity         = $env:PSMODULE_INVOKE_PESTER_INPUT_Output_StackTraceVerbosity
@@ -68,8 +68,8 @@ LogGroup 'Init - Load inputs' {
         Output_CILogLevel                  = $env:PSMODULE_INVOKE_PESTER_INPUT_Output_CILogLevel
         Output_RenderMode                  = $env:PSMODULE_INVOKE_PESTER_INPUT_Output_RenderMode
 
-        TestDrive_Enabled                  = $env:PSMODULE_INVOKE_PESTER_INPUT_TestDrive_Enabled
-        TestRegistry_Enabled               = $env:PSMODULE_INVOKE_PESTER_INPUT_TestRegistry_Enabled
+        TestDrive_Enabled                  = $env:PSMODULE_INVOKE_PESTER_INPUT_TestDrive_Enabled -eq 'true'
+        TestRegistry_Enabled               = $env:PSMODULE_INVOKE_PESTER_INPUT_TestRegistry_Enabled -eq 'true'
     }
 
     Show-Input -Inputs $inputs
