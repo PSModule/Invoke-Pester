@@ -346,6 +346,8 @@ runs:
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_Mode: ${{ inputs.StepSummary_Mode }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTestOverview: ${{ inputs.StepSummary_ShowTestOverview }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowConfiguration: ${{ inputs.StepSummary_ShowConfiguration }}
+        PSMODULE_INVOKE_PESTER_INPUT_Debug: ${{ inputs.Debug }}
+        PSMODULE_INVOKE_PESTER_INPUT_Verbose: ${{ inputs.Verbose }}
       id: test
       run: |
         # Invoke-Pester (exec)
