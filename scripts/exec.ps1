@@ -1,6 +1,9 @@
 ﻿[CmdletBinding()]
 param()
 
+$DebugPreference = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug -eq 'true' ? 'Continue' : 'SilentlyContinue'
+$VerbosePreference = $env:PSMODULE_INVOKE_PESTER_INPUT_Verbose -eq 'true' ? 'Continue' : 'SilentlyContinue'
+
 $PSStyle.OutputRendering = 'Ansi'
 
 '::group::Exec - Setup prerequisites'
