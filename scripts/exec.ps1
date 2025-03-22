@@ -55,7 +55,9 @@ Get-Module | Format-Table -AutoSize | Out-String
 '::endgroup::'
 
 $configuration = New-PesterConfiguration -Hashtable $configuration
+$PSStyle.OutputRendering = 'Host'
 $testResults = Invoke-Pester -Configuration $configuration
+$PSStyle.OutputRendering = 'Ansi'
 
 '::group::Eval - Setup prerequisites'
 'Pester', 'Hashtable', 'TimeSpan', 'Markdown' | Install-PSResourceWithRetry
