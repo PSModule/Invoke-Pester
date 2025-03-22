@@ -55,7 +55,7 @@ Get-Module | Format-Table -AutoSize | Out-String
 '::endgroup::'
 
 $configuration = New-PesterConfiguration -Hashtable $configuration
-$PSStyle.OutputRendering = 'Host'
+$PSStyle.OutputRendering = 'Host' # Ensure propper XML rendering
 $testResults = Invoke-Pester -Configuration $configuration
 $PSStyle.OutputRendering = 'Ansi'
 
