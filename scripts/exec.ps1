@@ -5,6 +5,8 @@ $DebugPreference = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug -eq 'true' ? 'Continu
 $VerbosePreference = $env:PSMODULE_INVOKE_PESTER_INPUT_Verbose -eq 'true' ? 'Continue' : 'SilentlyContinue'
 
 $PSStyle.OutputRendering = 'Ansi'
+$DebugPreference = $env:PSMODULE_INVOKE_PESTER_INPUT_Debug ? 'Continue' : 'SilentlyContinue'
+$VerbosePreference = $env:PSMODULE_INVOKE_PESTER_INPUT_Verbose ? 'Continue' : 'SilentlyContinue'
 
 '::group::Exec - Setup prerequisites'
 Import-Module "$PSScriptRoot/Helpers.psm1"
