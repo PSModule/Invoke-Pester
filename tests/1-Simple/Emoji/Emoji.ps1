@@ -20,6 +20,8 @@ function Get-Emoji {
         [string] $Name = '*',
         [string] $Property
     )
+    Write-Verbose "Getting emoji by name [$Name]"
+    Write-Debug "Property: [$Property]"
     if ($Property) {
         $script:emojis | Where-Object Name -Like $Name | ForEach-Object $Property
     } else {

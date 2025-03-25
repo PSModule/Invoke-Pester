@@ -36,6 +36,8 @@ jobs:
         id: action-test
         with:
           WorkingDirectory: tests/1-Simple
+          Debug: true
+          Verbose: true
 
       - name: Status
         shell: pwsh
