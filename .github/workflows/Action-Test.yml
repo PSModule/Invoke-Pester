@@ -29,7 +29,7 @@ jobs:
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Action-Test [1-Simple]
         uses: ./
@@ -57,7 +57,7 @@ jobs:
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Action-Test [1-Simple-File]
         uses: ./
@@ -85,7 +85,7 @@ jobs:
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Action-Test [1-Simple-Failure]
         uses: ./
@@ -114,7 +114,7 @@ jobs:
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Action-Test [1-Simple-Failure]
         uses: ./
@@ -143,7 +143,7 @@ jobs:
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Action-Test [1-Simple-ExecutionFailure]
         uses: ./
@@ -170,7 +170,7 @@ jobs:
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Action-Test [2-Standard]
         uses: ./
@@ -200,7 +200,7 @@ jobs:
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Action-Test [2-Standard-NoSummary]
         uses: ./
@@ -228,7 +228,7 @@ jobs:
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Action-Test [3-Advanced]
         uses: ./
