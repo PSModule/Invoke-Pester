@@ -333,6 +333,7 @@ runs:
         Verbose: ${{ inputs.Verbose }}
         Version: ${{ inputs.Version }}
         WorkingDirectory: ${{ inputs.WorkingDirectory }}
+        Name: Invoke-Pester
         Script: |
           # Invoke-Pester (init)
           ${{ github.action_path }}/scripts/init.ps1
