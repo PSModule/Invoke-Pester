@@ -19,6 +19,11 @@ inputs:
     description: |
       Script to be executed before the test run. This script is executed in the same context as the test run.
     required: false
+  Notice_Mode:
+    description: |
+      Controls when to show notices for test completion. Allows "Full" (show on success and failure), "Failed" (show only on failure), or "None" (disable notices).
+    required: false
+    default: 'Failed'
   StepSummary_Mode:
     description: |
       Controls which tests to show in the GitHub step summary. Allows "Full" (show all tests), "Failed" (only failed tests), or "None" (disable step summary).
@@ -344,6 +349,7 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
+        PSMODULE_INVOKE_PESTER_INPUT_Notice_Mode: ${{ inputs.Notice_Mode }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_Mode: ${{ inputs.StepSummary_Mode }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTestOverview: ${{ inputs.StepSummary_ShowTestOverview }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowConfiguration: ${{ inputs.StepSummary_ShowConfiguration }}

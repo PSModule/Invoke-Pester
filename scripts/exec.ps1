@@ -138,23 +138,34 @@ $codeCoverageOutputFolderPath = $testResults.Configuration.CodeCoverage.OutputPa
 "TotalCount=$($testResults.TotalCount)" >> $env:GITHUB_OUTPUT
 
 if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
-    $jsonOutputPath = $testResults.Configuration.TestResult.OutputPath.Value -Replace '\.xml$', '.json'
+    $jsonOutputPath = $testResults.Configuration.TestResult.OutputPath.Value -replace '\.xml$', '.json'
     Write-Output "Exporting test results to [$jsonOutputPath]"
     $testResults | Get-PesterTestTree | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
 }
 
 if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.CodeCoverage.Enabled.Value) {
-    $jsonOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value -Replace '\.xml$', '.json'
+    $jsonOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value -replace '\.xml$', '.json'
     Write-Output "Exporting code coverage results to [$jsonOutputPath]"
     $testResults.CodeCoverage | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
 }
 '::endgroup::'
 
 '::group::Exit'
+$noticeMode = $env:PSMODULE_INVOKE_PESTER_INPUT_Notice_Mode
+$failedTests = $testResults.FailedCount
 if ($testResults.Result -eq 'Passed') {
-    '::notice::✅ All tests passed.'
+    if ($noticeMode -eq 'Full') {
+        '::notice::✅ All tests passed.'
+    }
     $script:exit = 0
 } else {
+    if ($noticeMode -in @('Full', 'Failed')) {
+        if ($failedTests -gt 0) {
+            "::notice::❌ Some [$failedTests] tests failed."
+        } else {
+            '::notice::❌ Some tests failed.'
+        }
+    }
     if ($failedTests -gt 0) {
         "::error::❌ Some [$failedTests] tests failed."
         $script:exit = $failedTests
