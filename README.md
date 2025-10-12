@@ -264,6 +264,7 @@ jobs:
 | `Path`                               | Path to where tests are located or a configuration file.                                                                                            | *(none)*    |
 | `ReportAsJson`                       | Output generated reports in JSON format in addition to the configured format through Pester.                                                        | `true`      |
 | `Prescript`                          | Script to be executed before the test run. This script is executed in the same context as the test run.                                             | *(none)*    |
+| `Notice_Mode`                        | Controls when to show notices for test completion. Allows "Full" (show on success and failure), "Failed" (show only on failure), or "None" (disable notices). | `Failed`    |
 | `StepSummary_Mode`                   | Controls which tests to show in the GitHub step summary. Allows "Full" (all tests), "Failed" (only failed tests), or "None" (disable step summary). | `Failed`    |
 | `StepSummary_ShowTestOverview`       | Controls whether to show the test overview table in the GitHub step summary.                                                                        | `false`     |
 | `StepSummary_ShowConfiguration`      | Controls whether to show the configuration details in the GitHub step summary.                                                                      | `false`     |
