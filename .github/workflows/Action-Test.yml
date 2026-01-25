@@ -30,6 +30,8 @@ jobs:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Action-Test [1-Simple]
         uses: ./
@@ -58,6 +60,8 @@ jobs:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Action-Test [1-Simple-File]
         uses: ./
@@ -86,6 +90,8 @@ jobs:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Action-Test [1-Simple-Failure]
         uses: ./
@@ -115,6 +121,8 @@ jobs:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Action-Test [1-Simple-Failure]
         uses: ./
@@ -144,6 +152,8 @@ jobs:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Action-Test [1-Simple-ExecutionFailure]
         uses: ./
@@ -171,6 +181,8 @@ jobs:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Action-Test [2-Standard]
         uses: ./
@@ -201,6 +213,8 @@ jobs:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Action-Test [2-Standard-NoSummary]
         uses: ./
@@ -229,6 +243,8 @@ jobs:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Action-Test [3-Advanced]
         uses: ./
