@@ -341,7 +341,7 @@ runs:
         Name: Invoke-Pester
         Script: |
           # Invoke-Pester (init)
-          ${{ github.action_path }}/scripts/init.ps1
+          ${{ github.action_path }}/src/init.ps1
 
     - name: Invoke-Pester (exec)
       shell: pwsh
@@ -359,7 +359,7 @@ runs:
       run: |
         # Invoke-Pester (exec)
         ${{ inputs.Prescript }}
-        ${{ github.action_path }}/scripts/exec.ps1
+        ${{ github.action_path }}/src/exec.ps1
 
     - name: Upload test results - [${{ steps.test.outputs.TestSuiteName }}-TestResults]
       uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
@@ -398,4 +398,4 @@ runs:
         PSMODULE_INVOKE_PESTER_INTERNAL_TotalCount: ${{ steps.test.outputs.TotalCount }}
       run: |
         # Status
-        ${{ github.action_path }}/scripts/status.ps1
+        ${{ github.action_path }}/src/status.ps1
