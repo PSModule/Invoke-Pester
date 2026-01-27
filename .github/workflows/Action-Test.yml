@@ -230,7 +230,7 @@ jobs:
         with:
           WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
-          Prescript: Prescript.ps1
+          Prescript: ../Prescript.ps1
 
       - name: Status
         shell: pwsh
