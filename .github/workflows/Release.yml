@@ -28,10 +28,10 @@ jobs:
   Release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - name: Release
-        uses: PSModule/Release-GHRepository@88c70461c8f16cc09682005bcf3b7fca4dd8dc1a # v2.0.1
+        uses: PSModule/Release-GHRepository@5a5165d66f485d1aad217ef34a190178b214fdcb # v2.0.2
