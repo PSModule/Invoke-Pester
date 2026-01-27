@@ -19,8 +19,9 @@ Write-Host '::group::Prescript - Execution'
 
 # Check if the prescript is a path to an existing file
 if (Test-Path -Path $prescript -PathType Leaf) {
-    Write-Host "Executing prescript from file: [$prescript]"
-    & $prescript
+    $scriptPath = Resolve-Path -Path $prescript
+    Write-Host "Executing prescript from file: [$scriptPath]"
+    & $scriptPath
 } else {
     Write-Host 'Executing inline prescript'
     # Use ScriptBlock::Create for safer execution than Invoke-Expression
