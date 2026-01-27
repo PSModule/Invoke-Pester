@@ -108,6 +108,19 @@ $ActionTest2StandardResult = $env:ACTIONTEST2STANDARD_RESULT
 $ActionTest2StandardResultExpected = 'Passed'
 $ActionTest2StandardResultResult = $ActionTest2StandardResult -eq $ActionTest2StandardResultExpected
 
+$ActionTest2StandardPrescriptFileOutcome = $env:ACTIONTEST2STANDARDPRESCRIPTFILE_OUTCOME
+$ActionTest2StandardPrescriptFileOutcomeExpected = 'success'
+$ActionTest2StandardPrescriptFileOutcomeResult = $ActionTest2StandardPrescriptFileOutcome -eq $ActionTest2StandardPrescriptFileOutcomeExpected
+$ActionTest2StandardPrescriptFileConclusion = $env:ACTIONTEST2STANDARDPRESCRIPTFILE_CONCLUSION
+$ActionTest2StandardPrescriptFileConclusionExpected = 'success'
+$ActionTest2StandardPrescriptFileConclusionResult = $ActionTest2StandardPrescriptFileConclusion -eq $ActionTest2StandardPrescriptFileConclusionExpected
+$ActionTest2StandardPrescriptFileExecuted = $env:ACTIONTEST2STANDARDPRESCRIPTFILE_EXECUTED
+$ActionTest2StandardPrescriptFileExecutedExpected = 'True'
+$ActionTest2StandardPrescriptFileExecutedResult = $ActionTest2StandardPrescriptFileExecuted -eq $ActionTest2StandardPrescriptFileExecutedExpected
+$ActionTest2StandardPrescriptFileResult = $env:ACTIONTEST2STANDARDPRESCRIPTFILE_RESULT
+$ActionTest2StandardPrescriptFileResultExpected = 'Passed'
+$ActionTest2StandardPrescriptFileResultResult = $ActionTest2StandardPrescriptFileResult -eq $ActionTest2StandardPrescriptFileResultExpected
+
 $ActionTest2StandardNoSummaryOutcome = $env:ACTIONTEST2STANDARDNOSUMMARY_OUTCOME
 $ActionTest2StandardNoSummaryOutcomeExpected = 'success'
 $ActionTest2StandardNoSummaryOutcomeResult = $ActionTest2StandardNoSummaryOutcome -eq $ActionTest2StandardNoSummaryOutcomeExpected
@@ -224,6 +237,21 @@ $jobs = @(
         Result             = $ActionTest2StandardResult
         ResultExpected     = $ActionTest2StandardResultExpected
         ResultResult       = $ActionTest2StandardResultResult
+    },
+    [PSCustomObject]@{
+        Name               = 'Action-Test - [2-Standard-PrescriptFile]'
+        Outcome            = $ActionTest2StandardPrescriptFileOutcome
+        OutcomeExpected    = $ActionTest2StandardPrescriptFileOutcomeExpected
+        OutcomeResult      = $ActionTest2StandardPrescriptFileOutcomeResult
+        Conclusion         = $ActionTest2StandardPrescriptFileConclusion
+        ConclusionExpected = $ActionTest2StandardPrescriptFileConclusionExpected
+        ConclusionResult   = $ActionTest2StandardPrescriptFileConclusionResult
+        Executed           = $ActionTest2StandardPrescriptFileExecuted
+        ExecutedExpected   = $ActionTest2StandardPrescriptFileExecutedExpected
+        ExecutedResult     = $ActionTest2StandardPrescriptFileExecutedResult
+        Result             = $ActionTest2StandardPrescriptFileResult
+        ResultExpected     = $ActionTest2StandardPrescriptFileResultExpected
+        ResultResult       = $ActionTest2StandardPrescriptFileResultResult
     },
     [PSCustomObject]@{
         Name               = 'Action-Test - [2-Standard-NoSummary]'

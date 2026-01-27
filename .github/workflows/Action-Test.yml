@@ -208,6 +208,37 @@ jobs:
           CONCLUSION: ${{ steps.action-test.conclusion }}
         run: tests/Show-Status.ps1
 
+  ActionTest2StandardPrescriptFile:
+    name: Action-Test - [2-Standard-PrescriptFile]
+    runs-on: ubuntu-latest
+    outputs:
+      Outcome: ${{ steps.action-test.outcome }}
+      Conclusion: ${{ steps.action-test.conclusion }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
+
+    steps:
+      # Need to check out as part of the test, as its a local action
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Action-Test [2-Standard-PrescriptFile]
+        uses: ./
+        id: action-test
+        with:
+          WorkingDirectory: tests/2-Standard
+          Output_CIFormat: GithubActions
+          Prescript: Prescript.ps1
+
+      - name: Status
+        shell: pwsh
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
+
   ActionTest2StandardNoSummary:
     name: Action-Test - [2-Standard-NoSummary]
     runs-on: ubuntu-latest
@@ -279,6 +310,7 @@ jobs:
       - ActionTest1SimpleFailureOnlyFailedSummary
       - ActionTest1SimpleExecutionFailure
       - ActionTest2Standard
+      - ActionTest2StandardPrescriptFile
       - ActionTest2StandardNoSummary
       - ActionTest3Advanced
     if: always()
@@ -316,6 +348,10 @@ jobs:
           ACTIONTEST2STANDARD_CONCLUSION: ${{ needs.ActionTest2Standard.outputs.Conclusion }}
           ACTIONTEST2STANDARD_EXECUTED: ${{ needs.ActionTest2Standard.outputs.Executed }}
           ACTIONTEST2STANDARD_RESULT: ${{ needs.ActionTest2Standard.outputs.Result }}
+          ACTIONTEST2STANDARDPRESCRIPTFILE_OUTCOME: ${{ needs.ActionTest2StandardPrescriptFile.outputs.Outcome }}
+          ACTIONTEST2STANDARDPRESCRIPTFILE_CONCLUSION: ${{ needs.ActionTest2StandardPrescriptFile.outputs.Conclusion }}
+          ACTIONTEST2STANDARDPRESCRIPTFILE_EXECUTED: ${{ needs.ActionTest2StandardPrescriptFile.outputs.Executed }}
+          ACTIONTEST2STANDARDPRESCRIPTFILE_RESULT: ${{ needs.ActionTest2StandardPrescriptFile.outputs.Result }}
           ACTIONTEST2STANDARDNOSUMMARY_OUTCOME: ${{ needs.ActionTest2StandardNoSummary.outputs.Outcome }}
           ACTIONTEST2STANDARDNOSUMMARY_CONCLUSION: ${{ needs.ActionTest2StandardNoSummary.outputs.Conclusion }}
           ACTIONTEST2STANDARDNOSUMMARY_EXECUTED: ${{ needs.ActionTest2StandardNoSummary.outputs.Executed }}
