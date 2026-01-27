@@ -285,7 +285,7 @@ runs:
   using: composite
   steps:
     - name: Invoke-Pester (init)
-      uses: PSModule/GitHub-Script@v1
+      uses: PSModule/GitHub-Script@0097f3bbe3f413f3b577b9bcc600727b0ca3201a # v1.7.10
       env:
         PSMODULE_INVOKE_PESTER_INPUT_Path: ${{ inputs.Path }}
         PSMODULE_INVOKE_PESTER_INPUT_Run_Path: ${{ inputs.Run_Path }}
@@ -341,7 +341,7 @@ runs:
         Name: Invoke-Pester
         Script: |
           # Invoke-Pester (init)
-          ${{ github.action_path }}/scripts/init.ps1
+          ${{ github.action_path }}/src/init.ps1
 
     - name: Invoke-Pester (exec)
       shell: pwsh
@@ -355,14 +355,15 @@ runs:
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowConfiguration: ${{ inputs.StepSummary_ShowConfiguration }}
         PSMODULE_INVOKE_PESTER_INPUT_Debug: ${{ inputs.Debug }}
         PSMODULE_INVOKE_PESTER_INPUT_Verbose: ${{ inputs.Verbose }}
+        PSMODULE_INVOKE_PESTER_INPUT_Prescript: ${{ inputs.Prescript }}
       id: test
       run: |
         # Invoke-Pester (exec)
-        ${{ inputs.Prescript }}
-        ${{ github.action_path }}/scripts/exec.ps1
+        ${{ github.action_path }}/src/prescript.ps1
+        ${{ github.action_path }}/src/exec.ps1
 
     - name: Upload test results - [${{ steps.test.outputs.TestSuiteName }}-TestResults]
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       if: ${{ steps.test.outputs.TestResultEnabled == 'true' && (success() || failure()) }}
       with:
         name: ${{ steps.test.outputs.TestSuiteName }}-TestResults
@@ -371,7 +372,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload code coverage report - [${{ steps.test.outputs.TestSuiteName }}-CodeCoverage]
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       if: ${{ steps.test.outputs.CodeCoverageEnabled == 'true' && (success() || failure()) }}
       with:
         name: ${{ steps.test.outputs.TestSuiteName }}-CodeCoverage
@@ -398,4 +399,4 @@ runs:
         PSMODULE_INVOKE_PESTER_INTERNAL_TotalCount: ${{ steps.test.outputs.TotalCount }}
       run: |
         # Status
-        ${{ github.action_path }}/scripts/status.ps1
+        ${{ github.action_path }}/src/status.ps1
