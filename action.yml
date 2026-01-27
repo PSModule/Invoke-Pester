@@ -362,7 +362,7 @@ runs:
         ${{ github.action_path }}/src/exec.ps1
 
     - name: Upload test results - [${{ steps.test.outputs.TestSuiteName }}-TestResults]
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       if: ${{ steps.test.outputs.TestResultEnabled == 'true' && (success() || failure()) }}
       with:
         name: ${{ steps.test.outputs.TestSuiteName }}-TestResults
@@ -371,7 +371,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload code coverage report - [${{ steps.test.outputs.TestSuiteName }}-CodeCoverage]
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       if: ${{ steps.test.outputs.CodeCoverageEnabled == 'true' && (success() || failure()) }}
       with:
         name: ${{ steps.test.outputs.TestSuiteName }}-CodeCoverage
