@@ -231,6 +231,7 @@ jobs:
           WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
           Prescript: ../Prescript.ps1
+          TestResult_TestSuiteName: 2-Standard-PrescriptFile
 
       - name: Status
         shell: pwsh
