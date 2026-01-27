@@ -43,9 +43,10 @@ jobs:
 
       - name: Status
         shell: pwsh
-        run: |
-          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
 
   ActionTest1SimpleFile:
     name: Action-Test - [1-Simple-File]
@@ -73,9 +74,10 @@ jobs:
 
       - name: Status
         shell: pwsh
-        run: |
-          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
 
   ActionTest1SimpleFailure:
     name: Action-Test - [1-Simple-Failure]
@@ -104,9 +106,10 @@ jobs:
 
       - name: Status
         shell: pwsh
-        run: |
-          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
 
   ActionTest1SimpleFailureOnlyFailedSummary:
     name: Action-Test - [1-Simple-Failure-OnlyFailedSummary]
@@ -135,9 +138,10 @@ jobs:
 
       - name: Status
         shell: pwsh
-        run: |
-          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
 
   ActionTest1SimpleExecutionFailure:
     name: Action-Test - [1-Simple-ExecutionFailure]
@@ -164,9 +168,10 @@ jobs:
 
       - name: Status
         shell: pwsh
-        run: |
-          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
 
   ActionTest2Standard:
     name: Action-Test - [2-Standard]
@@ -187,18 +192,21 @@ jobs:
       - name: Action-Test [2-Standard]
         uses: ./
         id: action-test
+        env:
+          RUNNER_OS: ${{ runner.os }}
         with:
           WorkingDirectory: tests/2-Standard
           Output_CIFormat: GithubActions
           Prescript: |
             Write-Host "This is a prescript"
-            Write-Host "We are running on ${{ runner.os }}"
+            Write-Host "We are running on $env:RUNNER_OS"
 
       - name: Status
         shell: pwsh
-        run: |
-          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
 
   ActionTest2StandardNoSummary:
     name: Action-Test - [2-Standard-NoSummary]
@@ -226,9 +234,10 @@ jobs:
 
       - name: Status
         shell: pwsh
-        run: |
-          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
 
   ActionTest3Advanced:
     name: Action-Test - [3-Advanced]
@@ -256,9 +265,10 @@ jobs:
 
       - name: Status
         shell: pwsh
-        run: |
-          Write-Host "Outcome: ${{ steps.action-test.outcome }}"
-          Write-Host "Conclusion: ${{ steps.action-test.conclusion }}"
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
 
   CatchJob:
     name: Catch Job - Aggregate Status
@@ -274,295 +284,45 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
       - name: Display Aggregated Results as a Table
         uses: PSModule/GitHub-Script@0097f3bbe3f413f3b577b9bcc600727b0ca3201a # v1.7.10
+        env:
+          ACTIONTEST1SIMPLE_OUTCOME: ${{ needs.ActionTest1Simple.outputs.Outcome }}
+          ACTIONTEST1SIMPLE_CONCLUSION: ${{ needs.ActionTest1Simple.outputs.Conclusion }}
+          ACTIONTEST1SIMPLE_EXECUTED: ${{ needs.ActionTest1Simple.outputs.Executed }}
+          ACTIONTEST1SIMPLE_RESULT: ${{ needs.ActionTest1Simple.outputs.Result }}
+          ACTIONTEST1SIMPLEFILE_OUTCOME: ${{ needs.ActionTest1SimpleFile.outputs.Outcome }}
+          ACTIONTEST1SIMPLEFILE_CONCLUSION: ${{ needs.ActionTest1SimpleFile.outputs.Conclusion }}
+          ACTIONTEST1SIMPLEFILE_EXECUTED: ${{ needs.ActionTest1SimpleFile.outputs.Executed }}
+          ACTIONTEST1SIMPLEFILE_RESULT: ${{ needs.ActionTest1SimpleFile.outputs.Result }}
+          ACTIONTEST1SIMPLEFAILURE_OUTCOME: ${{ needs.ActionTest1SimpleFailure.outputs.Outcome }}
+          ACTIONTEST1SIMPLEFAILURE_CONCLUSION: ${{ needs.ActionTest1SimpleFailure.outputs.Conclusion }}
+          ACTIONTEST1SIMPLEFAILURE_EXECUTED: ${{ needs.ActionTest1SimpleFailure.outputs.Executed }}
+          ACTIONTEST1SIMPLEFAILURE_RESULT: ${{ needs.ActionTest1SimpleFailure.outputs.Result }}
+          ACTIONTEST1SIMPLEFAILUREONLYFAILEDSUMMARY_OUTCOME: ${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Outcome }}
+          ACTIONTEST1SIMPLEFAILUREONLYFAILEDSUMMARY_CONCLUSION: ${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Conclusion }}
+          ACTIONTEST1SIMPLEFAILUREONLYFAILEDSUMMARY_EXECUTED: ${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Executed }}
+          ACTIONTEST1SIMPLEFAILUREONLYFAILEDSUMMARY_RESULT: ${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Result }}
+          ACTIONTEST1SIMPLEEXECUTIONFAILURE_OUTCOME: ${{ needs.ActionTest1SimpleExecutionFailure.outputs.Outcome }}
+          ACTIONTEST1SIMPLEEXECUTIONFAILURE_CONCLUSION: ${{ needs.ActionTest1SimpleExecutionFailure.outputs.Conclusion }}
+          ACTIONTEST1SIMPLEEXECUTIONFAILURE_EXECUTED: ${{ needs.ActionTest1SimpleExecutionFailure.outputs.Executed }}
+          ACTIONTEST1SIMPLEEXECUTIONFAILURE_RESULT: ${{ needs.ActionTest1SimpleExecutionFailure.outputs.Result }}
+          ACTIONTEST2STANDARD_OUTCOME: ${{ needs.ActionTest2Standard.outputs.Outcome }}
+          ACTIONTEST2STANDARD_CONCLUSION: ${{ needs.ActionTest2Standard.outputs.Conclusion }}
+          ACTIONTEST2STANDARD_EXECUTED: ${{ needs.ActionTest2Standard.outputs.Executed }}
+          ACTIONTEST2STANDARD_RESULT: ${{ needs.ActionTest2Standard.outputs.Result }}
+          ACTIONTEST2STANDARDNOSUMMARY_OUTCOME: ${{ needs.ActionTest2StandardNoSummary.outputs.Outcome }}
+          ACTIONTEST2STANDARDNOSUMMARY_CONCLUSION: ${{ needs.ActionTest2StandardNoSummary.outputs.Conclusion }}
+          ACTIONTEST2STANDARDNOSUMMARY_EXECUTED: ${{ needs.ActionTest2StandardNoSummary.outputs.Executed }}
+          ACTIONTEST2STANDARDNOSUMMARY_RESULT: ${{ needs.ActionTest2StandardNoSummary.outputs.Result }}
+          ACTIONTEST3ADVANCED_OUTCOME: ${{ needs.ActionTest3Advanced.outputs.Outcome }}
+          ACTIONTEST3ADVANCED_CONCLUSION: ${{ needs.ActionTest3Advanced.outputs.Conclusion }}
+          ACTIONTEST3ADVANCED_EXECUTED: ${{ needs.ActionTest3Advanced.outputs.Executed }}
+          ACTIONTEST3ADVANCED_RESULT: ${{ needs.ActionTest3Advanced.outputs.Result }}
         with:
-          Script: |
-            'Markdown' | ForEach-Object {
-                $name = $_
-                Write-Output "Installing module: $name"
-                $retryCount = 5
-                $retryDelay = 10
-                for ($i = 0; $i -lt $retryCount; $i++) {
-                    try {
-                        Install-PSResource -Name $name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
-                        break
-                    } catch {
-                        Write-Warning "Installation of $name failed with error: $_"
-                        if ($i -eq $retryCount - 1) {
-                            throw
-                        }
-                        Write-Warning "Retrying in $retryDelay seconds..."
-                        Start-Sleep -Seconds $retryDelay
-                    }
-                }
-                Import-Module -Name $name
-            }
-
-            # Build an array of objects for each job
-            $ActionTest1SimpleOutcome = '${{ needs.ActionTest1Simple.outputs.Outcome }}'
-            $ActionTest1SimpleOutcomeExpected = 'success'
-            $ActionTest1SimpleOutcomeResult = $ActionTest1SimpleOutcome -eq $ActionTest1SimpleOutcomeExpected
-            $ActionTest1SimpleConclusion = '${{ needs.ActionTest1Simple.outputs.Conclusion }}'
-            $ActionTest1SimpleConclusionExpected = 'success'
-            $ActionTest1SimpleConclusionResult = $ActionTest1SimpleConclusion -eq $ActionTest1SimpleConclusionExpected
-            $ActionTest1SimpleExecuted = '${{ needs.ActionTest1Simple.outputs.Executed }}'
-            $ActionTest1SimpleExecutedExpected = 'True'
-            $ActionTest1SimpleExecutedResult = $ActionTest1SimpleExecuted -eq $ActionTest1SimpleExecutedExpected
-            $ActionTest1SimpleResult = '${{ needs.ActionTest1Simple.outputs.Result }}'
-            $ActionTest1SimpleResultExpected = 'Passed'
-            $ActionTest1SimpleResultResult = $ActionTest1SimpleResult -eq $ActionTest1SimpleResultExpected
-
-            $ActionTest1SimpleFileOutcome = '${{ needs.ActionTest1SimpleFile.outputs.Outcome }}'
-            $ActionTest1SimpleFileOutcomeExpected = 'success'
-            $ActionTest1SimpleFileOutcomeResult = $ActionTest1SimpleFileOutcome -eq $ActionTest1SimpleFileOutcomeExpected
-            $ActionTest1SimpleFileConclusion = '${{ needs.ActionTest1SimpleFile.outputs.Conclusion }}'
-            $ActionTest1SimpleFileConclusionExpected = 'success'
-            $ActionTest1SimpleFileConclusionResult = $ActionTest1SimpleFileConclusion -eq $ActionTest1SimpleFileConclusionExpected
-            $ActionTest1SimpleFileExecuted = '${{ needs.ActionTest1SimpleFile.outputs.Executed }}'
-            $ActionTest1SimpleFileExecutedExpected = 'True'
-            $ActionTest1SimpleFileExecutedResult = $ActionTest1SimpleFileExecuted -eq $ActionTest1SimpleFileExecutedExpected
-            $ActionTest1SimpleFileResult = '${{ needs.ActionTest1SimpleFile.outputs.Result }}'
-            $ActionTest1SimpleFileResultExpected = 'Passed'
-            $ActionTest1SimpleFileResultResult = $ActionTest1SimpleFileResult -eq $ActionTest1SimpleFileResultExpected
-
-            $ActionTest1SimpleFailureOutcome = '${{ needs.ActionTest1SimpleFailure.outputs.Outcome }}'
-            $ActionTest1SimpleFailureOutcomeExpected = 'failure'
-            $ActionTest1SimpleFailureOutcomeResult = $ActionTest1SimpleFailureOutcome -eq $ActionTest1SimpleFailureOutcomeExpected
-            $ActionTest1SimpleFailureConclusion = '${{ needs.ActionTest1SimpleFailure.outputs.Conclusion }}'
-            $ActionTest1SimpleFailureConclusionExpected = 'success'
-            $ActionTest1SimpleFailureConclusionResult = $ActionTest1SimpleFailureConclusion -eq $ActionTest1SimpleFailureConclusionExpected
-            $ActionTest1SimpleFailureExecuted = '${{ needs.ActionTest1SimpleFailure.outputs.Executed }}'
-            $ActionTest1SimpleFailureExecutedExpected = 'True'
-            $ActionTest1SimpleFailureExecutedResult = $ActionTest1SimpleFailureExecuted -eq $ActionTest1SimpleFailureExecutedExpected
-            $ActionTest1SimpleFailureResult = '${{ needs.ActionTest1SimpleFailure.outputs.Result }}'
-            $ActionTest1SimpleFailureResultExpected = 'Failed'
-            $ActionTest1SimpleFailureResultResult = $ActionTest1SimpleFailureResult -eq $ActionTest1SimpleFailureResultExpected
-
-            $ActionTest1SimpleFailureOnlyFailedSummaryOutcome = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Outcome }}'
-            $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeExpected = 'failure'
-            $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeResult = $ActionTest1SimpleFailureOnlyFailedSummaryOutcome -eq $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeExpected
-            $ActionTest1SimpleFailureOnlyFailedSummaryConclusion = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Conclusion }}'
-            $ActionTest1SimpleFailureOnlyFailedSummaryonclusionExpected = 'success'
-            $ActionTest1SimpleFailureOnlyFailedSummaryonclusionResult = $ActionTest1SimpleFailureOnlyFailedSummaryConclusion -eq $ActionTest1SimpleFailureOnlyFailedSummaryonclusionExpected
-            $ActionTest1SimpleFailureOnlyFailedSummaryExecuted = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Executed }}'
-            $ActionTest1SimpleFailureOnlyFailedSummaryExecutedExpected = 'True'
-            $ActionTest1SimpleFailureOnlyFailedSummaryExecutedResult = $ActionTest1SimpleFailureOnlyFailedSummaryExecuted -eq $ActionTest1SimpleFailureOnlyFailedSummaryExecutedExpected
-            $ActionTest1SimpleFailureOnlyFailedSummaryResult = '${{ needs.ActionTest1SimpleFailureOnlyFailedSummary.outputs.Result }}'
-            $ActionTest1SimpleFailureOnlyFailedSummaryResultExpected = 'Failed'
-            $ActionTest1SimpleFailureOnlyFailedSummaryResultResult = $ActionTest1SimpleFailureOnlyFailedSummaryResult -eq $ActionTest1SimpleFailureOnlyFailedSummaryResultExpected
-
-            $ActionTest1SimpleExecutionFailureOutcome = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Outcome }}'
-            $ActionTest1SimpleExecutionFailureOutcomeExpected = 'failure'
-            $ActionTest1SimpleExecutionFailureOutcomeResult = $ActionTest1SimpleExecutionFailureOutcome -eq $ActionTest1SimpleExecutionFailureOutcomeExpected
-            $ActionTest1SimpleExecutionFailureConclusion = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Conclusion }}'
-            $ActionTest1SimpleExecutionFailureConclusionExpected = 'success'
-            $ActionTest1SimpleExecutionFailureConclusionResult = $ActionTest1SimpleExecutionFailureConclusion -eq $ActionTest1SimpleExecutionFailureConclusionExpected
-            $ActionTest1SimpleExecutionFailureExecuted = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Executed }}'
-            $ActionTest1SimpleExecutionFailureExecutedExpected = 'False'
-            $ActionTest1SimpleExecutionFailureExecutedResult = $ActionTest1SimpleExecutionFailureExecuted -eq $ActionTest1SimpleExecutionFailureExecutedExpected
-            $ActionTest1SimpleExecutionFailureResult = '${{ needs.ActionTest1SimpleExecutionFailure.outputs.Result }}'
-            $ActionTest1SimpleExecutionFailureResultExpected = ''
-            $ActionTest1SimpleExecutionFailureResultResult = $ActionTest1SimpleExecutionFailureResult -eq $ActionTest1SimpleExecutionFailureResultExpected
-
-            $ActionTest2StandardOutcome = '${{ needs.ActionTest2Standard.outputs.Outcome }}'
-            $ActionTest2StandardOutcomeExpected = 'success'
-            $ActionTest2StandardOutcomeResult = $ActionTest2StandardOutcome -eq $ActionTest2StandardOutcomeExpected
-            $ActionTest2StandardConclusion = '${{ needs.ActionTest2Standard.outputs.Conclusion }}'
-            $ActionTest2StandardConclusionExpected = 'success'
-            $ActionTest2StandardConclusionResult = $ActionTest2StandardConclusion -eq $ActionTest2StandardConclusionExpected
-            $ActionTest2StandardExecuted = '${{ needs.ActionTest2Standard.outputs.Executed }}'
-            $ActionTest2StandardExecutedExpected = 'True'
-            $ActionTest2StandardExecutedResult = $ActionTest2StandardExecuted -eq $ActionTest2StandardExecutedExpected
-            $ActionTest2StandardResult = '${{ needs.ActionTest2Standard.outputs.Result }}'
-            $ActionTest2StandardResultExpected = 'Passed'
-            $ActionTest2StandardResultResult = $ActionTest2StandardResult -eq $ActionTest2StandardResultExpected
-
-            $ActionTest2StandardNoSummaryOutcome = '${{ needs.ActionTest2StandardNoSummary.outputs.Outcome }}'
-            $ActionTest2StandardNoSummaryOutcomeExpected = 'success'
-            $ActionTest2StandardNoSummaryOutcomeResult = $ActionTest2StandardNoSummaryOutcome -eq $ActionTest2StandardNoSummaryOutcomeExpected
-            $ActionTest2StandardNoSummaryConclusion = '${{ needs.ActionTest2StandardNoSummary.outputs.Conclusion }}'
-            $ActionTest2StandardNoSummaryConclusionExpected = 'success'
-            $ActionTest2StandardNoSummaryConclusionResult = $ActionTest2StandardNoSummaryConclusion -eq $ActionTest2StandardNoSummaryConclusionExpected
-            $ActionTest2StandardNoSummaryExecuted = '${{ needs.ActionTest2StandardNoSummary.outputs.Executed }}'
-            $ActionTest2StandardNoSummaryExecutedExpected = 'True'
-            $ActionTest2StandardNoSummaryExecutedResult = $ActionTest2StandardNoSummaryExecuted -eq $ActionTest2StandardNoSummaryExecutedExpected
-            $ActionTest2StandardNoSummaryResult = '${{ needs.ActionTest2StandardNoSummary.outputs.Result }}'
-            $ActionTest2StandardNoSummaryResultExpected = 'Passed'
-            $ActionTest2StandardNoSummaryResultResult = $ActionTest2StandardNoSummaryResult -eq $ActionTest2StandardNoSummaryResultExpected
-
-            $ActionTest3AdvancedOutcome = '${{ needs.ActionTest3Advanced.outputs.Outcome }}'
-            $ActionTest3AdvancedOutcomeExpected = 'success'
-            $ActionTest3AdvancedOutcomeResult = $ActionTest3AdvancedOutcome -eq $ActionTest3AdvancedOutcomeExpected
-            $ActionTest3AdvancedConclusion = '${{ needs.ActionTest3Advanced.outputs.Conclusion }}'
-            $ActionTest3AdvancedConclusionExpected = 'success'
-            $ActionTest3AdvancedConclusionResult = $ActionTest3AdvancedConclusion -eq $ActionTest3AdvancedConclusionExpected
-            $ActionTest3AdvancedExecuted = '${{ needs.ActionTest3Advanced.outputs.Executed }}'
-            $ActionTest3AdvancedExecutedExpected = 'True'
-            $ActionTest3AdvancedExecutedResult = $ActionTest3AdvancedExecuted -eq $ActionTest3AdvancedExecutedExpected
-            $ActionTest3AdvancedResult = '${{ needs.ActionTest3Advanced.outputs.Result }}'
-            $ActionTest3AdvancedResultExpected = 'Passed'
-            $ActionTest3AdvancedResultResult = $ActionTest3AdvancedResult -eq $ActionTest3AdvancedResultExpected
-
-            $jobs = @(
-              [PSCustomObject]@{
-                Name               = "Action-Test - [1-Simple]"
-                Outcome            = $ActionTest1SimpleOutcome
-                OutcomeExpected    = $ActionTest1SimpleOutcomeExpected
-                OutcomeResult      = $ActionTest1SimpleOutcomeResult
-                Conclusion         = $ActionTest1SimpleConclusion
-                ConclusionExpected = $ActionTest1SimpleConclusionExpected
-                ConclusionResult   = $ActionTest1SimpleConclusionResult
-                Executed           = $ActionTest1SimpleExecuted
-                ExecutedExpected   = $ActionTest1SimpleExecutedExpected
-                ExecutedResult     = $ActionTest1SimpleExecutedResult
-                Result             = $ActionTest1SimpleResult
-                ResultExpected     = $ActionTest1SimpleResultExpected
-                ResultResult       = $ActionTest1SimpleResultResult
-              },
-              [PSCustomObject]@{
-                Name               = "Action-Test - [1-Simple-File]"
-                Outcome            = $ActionTest1SimpleFileOutcome
-                OutcomeExpected    = $ActionTest1SimpleFileOutcomeExpected
-                OutcomeResult      = $ActionTest1SimpleFileOutcomeResult
-                Conclusion         = $ActionTest1SimpleFileConclusion
-                ConclusionExpected = $ActionTest1SimpleFileConclusionExpected
-                ConclusionResult   = $ActionTest1SimpleFileConclusionResult
-                Executed           = $ActionTest1SimpleFileExecuted
-                ExecutedExpected   = $ActionTest1SimpleFileExecutedExpected
-                ExecutedResult     = $ActionTest1SimpleFileExecutedResult
-                Result             = $ActionTest1SimpleFileResult
-                ResultExpected     = $ActionTest1SimpleFileResultExpected
-                ResultResult       = $ActionTest1SimpleFileResultResult
-              },
-              [PSCustomObject]@{
-                Name               = "Action-Test - [1-Simple-Failure]"
-                Outcome            = $ActionTest1SimpleFailureOutcome
-                OutcomeExpected    = $ActionTest1SimpleFailureOutcomeExpected
-                OutcomeResult      = $ActionTest1SimpleFailureOutcomeResult
-                Conclusion         = $ActionTest1SimpleFailureConclusion
-                ConclusionExpected = $ActionTest1SimpleFailureConclusionExpected
-                ConclusionResult   = $ActionTest1SimpleFailureConclusionResult
-                Executed           = $ActionTest1SimpleFailureExecuted
-                ExecutedExpected   = $ActionTest1SimpleFailureExecutedExpected
-                ExecutedResult     = $ActionTest1SimpleFailureExecutedResult
-                Result             = $ActionTest1SimpleFailureResult
-                ResultExpected     = $ActionTest1SimpleFailureResultExpected
-                ResultResult       = $ActionTest1SimpleFailureResultResult
-              },
-              [PSCustomObject]@{
-                Name               = "Action-Test - [1-Simple-Failure-OnlyFailedSummary]"
-                Outcome            = $ActionTest1SimpleFailureOnlyFailedSummaryOutcome
-                OutcomeExpected    = $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeExpected
-                OutcomeResult      = $ActionTest1SimpleFailureOnlyFailedSummaryOutcomeResult
-                Conclusion         = $ActionTest1SimpleFailureOnlyFailedSummaryConclusion
-                ConclusionExpected = $ActionTest1SimpleFailureOnlyFailedSummaryonclusionExpected
-                ConclusionResult   = $ActionTest1SimpleFailureOnlyFailedSummaryonclusionResult
-                Executed           = $ActionTest1SimpleFailureOnlyFailedSummaryExecuted
-                ExecutedExpected   = $ActionTest1SimpleFailureOnlyFailedSummaryExecutedExpected
-                ExecutedResult     = $ActionTest1SimpleFailureOnlyFailedSummaryExecutedResult
-                Result             = $ActionTest1SimpleFailureOnlyFailedSummaryResult
-                ResultExpected     = $ActionTest1SimpleFailureOnlyFailedSummaryResultExpected
-                ResultResult       = $ActionTest1SimpleFailureOnlyFailedSummaryResultResult
-              },
-              [PSCustomObject]@{
-                Name               = "Action-Test - [1-Simple-ExecutionFailure]"
-                Outcome            = $ActionTest1SimpleExecutionFailureOutcome
-                OutcomeExpected    = $ActionTest1SimpleExecutionFailureOutcomeExpected
-                OutcomeResult      = $ActionTest1SimpleExecutionFailureOutcomeResult
-                Conclusion         = $ActionTest1SimpleExecutionFailureConclusion
-                ConclusionExpected = $ActionTest1SimpleExecutionFailureConclusionExpected
-                ConclusionResult   = $ActionTest1SimpleExecutionFailureConclusionResult
-                Executed           = $ActionTest1SimpleExecutionFailureExecuted
-                ExecutedExpected   = $ActionTest1SimpleExecutionFailureExecutedExpected
-                ExecutedResult     = $ActionTest1SimpleExecutionFailureExecutedResult
-                Result             = $ActionTest1SimpleExecutionFailureResult
-                ResultExpected     = $ActionTest1SimpleExecutionFailureResultExpected
-                ResultResult       = $ActionTest1SimpleExecutionFailureResultResult
-              },
-              [PSCustomObject]@{
-                Name               = "Action-Test - [2-Standard]"
-                Outcome            = $ActionTest2StandardOutcome
-                OutcomeExpected    = $ActionTest2StandardOutcomeExpected
-                OutcomeResult      = $ActionTest2StandardOutcomeResult
-                Conclusion         = $ActionTest2StandardConclusion
-                ConclusionExpected = $ActionTest2StandardConclusionExpected
-                ConclusionResult   = $ActionTest2StandardConclusionResult
-                Executed           = $ActionTest2StandardExecuted
-                ExecutedExpected   = $ActionTest2StandardExecutedExpected
-                ExecutedResult     = $ActionTest2StandardExecutedResult
-                Result             = $ActionTest2StandardResult
-                ResultExpected     = $ActionTest2StandardResultExpected
-                ResultResult       = $ActionTest2StandardResultResult
-              },
-              [PSCustomObject]@{
-                Name               = "Action-Test - [2-Standard-NoSummary]"
-                Outcome            = $ActionTest2StandardNoSummaryOutcome
-                OutcomeExpected    = $ActionTest2StandardNoSummaryOutcomeExpected
-                OutcomeResult      = $ActionTest2StandardNoSummaryOutcomeResult
-                Conclusion         = $ActionTest2StandardNoSummaryConclusion
-                ConclusionExpected = $ActionTest2StandardNoSummaryConclusionExpected
-                ConclusionResult   = $ActionTest2StandardNoSummaryConclusionResult
-                Executed           = $ActionTest2StandardNoSummaryExecuted
-                ExecutedExpected   = $ActionTest2StandardNoSummaryExecutedExpected
-                ExecutedResult     = $ActionTest2StandardNoSummaryExecutedResult
-                Result             = $ActionTest2StandardNoSummaryResult
-                ResultExpected     = $ActionTest2StandardNoSummaryResultExpected
-                ResultResult       = $ActionTest2StandardNoSummaryResultResult
-              },
-              [PSCustomObject]@{
-                Name               = "Action-Test - [3-Advanced]"
-                Outcome            = $ActionTest3AdvancedOutcome
-                OutcomeExpected    = $ActionTest3AdvancedOutcomeExpected
-                OutcomeResult      = $ActionTest3AdvancedOutcomeResult
-                Conclusion         = $ActionTest3AdvancedConclusion
-                ConclusionExpected = $ActionTest3AdvancedConclusionExpected
-                ConclusionResult   = $ActionTest3AdvancedConclusionResult
-                Executed           = $ActionTest3AdvancedExecuted
-                ExecutedExpected   = $ActionTest3AdvancedExecutedExpected
-                ExecutedResult     = $ActionTest3AdvancedExecutedResult
-                Result             = $ActionTest3AdvancedResult
-                ResultExpected     = $ActionTest3AdvancedResultExpected
-                ResultResult       = $ActionTest3AdvancedResultResult
-              }
-            )
-
-            # Display the table in the workflow logs
-            $jobs | Format-List | Out-String
-
-            $passed = $true
-            $jobs | ForEach-Object {
-              if (-not $_.OutcomeResult) {
-                Write-Error "Job $($_.Name) failed with Outcome $($_.Outcome) and Expected Outcome $($_.OutcomeExpected)"
-                $passed = $false
-              }
-
-              if (-not $_.ConclusionResult) {
-                Write-Error "Job $($_.Name) failed with Conclusion $($_.Conclusion) and Expected Conclusion $($_.ConclusionExpected)"
-                $passed = $false
-              }
-
-              if (-not $_.ExecutedResult) {
-                Write-Error "Job $($_.Name) not executed as expected. (Actual: $($_.Executed), Expected: $($_.ExecutedExpected))"
-                $passed = $false
-              }
-
-              if (-not $_.ResultResult) {
-                Write-Error "Job $($_.Name) tests did not pass as expected. (Actual: $($_.Result), Expected: $($_.ResultExpected))"
-                $passed = $false
-              }
-            }
-
-            $icon = if ($passed) { '✅' } else { '❌' }
-            $status = Heading 1 "$icon - GitHub Actions Status" {
-                Table {
-                    $jobs
-                }
-            }
-
-            Set-GitHubStepSummary -Summary $status
-
-            if (-not $passed) {
-              Write-GithubError "One or more jobs failed"
-              exit 1
-            }
+          Script: tests/Test-ActionResults.ps1

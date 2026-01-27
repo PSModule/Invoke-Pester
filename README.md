@@ -264,8 +264,8 @@ jobs:
 | `Path`                               | Path to where tests are located or a configuration file.                                                                                            | *(none)*    |
 | `ReportAsJson`                       | Output generated reports in JSON format in addition to the configured format through Pester.                                                        | `true`      |
 | `Prescript`                          | Script to be executed before the test run. This script is executed in the same context as the test run.                                             | *(none)*    |
-| `Notice_Mode`                        | Controls when to show notices for test completion. Allows "Full" (show on success and failure), "Failed" (show only on failure), or "None" (disable notices). | `Failed`    |
-| `StepSummary_Mode`                   | Controls which tests to show in the GitHub step summary. Allows "Full" (all tests), "Failed" (only failed tests), or "None" (disable step summary). | `Failed`    |
+| `Notice_Mode`                        | Controls when to show notices for test completion.<br><ul><li>`Full` - show on success and failure</li><li>`Failed` - show only on failure</li><li>`None` - disable notices</li></ul> | `Failed`    |
+| `StepSummary_Mode`                   | Controls which tests to show in the GitHub step summary.<br><ul><li>`Full` - all tests</li><li>`Failed` - only failed tests</li><li>`None` - disable summary</li></ul> | `Failed`    |
 | `StepSummary_ShowTestOverview`       | Controls whether to show the test overview table in the GitHub step summary.                                                                        | `false`     |
 | `StepSummary_ShowConfiguration`      | Controls whether to show the configuration details in the GitHub step summary.                                                                      | `false`     |
 | `Run_Path`                           | Directories/files to be searched for tests.                                                                                                         | *(none)*    |
@@ -320,20 +320,20 @@ jobs:
 
 The action provides the following outputs:
 
-| Output | Description |
-|--------|-------------|
-| `Outcome` | The outcome of the test run (success/failure) |
-| `Conclusion` | The conclusion of the test run (success/failure) |
-| `Executed` | Whether tests were executed (True/False) |
-| `Result` | Overall result of the Pester test run (Passed/Failed) |
-| `FailedCount` | Number of failed tests |
-| `FailedBlocksCount` | Number of failed blocks |
-| `FailedContainersCount` | Number of failed containers |
-| `PassedCount` | Number of passed tests |
-| `SkippedCount` | Number of skipped tests |
-| `InconclusiveCount` | Number of inconclusive tests |
-| `NotRunCount` | Number of tests not run |
-| `TotalCount` | Total count of tests |
+| Output                 | Description                                     |
+|------------------------|------------------------------------------------|
+| `Outcome`              | The outcome of the test run (success/failure)  |
+| `Conclusion`           | The conclusion of the test run (success/failure) |
+| `Executed`             | Whether tests were executed (True/False)       |
+| `Result`               | Overall result of Pester test run (Passed/Failed) |
+| `FailedCount`          | Number of failed tests                         |
+| `FailedBlocksCount`    | Number of failed blocks                        |
+| `FailedContainersCount`| Number of failed containers                    |
+| `PassedCount`          | Number of passed tests                         |
+| `SkippedCount`         | Number of skipped tests                        |
+| `InconclusiveCount`    | Number of inconclusive tests                   |
+| `NotRunCount`          | Number of tests not run                        |
+| `TotalCount`           | Total count of tests                           |
 
 ## Examples
 

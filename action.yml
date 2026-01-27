@@ -355,11 +355,14 @@ runs:
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowConfiguration: ${{ inputs.StepSummary_ShowConfiguration }}
         PSMODULE_INVOKE_PESTER_INPUT_Debug: ${{ inputs.Debug }}
         PSMODULE_INVOKE_PESTER_INPUT_Verbose: ${{ inputs.Verbose }}
+        PSMODULE_INVOKE_PESTER_INPUT_Prescript: ${{ inputs.Prescript }}
       id: test
       run: |
         # Invoke-Pester (exec)
-        ${{ inputs.Prescript }}
-        ${{ github.action_path }}/src/exec.ps1
+        if ($env:PSMODULE_INVOKE_PESTER_INPUT_Prescript) {
+            Invoke-Expression $env:PSMODULE_INVOKE_PESTER_INPUT_Prescript
+        }
+        & "${{ github.action_path }}/src/exec.ps1"
 
     - name: Upload test results - [${{ steps.test.outputs.TestSuiteName }}-TestResults]
       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
