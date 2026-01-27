@@ -320,20 +320,20 @@ jobs:
 
 The action provides the following outputs:
 
-| Output                 | Description                                     |
-|------------------------|------------------------------------------------|
-| `Outcome`              | The outcome of the test run (success/failure)  |
-| `Conclusion`           | The conclusion of the test run (success/failure) |
-| `Executed`             | Whether tests were executed (True/False)       |
-| `Result`               | Overall result of Pester test run (Passed/Failed) |
-| `FailedCount`          | Number of failed tests                         |
-| `FailedBlocksCount`    | Number of failed blocks                        |
-| `FailedContainersCount`| Number of failed containers                    |
-| `PassedCount`          | Number of passed tests                         |
-| `SkippedCount`         | Number of skipped tests                        |
-| `InconclusiveCount`    | Number of inconclusive tests                   |
-| `NotRunCount`          | Number of tests not run                        |
-| `TotalCount`           | Total count of tests                           |
+| Output                  | Description                                       |
+|-------------------------|---------------------------------------------------|
+| `Outcome`               | The outcome of the test run (success/failure)     |
+| `Conclusion`            | The conclusion of the test run (success/failure)  |
+| `Executed`              | Whether tests were executed (True/False)          |
+| `Result`                | Overall result of Pester test run (Passed/Failed) |
+| `FailedCount`           | Number of failed tests                            |
+| `FailedBlocksCount`     | Number of failed blocks                           |
+| `FailedContainersCount` | Number of failed containers                       |
+| `PassedCount`           | Number of passed tests                            |
+| `SkippedCount`          | Number of skipped tests                           |
+| `InconclusiveCount`     | Number of inconclusive tests                      |
+| `NotRunCount`           | Number of tests not run                           |
+| `TotalCount`            | Total count of tests                              |
 
 ## Examples
 
