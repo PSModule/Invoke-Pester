@@ -1,7 +1,7 @@
 ﻿<#
     .DESCRIPTION
-        Aggregates and validates test results from all Action-Test workflow jobs.
-        Compares actual outcomes against expected values and generates a summary report.
+    Aggregates and validates test results from all Action-Test workflow jobs.
+    Compares actual outcomes against expected values and generates a summary report.
 #>
 
 [CmdletBinding()]

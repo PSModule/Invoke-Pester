@@ -1,7 +1,7 @@
-﻿<#PSScriptInfo
+﻿<#
     .DESCRIPTION
-        Executes a prescript that can be either an inline script or a path to a script file.
-        Safely handles both cases by checking if the input is a valid file path first.
+    Executes a prescript that can be either an inline script or a path to a script file.
+    Safely handles both cases by checking if the input is a valid file path first.
 #>
 
 [CmdletBinding()]

@@ -1,6 +1,6 @@
-﻿<#PSScriptInfo
+﻿<#
     .DESCRIPTION
-        Sample prescript file used for testing the file-based prescript execution.
+    Sample prescript file used for testing the file-based prescript execution.
 #>
 
 [CmdletBinding()]

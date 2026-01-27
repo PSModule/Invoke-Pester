@@ -1,7 +1,7 @@
 ﻿<#
     .DESCRIPTION
-        Displays the outcome and conclusion of an action step.
-        Used by workflow tests to verify action execution results.
+    Displays the outcome and conclusion of an action step.
+    Used by workflow tests to verify action execution results.
 #>
 
 [CmdletBinding()]
