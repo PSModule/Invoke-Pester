@@ -9,6 +9,7 @@
     }
     CodeCoverage = @{
         Enabled = $true
+        Path    = "$PSScriptRoot/Emoji.psm1"
     }
     Output       = @{
         CIFormat            = 'Auto'
