@@ -20,11 +20,11 @@ to streamline continuous integration for PowerShell projects:
 The action's behavior is controlled by a **layered configuration** system, which merges settings from multiple sources in a specific order. The
 highest-priority settings override lower-priority ones. The order of precedence is as follows:
 
-| Setting    | Default | Test Suite | Direct Inputs | Result |
-|------------|---------|------------|---------------|--------|
-| `SettingA` | `X`     |            |               | `X`    |
-| `SettingB` | `X`     | `Y`        |               | `Y`    |
-| `SettingC` | `X`     | `Y`        | `Z`           | `Z`    |
+| Setting     | Default | Test Suite | Direct Inputs | Result |
+|-------------|---------|------------|---------------|--------|
+| `Setting_A` | `X`     |            |               | `X`    |
+| `Setting_B` | `X`     | `Y`        |               | `Y`    |
+| `Setting_C` | `X`     | `Y`        | `Z`           | `Z`    |
 
 This **last-write-wins** strategy means you can set global defaults while retaining the flexibility to override them at the action level.
 
