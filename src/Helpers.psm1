@@ -1298,6 +1298,11 @@ function Install-PSResourceWithRetry {
         )]
         [string] $Name,
 
+        # Version of the module to install. Accepts an exact version or a NuGet version range,
+        # e.g. '[6.0.0,7.0.0)' to lock to the 6.x major version. Defaults to the latest version.
+        [Parameter()]
+        [string] $Version,
+
         # Number of times to retry installation, default is 5
         [Parameter()]
         [int] $RetryCount = 5,
@@ -1308,10 +1313,19 @@ function Install-PSResourceWithRetry {
     )
 
     process {
-        Write-Output "Installing module: $Name"
+        $installParams = @{
+            Name            = $Name
+            Repository      = 'PSGallery'
+            TrustRepository = $true
+            WarningAction   = 'SilentlyContinue'
+        }
+        if (-not [string]::IsNullOrEmpty($Version)) {
+            $installParams['Version'] = $Version
+        }
+        Write-Output "Installing module: $Name $Version".Trim()
         for ($i = 0; $i -lt $RetryCount; $i++) {
             try {
-                Install-PSResource -Name $Name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+                Install-PSResource @installParams
                 break
             } catch {
                 Write-Warning "Installation of $Name failed with error: $_"

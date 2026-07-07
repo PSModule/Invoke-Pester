@@ -122,6 +122,7 @@ If you specify `CodeCoverage_Enabled: true` here, it will enable coverage even i
 
 1. **Prerequisite Setup**
    - Installs required PowerShell modules if they're not present.
+   - Pester is locked to the `6.x` major version (`[6.0.0,7.0.0)`), so a future major release cannot be adopted silently.
    - Imports the modules so the testing framework is ready to use.
 2. **Loading Inputs and Configuration**
    - Loads a default Pester configuration.
