@@ -7,7 +7,8 @@ $PSStyle.OutputRendering = 'Ansi'
 
 '::group::Exec - Setup prerequisites'
 Import-Module "$PSScriptRoot/Helpers.psm1"
-'Pester' | Install-PSResourceWithRetry
+# Lock Pester to the 6.x major version so a future major release cannot be adopted silently.
+Install-PSResourceWithRetry -Name 'Pester' -Version '[6.0.0,7.0.0)'
 '::endgroup::'
 
 '::group::Exec - Get test kit versions'
@@ -59,7 +60,9 @@ $testResults = Invoke-Pester -Configuration $configuration
 $PSStyle.OutputRendering = 'Ansi'
 
 '::group::Eval - Setup prerequisites'
-'Pester', 'Hashtable', 'TimeSpan', 'Markdown' | Install-PSResourceWithRetry
+# Lock Pester to the 6.x major version so a future major release cannot be adopted silently.
+Install-PSResourceWithRetry -Name 'Pester' -Version '[6.0.0,7.0.0)'
+'Hashtable', 'TimeSpan', 'Markdown' | Install-PSResourceWithRetry
 '::endgroup::'
 
 '::group::Eval - Get test kit versions'
