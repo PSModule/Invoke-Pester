@@ -1319,7 +1319,7 @@ function Install-PSResourceWithRetry {
             TrustRepository = $true
             WarningAction   = 'SilentlyContinue'
         }
-        if (-not [string]::IsNullOrEmpty($Version)) {
+        if (-not [string]::IsNullOrWhiteSpace($Version)) {
             $installParams['Version'] = $Version
         }
         Write-Output "Installing module: $Name $Version".Trim()
