@@ -323,7 +323,7 @@ jobs:
           persist-credentials: false
 
       - name: Display Aggregated Results as a Table
-        uses: PSModule/GitHub-Script@0097f3bbe3f413f3b577b9bcc600727b0ca3201a # v1.7.10
+        uses: PSModule/GitHub-Script@1ee97bbc652d19c38ae12f6e1e47e9d9fbd12d0a # v1.8.0
         env:
           ACTIONTEST1SIMPLE_OUTCOME: ${{ needs.ActionTest1Simple.outputs.Outcome }}
           ACTIONTEST1SIMPLE_CONCLUSION: ${{ needs.ActionTest1Simple.outputs.Conclusion }}
