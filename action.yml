@@ -10,12 +10,12 @@ inputs:
     description: |
       Path to where tests are located or a configuration file.
     required: false
-  Pester_Version:
+  PesterVersion:
     description: |
       Version of the Pester module to install, using NuGet version-range syntax, e.g. '[6.0.0,7.0.0)' to allow any 6.x.
       A single value such as '6.4.0' installs that exact version. When empty, the latest available version is installed.
     required: false
-  Pester_Prerelease:
+  PesterPrerelease:
     description: |
       Allow installing prerelease versions of Pester.
     required: false
@@ -298,8 +298,8 @@ runs:
       uses: PSModule/GitHub-Script@1ee97bbc652d19c38ae12f6e1e47e9d9fbd12d0a # v1.8.0
       env:
         PSMODULE_INVOKE_PESTER_INPUT_Path: ${{ inputs.Path }}
-        PSMODULE_INVOKE_PESTER_INPUT_Pester_Version: ${{ inputs.Pester_Version }}
-        PSMODULE_INVOKE_PESTER_INPUT_Pester_Prerelease: ${{ inputs.Pester_Prerelease }}
+        PSMODULE_INVOKE_PESTER_INPUT_PesterVersion: ${{ inputs.PesterVersion }}
+        PSMODULE_INVOKE_PESTER_INPUT_PesterPrerelease: ${{ inputs.PesterPrerelease }}
         PSMODULE_INVOKE_PESTER_INPUT_Run_Path: ${{ inputs.Run_Path }}
         PSMODULE_INVOKE_PESTER_INPUT_Run_ExcludePath: ${{ inputs.Run_ExcludePath }}
         PSMODULE_INVOKE_PESTER_INPUT_Run_ScriptBlock: ${{ inputs.Run_ScriptBlock }}
@@ -361,8 +361,8 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
-        PSMODULE_INVOKE_PESTER_INPUT_Pester_Version: ${{ inputs.Pester_Version }}
-        PSMODULE_INVOKE_PESTER_INPUT_Pester_Prerelease: ${{ inputs.Pester_Prerelease }}
+        PSMODULE_INVOKE_PESTER_INPUT_PesterVersion: ${{ inputs.PesterVersion }}
+        PSMODULE_INVOKE_PESTER_INPUT_PesterPrerelease: ${{ inputs.PesterPrerelease }}
         PSMODULE_INVOKE_PESTER_INPUT_Notice_Mode: ${{ inputs.Notice_Mode }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_Mode: ${{ inputs.StepSummary_Mode }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTestOverview: ${{ inputs.StepSummary_ShowTestOverview }}

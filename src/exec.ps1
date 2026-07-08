@@ -8,8 +8,8 @@ $PSStyle.OutputRendering = 'Ansi'
 '::group::Exec - Setup prerequisites'
 Import-Module "$PSScriptRoot/Helpers.psm1"
 # Install Pester honoring the optional version constraint from the action input. An empty value installs the latest version.
-$pesterVersion = $env:PSMODULE_INVOKE_PESTER_INPUT_Pester_Version
-$pesterPrerelease = $env:PSMODULE_INVOKE_PESTER_INPUT_Pester_Prerelease -eq 'true'
+$pesterVersion = $env:PSMODULE_INVOKE_PESTER_INPUT_PesterVersion
+$pesterPrerelease = $env:PSMODULE_INVOKE_PESTER_INPUT_PesterPrerelease -eq 'true'
 Install-PSResourceWithRetry -Name 'Pester' -Version $pesterVersion -Prerelease:$pesterPrerelease
 '::endgroup::'
 

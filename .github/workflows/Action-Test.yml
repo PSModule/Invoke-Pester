@@ -323,7 +323,7 @@ jobs:
         id: action-test
         with:
           WorkingDirectory: tests/4-PesterVersionConstraints/Pester5Range
-          Pester_Version: '[5.0.0,6.0.0)'
+          PesterVersion: '[5.0.0,6.0.0)'
           TestResult_TestSuiteName: Pester5RangeConstraint
 
       - name: Status
@@ -354,7 +354,7 @@ jobs:
         id: action-test
         with:
           WorkingDirectory: tests/4-PesterVersionConstraints/Pester6Exact
-          Pester_Version: '6.0.0'
+          PesterVersion: '6.0.0'
           TestResult_TestSuiteName: Pester6ExactConstraint
 
       - name: Status
