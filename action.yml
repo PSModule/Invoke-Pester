@@ -10,12 +10,12 @@ inputs:
     description: |
       Path to where tests are located or a configuration file.
     required: false
-  PesterVersion:
+  Version:
     description: |
       Version of the Pester module to install, using NuGet version-range syntax, e.g. '[6.0.0,7.0.0)' to allow any 6.x.
-      A single value such as '6.4.0' installs that exact version. When empty, the latest available version is installed.
+      A bare version such as '6.4.0' installs that exact version. When empty, the latest available version is installed.
     required: false
-  PesterPrerelease:
+  Prerelease:
     description: |
       Allow installing prerelease versions of Pester.
     required: false
@@ -229,11 +229,13 @@ inputs:
     description: Enable verbose output.
     required: false
     default: 'false'
-  Version:
-    description: Specifies the version of the GitHub module to be installed. The value must be an exact version.
+  GitHubVersion:
+    description: |
+      Version of the GitHub module to install during the init bootstrap step, using NuGet version-range syntax.
+      A bare version such as '1.8.0' installs that exact version. When empty, the latest available version is installed.
     required: false
-  Prerelease:
-    description: Allow prerelease versions if available.
+  GitHubPrerelease:
+    description: Allow installing prerelease versions of the GitHub module.
     required: false
     default: 'false'
   WorkingDirectory:
@@ -298,8 +300,8 @@ runs:
       uses: PSModule/GitHub-Script@1ee97bbc652d19c38ae12f6e1e47e9d9fbd12d0a # v1.8.0
       env:
         PSMODULE_INVOKE_PESTER_INPUT_Path: ${{ inputs.Path }}
-        PSMODULE_INVOKE_PESTER_INPUT_PesterVersion: ${{ inputs.PesterVersion }}
-        PSMODULE_INVOKE_PESTER_INPUT_PesterPrerelease: ${{ inputs.PesterPrerelease }}
+        PSMODULE_INVOKE_PESTER_INPUT_Version: ${{ inputs.Version }}
+        PSMODULE_INVOKE_PESTER_INPUT_Prerelease: ${{ inputs.Prerelease }}
         PSMODULE_INVOKE_PESTER_INPUT_Run_Path: ${{ inputs.Run_Path }}
         PSMODULE_INVOKE_PESTER_INPUT_Run_ExcludePath: ${{ inputs.Run_ExcludePath }}
         PSMODULE_INVOKE_PESTER_INPUT_Run_ScriptBlock: ${{ inputs.Run_ScriptBlock }}
@@ -346,9 +348,9 @@ runs:
         ShowInfo: false
         ShowOutput: true
         Debug: ${{ inputs.Debug }}
-        Prerelease: ${{ inputs.Prerelease }}
+        Prerelease: ${{ inputs.GitHubPrerelease }}
         Verbose: ${{ inputs.Verbose }}
-        Version: ${{ inputs.Version }}
+        Version: ${{ inputs.GitHubVersion }}
         WorkingDirectory: ${{ inputs.WorkingDirectory }}
         Name: Invoke-Pester
         Script: |
@@ -361,8 +363,8 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
-        PSMODULE_INVOKE_PESTER_INPUT_PesterVersion: ${{ inputs.PesterVersion }}
-        PSMODULE_INVOKE_PESTER_INPUT_PesterPrerelease: ${{ inputs.PesterPrerelease }}
+        PSMODULE_INVOKE_PESTER_INPUT_Version: ${{ inputs.Version }}
+        PSMODULE_INVOKE_PESTER_INPUT_Prerelease: ${{ inputs.Prerelease }}
         PSMODULE_INVOKE_PESTER_INPUT_Notice_Mode: ${{ inputs.Notice_Mode }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_Mode: ${{ inputs.StepSummary_Mode }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTestOverview: ${{ inputs.StepSummary_ShowTestOverview }}

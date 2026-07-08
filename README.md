@@ -122,7 +122,7 @@ If you specify `CodeCoverage_Enabled: true` here, it will enable coverage even i
 
 1. **Prerequisite Setup**
    - Installs required PowerShell modules if they're not present.
-   - Installs Pester at the latest version by default, or the version matching the `PesterVersion` constraint when set.
+   - Installs Pester at the latest version by default, or the version matching the `Version` constraint when set.
    - Imports the exact installed Pester version so the version that runs is deterministic, even when the runner ships a different preinstalled Pester.
    - Imports the modules so the testing framework is ready to use.
 2. **Loading Inputs and Configuration**
@@ -264,8 +264,8 @@ jobs:
 | **Input**                            | **Description**                                                                                                                                                                       | **Default** |
 |--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
 | `Path`                               | Path to where tests are located or a configuration file.                                                                                                                              | *(none)*    |
-| `PesterVersion`                      | Version of Pester to install (NuGet range, e.g. `[6.0.0,7.0.0)` for any 6.x). Empty installs the latest version.                                                                      | `latest`    |
-| `PesterPrerelease`                   | Allow installing prerelease versions of Pester.                                                                                                                                       | `false`     |
+| `Version`                            | Version of Pester to install (NuGet range, e.g. `[6.0.0,7.0.0)` for any 6.x). Empty installs the latest version.                                                                      | `latest`    |
+| `Prerelease`                         | Allow installing prerelease versions of Pester.                                                                                                                                       | `false`     |
 | `ReportAsJson`                       | Output generated reports in JSON format in addition to the configured format through Pester.                                                                                          | `true`      |
 | `Prescript`                          | Script to be executed before the test run. This script is executed in the same context as the test run.                                                                               | *(none)*    |
 | `Notice_Mode`                        | Controls when to show notices for test completion.<br><ul><li>`Full` - show on success and failure</li><li>`Failed` - show only on failure</li><li>`None` - disable notices</li></ul> | `Failed`    |
@@ -316,8 +316,8 @@ jobs:
 | `TestRegistry_Enabled`               | Enable `TestRegistry`.                                                                                                                                                                | *(none)*    |
 | `Debug`                              | Enable debug output.                                                                                                                                                                  | `false`     |
 | `Verbose`                            | Enable verbose output.                                                                                                                                                                | `false`     |
-| `Version`                            | Specifies the exact version of the GitHub module to install.                                                                                                                          | *(none)*    |
-| `Prerelease`                         | Allow prerelease versions if available.                                                                                                                                               | `false`     |
+| `GitHubVersion`                      | Version of the GitHub module to install during init bootstrap (NuGet range, e.g. `[1.8.0,2.0.0)`). Empty installs latest.                                                             | `latest`    |
+| `GitHubPrerelease`                   | Allow installing prerelease versions of the GitHub module.                                                                                                                            | `false`     |
 | `WorkingDirectory`                   | The working directory where the script runs.                                                                                                                                          | `.`         |
 
 ### Outputs
