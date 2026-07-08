@@ -1283,10 +1283,14 @@ function Invoke-ProcessTestDirectory {
 function Install-PSResourceWithRetry {
     <#
         .SYNOPSIS
-        Installs a PowerShell module with retry mechanism
+        Installs a PowerShell module with a retry mechanism, then imports the installed version.
 
         .DESCRIPTION
-        Attempts to install a PowerShell module multiple times in case of failure
+        Attempts to install a PowerShell module multiple times in case of failure. When a version
+        constraint is supplied, the newest version satisfying it is installed; that exact version is
+        then imported so the loaded module is deterministic even when other versions (for example the
+        runner's preinstalled copy) are present on the machine. When no version is supplied, the latest
+        available version is installed.
     #>
     [CmdletBinding()]
     param (
@@ -1298,6 +1302,15 @@ function Install-PSResourceWithRetry {
         )]
         [string] $Name,
 
+        # Version of the module to install. Accepts an exact version or a NuGet version range,
+        # e.g. '[6.0.0,7.0.0)' to allow any 6.x. When empty, the latest available version is installed.
+        [Parameter()]
+        [string] $Version,
+
+        # Allow installing prerelease versions.
+        [Parameter()]
+        [switch] $Prerelease,
+
         # Number of times to retry installation, default is 5
         [Parameter()]
         [int] $RetryCount = 5,
@@ -1308,10 +1321,27 @@ function Install-PSResourceWithRetry {
     )
 
     process {
-        Write-Output "Installing module: $Name"
+        $installParams = @{
+            Name            = $Name
+            Repository      = 'PSGallery'
+            TrustRepository = $true
+            PassThru        = $true
+            WarningAction   = 'SilentlyContinue'
+        }
+        if (-not [string]::IsNullOrWhiteSpace($Version)) {
+            $installParams['Version'] = $Version
+        }
+        if ($Prerelease) {
+            $installParams['Prerelease'] = $true
+        }
+
+        $label = [string]::IsNullOrWhiteSpace($Version) ? $Name : "$Name $Version"
+        Write-Output "Installing module: $label"
+
+        $installed = $null
         for ($i = 0; $i -lt $RetryCount; $i++) {
             try {
-                Install-PSResource -Name $Name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+                $installed = Install-PSResource @installParams
                 break
             } catch {
                 Write-Warning "Installation of $Name failed with error: $_"
@@ -1322,6 +1352,32 @@ function Install-PSResourceWithRetry {
                 Start-Sleep -Seconds $RetryDelay
             }
         }
-        Import-Module -Name $Name
+
+        # Resolve the exact version to import. Prefer what was just installed; if the resource was
+        # already present, Install-PSResource returns nothing, so fall back to the newest installed
+        # version that satisfies the requested constraint.
+        $resolved = $installed | Where-Object { $_.Name -eq $Name } | Sort-Object Version -Descending | Select-Object -First 1
+        if (-not $resolved) {
+            $getParams = @{ Name = $Name; Verbose = $false; ErrorAction = 'SilentlyContinue' }
+            if (-not [string]::IsNullOrWhiteSpace($Version)) {
+                $getParams['Version'] = $Version
+            }
+            $resolved = Get-PSResource @getParams | Sort-Object Version -Descending | Select-Object -First 1
+        }
+
+        # Import into the global session state so the resolved version is the one every subsequent
+        # command (for example Invoke-Pester in exec.ps1) uses, instead of PowerShell auto-loading the
+        # highest version available on PSModulePath.
+        if ($resolved) {
+            Write-Output "Importing module: $Name $($resolved.Version)"
+            try {
+                Import-Module -Name $Name -RequiredVersion $resolved.Version -Force -Global -ErrorAction Stop
+            } catch {
+                Write-Warning "Could not import $Name version $($resolved.Version) explicitly: $_. Importing the latest available version instead."
+                Import-Module -Name $Name -Force -Global
+            }
+        } else {
+            Import-Module -Name $Name -Force -Global
+        }
     }
 }

@@ -122,6 +122,8 @@ If you specify `CodeCoverage_Enabled: true` here, it will enable coverage even i
 
 1. **Prerequisite Setup**
    - Installs required PowerShell modules if they're not present.
+   - Installs Pester at the latest version by default, or the version matching the `Pester_Version` constraint when set.
+   - Imports the exact installed Pester version so the version that runs is deterministic, even when the runner ships a different preinstalled Pester.
    - Imports the modules so the testing framework is ready to use.
 2. **Loading Inputs and Configuration**
    - Loads a default Pester configuration.
@@ -262,6 +264,8 @@ jobs:
 | **Input**                            | **Description**                                                                                                                                                                       | **Default** |
 |--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
 | `Path`                               | Path to where tests are located or a configuration file.                                                                                                                              | *(none)*    |
+| `Pester_Version`                     | Version of Pester to install (NuGet range, e.g. `[6.0.0,7.0.0)` for any 6.x). Empty installs the latest version.                                                                      | *(none)*    |
+| `Pester_Prerelease`                  | Allow installing prerelease versions of Pester.                                                                                                                                       | `false`     |
 | `ReportAsJson`                       | Output generated reports in JSON format in addition to the configured format through Pester.                                                                                          | `true`      |
 | `Prescript`                          | Script to be executed before the test run. This script is executed in the same context as the test run.                                                                               | *(none)*    |
 | `Notice_Mode`                        | Controls when to show notices for test completion.<br><ul><li>`Full` - show on success and failure</li><li>`Failed` - show only on failure</li><li>`None` - disable notices</li></ul> | `Failed`    |
