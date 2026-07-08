@@ -1335,7 +1335,10 @@ function Install-PSResourceWithRetry {
             $installParams['Prerelease'] = $true
         }
 
-        $label = [string]::IsNullOrWhiteSpace($Version) ? $Name : "$Name $Version"
+        $label = $Name
+        if (-not [string]::IsNullOrWhiteSpace($Version)) {
+            $label = "$Name $Version"
+        }
         Write-Output "Installing module: $label"
 
         $installed = $null
@@ -1370,12 +1373,7 @@ function Install-PSResourceWithRetry {
         # highest version available on PSModulePath.
         if ($resolved) {
             Write-Output "Importing module: $Name $($resolved.Version)"
-            try {
-                Import-Module -Name $Name -RequiredVersion $resolved.Version -Force -Global -ErrorAction Stop
-            } catch {
-                Write-Warning "Could not import $Name version $($resolved.Version) explicitly: $_. Importing the latest available version instead."
-                Import-Module -Name $Name -Force -Global
-            }
+            Import-Module -Name $Name -RequiredVersion $resolved.Version -Force -Global -ErrorAction Stop
         } else {
             Import-Module -Name $Name -Force -Global
         }

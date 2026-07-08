@@ -94,6 +94,20 @@ $jobs = @(
         Executed   = @{ Actual = $env:ACTIONTEST3ADVANCED_EXECUTED; Expected = 'True' }
         Result     = @{ Actual = $env:ACTIONTEST3ADVANCED_RESULT; Expected = 'Passed' }
     }
+    @{
+        Name       = 'Action-Test - [Pester 5.x Range Constraint]'
+        Outcome    = @{ Actual = $env:ACTIONTESTPESTER5RANGECONSTRAINT_OUTCOME; Expected = 'success' }
+        Conclusion = @{ Actual = $env:ACTIONTESTPESTER5RANGECONSTRAINT_CONCLUSION; Expected = 'success' }
+        Executed   = @{ Actual = $env:ACTIONTESTPESTER5RANGECONSTRAINT_EXECUTED; Expected = 'True' }
+        Result     = @{ Actual = $env:ACTIONTESTPESTER5RANGECONSTRAINT_RESULT; Expected = 'Passed' }
+    }
+    @{
+        Name       = 'Action-Test - [Pester 6.0.0 Exact Constraint]'
+        Outcome    = @{ Actual = $env:ACTIONTESTPESTER6EXACTCONSTRAINT_OUTCOME; Expected = 'success' }
+        Conclusion = @{ Actual = $env:ACTIONTESTPESTER6EXACTCONSTRAINT_CONCLUSION; Expected = 'success' }
+        Executed   = @{ Actual = $env:ACTIONTESTPESTER6EXACTCONSTRAINT_EXECUTED; Expected = 'True' }
+        Result     = @{ Actual = $env:ACTIONTESTPESTER6EXACTCONSTRAINT_RESULT; Expected = 'Passed' }
+    }
 )
 
 # Add Pass property to each check and convert to PSCustomObject for table output
