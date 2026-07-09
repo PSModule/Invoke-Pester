@@ -386,6 +386,7 @@ jobs:
         with:
           WorkingDirectory: tests/4-PesterVersionConstraints/PesterGuidPin
           Version: '6.0.0'
+          Guid: 'a699dea5-2c73-4616-a270-1f7abb777e71'
           TestResult_TestSuiteName: PesterGuidPin
 
       - name: Status
@@ -394,6 +395,38 @@ jobs:
           OUTCOME: ${{ steps.action-test.outcome }}
           CONCLUSION: ${{ steps.action-test.conclusion }}
         run: tests/Show-Status.ps1
+
+  ActionTestPesterGuidMismatch:
+    name: Action-Test - [Pester GUID Mismatch]
+    runs-on: ubuntu-latest
+
+    steps:
+      # Need to check out as part of the test, as it's a local action
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      # A wrong GUID must make the action fail fast during init, before any tests run.
+      - name: Action-Test [Pester GUID Mismatch]
+        uses: ./
+        id: action-test
+        continue-on-error: true
+        with:
+          WorkingDirectory: tests/2-Standard
+          Version: '6.0.0'
+          Guid: '00000000-0000-0000-0000-000000000000'
+
+      - name: Assert the action failed on the GUID mismatch
+        shell: pwsh
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+        run: |
+          if ($env:OUTCOME -ne 'failure') {
+              Write-Error "Expected the action to fail on a GUID mismatch, but the outcome was '$env:OUTCOME'."
+              exit 1
+          }
+          Write-Output 'Action failed as expected on the GUID mismatch.'
 
   CatchJob:
     name: Catch Job - Aggregate Status

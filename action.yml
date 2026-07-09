@@ -20,6 +20,12 @@ inputs:
       Allow installing prerelease versions of Pester.
     required: false
     default: 'false'
+  Guid:
+    description: |
+      Optional module identity (GUID) that the installed Pester must match, mirroring the GUID key of a
+      '#Requires -Modules @{ ... }' declaration. When set, the run fails fast if the loaded Pester's GUID does
+      not match, guarding against a different module named Pester on the runner's module path.
+    required: false
   ReportAsJson:
     description: |
       Output generated reports in JSON format in addition to the configured format through Pester.
@@ -302,6 +308,7 @@ runs:
         PSMODULE_INVOKE_PESTER_INPUT_Path: ${{ inputs.Path }}
         PSMODULE_INVOKE_PESTER_INPUT_Version: ${{ inputs.Version }}
         PSMODULE_INVOKE_PESTER_INPUT_Prerelease: ${{ inputs.Prerelease }}
+        PSMODULE_INVOKE_PESTER_INPUT_Guid: ${{ inputs.Guid }}
         PSMODULE_INVOKE_PESTER_INPUT_Run_Path: ${{ inputs.Run_Path }}
         PSMODULE_INVOKE_PESTER_INPUT_Run_ExcludePath: ${{ inputs.Run_ExcludePath }}
         PSMODULE_INVOKE_PESTER_INPUT_Run_ScriptBlock: ${{ inputs.Run_ScriptBlock }}
@@ -365,6 +372,7 @@ runs:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
         PSMODULE_INVOKE_PESTER_INPUT_Version: ${{ inputs.Version }}
         PSMODULE_INVOKE_PESTER_INPUT_Prerelease: ${{ inputs.Prerelease }}
+        PSMODULE_INVOKE_PESTER_INPUT_Guid: ${{ inputs.Guid }}
         PSMODULE_INVOKE_PESTER_INPUT_Notice_Mode: ${{ inputs.Notice_Mode }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_Mode: ${{ inputs.StepSummary_Mode }}
         PSMODULE_INVOKE_PESTER_INPUT_StepSummary_ShowTestOverview: ${{ inputs.StepSummary_ShowTestOverview }}

@@ -1311,6 +1311,11 @@ function Install-PSResourceWithRetry {
         [Parameter()]
         [switch] $Prerelease,
 
+        # Optional module identity (GUID) the loaded module must match. When set, the imported module's GUID is
+        # validated and a mismatch throws, guarding against a different module with the same name.
+        [Parameter()]
+        [string] $Guid,
+
         # Number of times to retry installation, default is 5
         [Parameter()]
         [int] $RetryCount = 5,
@@ -1382,6 +1387,16 @@ function Install-PSResourceWithRetry {
             throw "No installed '$Name' version satisfies constraint '$Version'; refusing to import an unconstrained version."
         } else {
             Import-Module -Name $Name -Force -Global -ErrorAction Stop
+        }
+
+        # Validate module identity when a GUID pin is supplied, so a different module with the same name cannot
+        # satisfy the request. This fails at install time (shifted left) in addition to any '#Requires' GUID pin.
+        if (-not [string]::IsNullOrWhiteSpace($Guid)) {
+            $loaded = Get-Module -Name $Name | Sort-Object Version -Descending | Select-Object -First 1
+            if (-not $loaded -or $loaded.Guid -ne [guid]$Guid) {
+                throw "Loaded '$Name' does not match the required GUID '$Guid' (loaded GUID: $($loaded.Guid))."
+            }
+            Write-Output "Verified module identity for ${Name}: GUID $Guid"
         }
     }
 }
