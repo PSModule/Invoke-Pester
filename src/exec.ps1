@@ -6,7 +6,7 @@ $VerbosePreference = $env:PSMODULE_INVOKE_PESTER_INPUT_Verbose -eq 'true' ? 'Con
 $PSStyle.OutputRendering = 'Ansi'
 
 '::group::Exec - Setup prerequisites'
-Import-Module "$PSScriptRoot/Helpers.psm1"
+Import-Module "$PSScriptRoot/Invoke-Pester.Helpers.psm1"
 # Install Pester honoring the optional version constraint from the action input. An empty value installs the latest version.
 $pesterVersion = $env:PSMODULE_INVOKE_PESTER_INPUT_Version
 $pesterPrerelease = $env:PSMODULE_INVOKE_PESTER_INPUT_Prerelease -eq 'true'
