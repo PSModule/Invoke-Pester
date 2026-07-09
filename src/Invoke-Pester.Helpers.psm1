@@ -1378,7 +1378,7 @@ function Install-PSResourceWithRetry {
         # highest version available on PSModulePath.
         if ($resolved) {
             Write-Output "Importing module: $Name $($resolved.Version)"
-            Import-Module -Name $Name -RequiredVersion $resolved.Version -Force -Global -ErrorAction Stop
+            $imported = Import-Module -Name $Name -RequiredVersion $resolved.Version -Force -Global -PassThru -ErrorAction Stop
         } elseif (-not [string]::IsNullOrWhiteSpace($Version)) {
             # A version constraint was requested but no satisfying installed version could be resolved. Importing the
             # module unconstrained here would silently load an arbitrary copy from PSModulePath (for example the
@@ -1386,17 +1386,23 @@ function Install-PSResourceWithRetry {
             # exists to guarantee. Fail fast instead.
             throw "No installed '$Name' version satisfies constraint '$Version'; refusing to import an unconstrained version."
         } else {
-            Import-Module -Name $Name -Force -Global -ErrorAction Stop
+            $imported = Import-Module -Name $Name -Force -Global -PassThru -ErrorAction Stop
         }
 
         # Validate module identity when a GUID pin is supplied, so a different module with the same name cannot
         # satisfy the request. This fails at install time (shifted left) in addition to any '#Requires' GUID pin.
         if (-not [string]::IsNullOrWhiteSpace($Guid)) {
-            $loaded = Get-Module -Name $Name | Sort-Object Version -Descending | Select-Object -First 1
-            if (-not $loaded -or $loaded.Guid -ne [guid]$Guid) {
-                throw "Loaded '$Name' does not match the required GUID '$Guid' (loaded GUID: $($loaded.Guid))."
+            $expectedGuid = [guid]::Empty
+            if (-not [guid]::TryParse($Guid, [ref]$expectedGuid)) {
+                throw "The provided Guid '$Guid' is not a valid GUID."
             }
-            Write-Output "Verified module identity for ${Name}: GUID $Guid"
+            # Validate the module this call just imported (via -PassThru), not the highest version that happens
+            # to be loaded, so a side-by-side loaded version cannot mask a mismatch.
+            $importedModule = $imported | Where-Object { $_.Name -eq $Name } | Select-Object -First 1
+            if (-not $importedModule -or $importedModule.Guid -ne $expectedGuid) {
+                throw "Loaded '$Name' does not match the required GUID '$expectedGuid' (loaded GUID: $($importedModule.Guid))."
+            }
+            Write-Output "Verified module identity for ${Name}: GUID $expectedGuid"
         }
     }
 }
