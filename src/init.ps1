@@ -6,7 +6,8 @@ LogGroup 'Init - Setup prerequisites' {
     # Install Pester honoring the optional version constraint from the action input. An empty value installs the latest version.
     $pesterVersion = $env:PSMODULE_INVOKE_PESTER_INPUT_Version
     $pesterPrerelease = $env:PSMODULE_INVOKE_PESTER_INPUT_Prerelease -eq 'true'
-    Install-PSResourceWithRetry -Name 'Pester' -Version $pesterVersion -Prerelease:$pesterPrerelease
+    $pesterGuid = $env:PSMODULE_INVOKE_PESTER_INPUT_Guid
+    Install-PSResourceWithRetry -Name 'Pester' -Version $pesterVersion -Prerelease:$pesterPrerelease -Guid $pesterGuid
     'Hashtable', 'TimeSpan', 'Markdown' | Install-PSResourceWithRetry
 }
 

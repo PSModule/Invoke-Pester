@@ -1,7 +1,8 @@
 ﻿<#
     .DESCRIPTION
-    Aggregates and validates test results from all Action-Test workflow jobs.
-    Compares actual outcomes against expected values and generates a summary report.
+    Aggregates and validates results from the result-producing Action-Test workflow jobs.
+    Compares actual outcomes against expected values and generates a summary report. The negative
+    'Action-Test - [Pester GUID Mismatch]' job self-validates in its own step and is not tabled here.
 #>
 
 [CmdletBinding()]
@@ -107,6 +108,20 @@ $jobs = @(
         Conclusion = @{ Actual = $env:ACTIONTESTPESTER6EXACTCONSTRAINT_CONCLUSION; Expected = 'success' }
         Executed   = @{ Actual = $env:ACTIONTESTPESTER6EXACTCONSTRAINT_EXECUTED; Expected = 'True' }
         Result     = @{ Actual = $env:ACTIONTESTPESTER6EXACTCONSTRAINT_RESULT; Expected = 'Passed' }
+    }
+    @{
+        Name       = 'Action-Test - [Pester GUID Pin]'
+        Outcome    = @{ Actual = $env:ACTIONTESTPESTERGUIDPIN_OUTCOME; Expected = 'success' }
+        Conclusion = @{ Actual = $env:ACTIONTESTPESTERGUIDPIN_CONCLUSION; Expected = 'success' }
+        Executed   = @{ Actual = $env:ACTIONTESTPESTERGUIDPIN_EXECUTED; Expected = 'True' }
+        Result     = @{ Actual = $env:ACTIONTESTPESTERGUIDPIN_RESULT; Expected = 'Passed' }
+    }
+    @{
+        Name       = 'Action-Test - [Pester GUID Match]'
+        Outcome    = @{ Actual = $env:ACTIONTESTPESTERGUIDMATCH_OUTCOME; Expected = 'success' }
+        Conclusion = @{ Actual = $env:ACTIONTESTPESTERGUIDMATCH_CONCLUSION; Expected = 'success' }
+        Executed   = @{ Actual = $env:ACTIONTESTPESTERGUIDMATCH_EXECUTED; Expected = 'True' }
+        Result     = @{ Actual = $env:ACTIONTESTPESTERGUIDMATCH_RESULT; Expected = 'Passed' }
     }
 )
 

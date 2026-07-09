@@ -364,6 +364,103 @@ jobs:
           CONCLUSION: ${{ steps.action-test.conclusion }}
         run: tests/Show-Status.ps1
 
+  ActionTestPesterGuidPin:
+    name: Action-Test - [Pester GUID Pin]
+    runs-on: ubuntu-latest
+    outputs:
+      Outcome: ${{ steps.action-test.outcome }}
+      Conclusion: ${{ steps.action-test.conclusion }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
+
+    steps:
+      # Need to check out as part of the test, as it's a local action
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Action-Test [Pester GUID Pin]
+        uses: ./
+        id: action-test
+        with:
+          WorkingDirectory: tests/4-PesterVersionConstraints/PesterGuidPin
+          Version: '6.0.0'
+          Guid: 'a699dea5-2c73-4616-a270-1f7abb777e71'
+          TestResult_TestSuiteName: PesterGuidPin
+
+      - name: Status
+        shell: pwsh
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
+
+  ActionTestPesterGuidMatch:
+    name: Action-Test - [Pester GUID Match]
+    runs-on: ubuntu-latest
+    outputs:
+      Outcome: ${{ steps.action-test.outcome }}
+      Conclusion: ${{ steps.action-test.conclusion }}
+      Executed: ${{ steps.action-test.outputs.Executed }}
+      Result: ${{ steps.action-test.outputs.Result }}
+
+    steps:
+      # Need to check out as part of the test, as it's a local action
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      # A matching GUID passed via the action input must let the run proceed and the tests pass.
+      - name: Action-Test [Pester GUID Match]
+        uses: ./
+        id: action-test
+        with:
+          WorkingDirectory: tests/4-PesterVersionConstraints/PesterGuidMatch
+          Version: '6.0.0'
+          Guid: 'a699dea5-2c73-4616-a270-1f7abb777e71'
+          TestResult_TestSuiteName: PesterGuidMatch
+
+      - name: Status
+        shell: pwsh
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+          CONCLUSION: ${{ steps.action-test.conclusion }}
+        run: tests/Show-Status.ps1
+
+  ActionTestPesterGuidMismatch:
+    name: Action-Test - [Pester GUID Mismatch]
+    runs-on: ubuntu-latest
+
+    steps:
+      # Need to check out as part of the test, as it's a local action
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      # A wrong GUID must make the action fail fast during init, before any tests run.
+      - name: Action-Test [Pester GUID Mismatch]
+        uses: ./
+        id: action-test
+        continue-on-error: true
+        with:
+          WorkingDirectory: tests/2-Standard
+          Version: '6.0.0'
+          Guid: '00000000-0000-0000-0000-000000000000'
+
+      - name: Assert the action failed on the GUID mismatch
+        shell: pwsh
+        env:
+          OUTCOME: ${{ steps.action-test.outcome }}
+        run: |
+          if ($env:OUTCOME -ne 'failure') {
+              Write-Error "Expected the action to fail on a GUID mismatch, but the outcome was '$env:OUTCOME'."
+              exit 1
+          }
+          Write-Output 'Action failed as expected on the GUID mismatch.'
+
   CatchJob:
     name: Catch Job - Aggregate Status
     needs:
@@ -378,6 +475,9 @@ jobs:
       - ActionTest3Advanced
       - ActionTestPester5RangeConstraint
       - ActionTestPester6ExactConstraint
+      - ActionTestPesterGuidPin
+      - ActionTestPesterGuidMatch
+      - ActionTestPesterGuidMismatch
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -433,5 +533,13 @@ jobs:
           ACTIONTESTPESTER6EXACTCONSTRAINT_CONCLUSION: ${{ needs.ActionTestPester6ExactConstraint.outputs.Conclusion }}
           ACTIONTESTPESTER6EXACTCONSTRAINT_EXECUTED: ${{ needs.ActionTestPester6ExactConstraint.outputs.Executed }}
           ACTIONTESTPESTER6EXACTCONSTRAINT_RESULT: ${{ needs.ActionTestPester6ExactConstraint.outputs.Result }}
+          ACTIONTESTPESTERGUIDPIN_OUTCOME: ${{ needs.ActionTestPesterGuidPin.outputs.Outcome }}
+          ACTIONTESTPESTERGUIDPIN_CONCLUSION: ${{ needs.ActionTestPesterGuidPin.outputs.Conclusion }}
+          ACTIONTESTPESTERGUIDPIN_EXECUTED: ${{ needs.ActionTestPesterGuidPin.outputs.Executed }}
+          ACTIONTESTPESTERGUIDPIN_RESULT: ${{ needs.ActionTestPesterGuidPin.outputs.Result }}
+          ACTIONTESTPESTERGUIDMATCH_OUTCOME: ${{ needs.ActionTestPesterGuidMatch.outputs.Outcome }}
+          ACTIONTESTPESTERGUIDMATCH_CONCLUSION: ${{ needs.ActionTestPesterGuidMatch.outputs.Conclusion }}
+          ACTIONTESTPESTERGUIDMATCH_EXECUTED: ${{ needs.ActionTestPesterGuidMatch.outputs.Executed }}
+          ACTIONTESTPESTERGUIDMATCH_RESULT: ${{ needs.ActionTestPesterGuidMatch.outputs.Result }}
         with:
           Script: tests/Test-ActionResults.ps1
