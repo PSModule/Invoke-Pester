@@ -115,6 +115,13 @@ $jobs = @(
         Executed   = @{ Actual = $env:ACTIONTESTPESTERGUIDPIN_EXECUTED; Expected = 'True' }
         Result     = @{ Actual = $env:ACTIONTESTPESTERGUIDPIN_RESULT; Expected = 'Passed' }
     }
+    @{
+        Name       = 'Action-Test - [Pester GUID Match]'
+        Outcome    = @{ Actual = $env:ACTIONTESTPESTERGUIDMATCH_OUTCOME; Expected = 'success' }
+        Conclusion = @{ Actual = $env:ACTIONTESTPESTERGUIDMATCH_CONCLUSION; Expected = 'success' }
+        Executed   = @{ Actual = $env:ACTIONTESTPESTERGUIDMATCH_EXECUTED; Expected = 'True' }
+        Result     = @{ Actual = $env:ACTIONTESTPESTERGUIDMATCH_RESULT; Expected = 'Passed' }
+    }
 )
 
 # Add Pass property to each check and convert to PSCustomObject for table output
