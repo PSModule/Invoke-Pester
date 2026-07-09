@@ -1374,8 +1374,14 @@ function Install-PSResourceWithRetry {
         if ($resolved) {
             Write-Output "Importing module: $Name $($resolved.Version)"
             Import-Module -Name $Name -RequiredVersion $resolved.Version -Force -Global -ErrorAction Stop
+        } elseif (-not [string]::IsNullOrWhiteSpace($Version)) {
+            # A version constraint was requested but no satisfying installed version could be resolved. Importing the
+            # module unconstrained here would silently load an arbitrary copy from PSModulePath (for example the
+            # runner's preinstalled module), defeating the deterministic, constraint-driven selection this function
+            # exists to guarantee. Fail fast instead.
+            throw "Unable to resolve an installed '$Name' version satisfying the requested constraint '$Version'. Refusing to import an unconstrained version to keep the loaded module deterministic."
         } else {
-            Import-Module -Name $Name -Force -Global
+            Import-Module -Name $Name -Force -Global -ErrorAction Stop
         }
     }
 }
