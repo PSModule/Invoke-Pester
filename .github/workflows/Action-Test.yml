@@ -477,6 +477,7 @@ jobs:
       - ActionTestPester6ExactConstraint
       - ActionTestPesterGuidPin
       - ActionTestPesterGuidMatch
+      - ActionTestPesterGuidMismatch
     if: always()
     runs-on: ubuntu-latest
     steps:
