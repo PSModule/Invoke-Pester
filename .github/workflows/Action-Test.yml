@@ -27,7 +27,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -58,7 +58,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -89,7 +89,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -121,7 +121,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -153,7 +153,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -183,7 +183,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -218,7 +218,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -250,7 +250,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -281,7 +281,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -312,7 +312,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -343,7 +343,7 @@ jobs:
       Result: ${{ steps.action-test.outputs.Result }}
 
     steps:
-      # Need to check out as part of the test, as its a local action
+      # Need to check out as part of the test, as it's a local action
       - name: Checkout repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
