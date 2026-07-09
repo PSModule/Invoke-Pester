@@ -1370,7 +1370,7 @@ function Install-PSResourceWithRetry {
             if (-not [string]::IsNullOrWhiteSpace($Version)) {
                 $getParams['Version'] = $Version
             }
-            $resolved = Get-PSResource @getParams | Sort-Object Version -Descending | Select-Object -First 1
+            $resolved = Get-InstalledPSResource @getParams | Sort-Object Version -Descending | Select-Object -First 1
         }
 
         # Import into the global session state so the resolved version is the one every subsequent
