@@ -7,11 +7,14 @@ $PSStyle.OutputRendering = 'Ansi'
 
 '::group::Exec - Setup prerequisites'
 Import-Module "$PSScriptRoot/Helpers.psm1"
-'Pester' | Install-PSResourceWithRetry
+# Install Pester honoring the optional version constraint from the action input. An empty value installs the latest version.
+$pesterVersion = $env:PSMODULE_INVOKE_PESTER_INPUT_Version
+$pesterPrerelease = $env:PSMODULE_INVOKE_PESTER_INPUT_Prerelease -eq 'true'
+Install-PSResourceWithRetry -Name 'Pester' -Version $pesterVersion -Prerelease:$pesterPrerelease
 '::endgroup::'
 
 '::group::Exec - Get test kit versions'
-$pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
+$pesterModule = Get-Module -Name Pester | Sort-Object Version -Descending | Select-Object -First 1
 
 [PSCustomObject]@{
     PowerShell = $PSVersionTable.PSVersion.ToString()
@@ -59,11 +62,13 @@ $testResults = Invoke-Pester -Configuration $configuration
 $PSStyle.OutputRendering = 'Ansi'
 
 '::group::Eval - Setup prerequisites'
-'Pester', 'Hashtable', 'TimeSpan', 'Markdown' | Install-PSResourceWithRetry
+# Reuse the Pester version constraint resolved during Exec setup. An empty value installs the latest version.
+Install-PSResourceWithRetry -Name 'Pester' -Version $pesterVersion -Prerelease:$pesterPrerelease
+'Hashtable', 'TimeSpan', 'Markdown' | Install-PSResourceWithRetry
 '::endgroup::'
 
 '::group::Eval - Get test kit versions'
-$pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
+$pesterModule = Get-Module -Name Pester | Sort-Object Version -Descending | Select-Object -First 1
 
 [PSCustomObject]@{
     PowerShell = $PSVersionTable.PSVersion.ToString()

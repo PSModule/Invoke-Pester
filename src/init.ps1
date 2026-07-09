@@ -3,11 +3,15 @@ param()
 
 LogGroup 'Init - Setup prerequisites' {
     Import-Module "$PSScriptRoot/Helpers.psm1"
-    'Pester', 'Hashtable', 'TimeSpan', 'Markdown' | Install-PSResourceWithRetry
+    # Install Pester honoring the optional version constraint from the action input. An empty value installs the latest version.
+    $pesterVersion = $env:PSMODULE_INVOKE_PESTER_INPUT_Version
+    $pesterPrerelease = $env:PSMODULE_INVOKE_PESTER_INPUT_Prerelease -eq 'true'
+    Install-PSResourceWithRetry -Name 'Pester' -Version $pesterVersion -Prerelease:$pesterPrerelease
+    'Hashtable', 'TimeSpan', 'Markdown' | Install-PSResourceWithRetry
 }
 
 LogGroup 'Init - Get test kit versions' {
-    $pesterModule = Get-PSResource -Name Pester -Verbose:$false | Sort-Object Version -Descending | Select-Object -First 1
+    $pesterModule = Get-Module -Name Pester | Sort-Object Version -Descending | Select-Object -First 1
 
     [PSCustomObject]@{
         PowerShell = $PSVersionTable.PSVersion.ToString()
