@@ -1379,7 +1379,7 @@ function Install-PSResourceWithRetry {
             # module unconstrained here would silently load an arbitrary copy from PSModulePath (for example the
             # runner's preinstalled module), defeating the deterministic, constraint-driven selection this function
             # exists to guarantee. Fail fast instead.
-            throw "Unable to resolve an installed '$Name' version satisfying the requested constraint '$Version'. Refusing to import an unconstrained version to keep the loaded module deterministic."
+            throw "No installed '$Name' version satisfies constraint '$Version'; refusing to import an unconstrained version."
         } else {
             Import-Module -Name $Name -Force -Global -ErrorAction Stop
         }
