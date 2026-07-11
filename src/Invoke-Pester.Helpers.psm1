@@ -1283,14 +1283,14 @@ function Invoke-ProcessTestDirectory {
 function Install-PSResourceWithRetry {
     <#
         .SYNOPSIS
-        Installs a PowerShell module with a retry mechanism, then imports the installed version.
+        Installs a PowerShell module with a retry mechanism, then imports the installed version as the only loaded version.
 
         .DESCRIPTION
         Attempts to install a PowerShell module multiple times in case of failure. When a version
-        constraint is supplied, the newest version satisfying it is installed; that exact version is
-        then imported so the loaded module is deterministic even when other versions (for example the
-        runner's preinstalled copy) are present on the machine. When no version is supplied, the latest
-        available version is installed.
+        constraint is supplied, the newest version satisfying it is installed. Any other versions already
+        loaded in the session are then removed and that exact version is imported, so the loaded module is
+        deterministic even when other versions (for example the runner's preinstalled copy) are present on
+        the machine. When no version is supplied, the latest available version is installed.
     #>
     [CmdletBinding()]
     param (
@@ -1373,9 +1373,11 @@ function Install-PSResourceWithRetry {
             $resolved = Get-InstalledPSResource @getParams | Sort-Object Version -Descending | Select-Object -First 1
         }
 
-        # Import into the global session state so the resolved version is the one every subsequent
+        # Remove any already-loaded versions from the session so the chosen version is the only one loaded,
+        # then import into the global session state so the resolved version is the one every subsequent
         # command (for example Invoke-Pester in exec.ps1) uses, instead of PowerShell auto-loading the
         # highest version available on PSModulePath.
+        Remove-Module -Name $Name -Force -ErrorAction SilentlyContinue
         if ($resolved) {
             Write-Output "Importing module: $Name $($resolved.Version)"
             $imported = Import-Module -Name $Name -RequiredVersion $resolved.Version -Force -Global -PassThru -ErrorAction Stop
