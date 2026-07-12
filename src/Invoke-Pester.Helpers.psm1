@@ -1365,9 +1365,11 @@ function Install-PSResourceWithRetry {
         # already present, Install-PSResource returns nothing, so fall back to the newest installed
         # version that satisfies the requested constraint. When prerelease versions are not requested,
         # never resolve to one; when a stable and a prerelease share a base version, the stable one wins.
+        # PSResourceGet exposes prerelease state as the 'Prerelease' string (empty for stable), present on
+        # both Install-PSResource and Get-InstalledPSResource output.
         $sortOrder = @(
             @{ Expression = 'Version'; Descending = $true }
-            @{ Expression = 'IsPrerelease'; Descending = $false }
+            @{ Expression = { -not [string]::IsNullOrWhiteSpace($_.Prerelease) }; Descending = $false }
         )
         $candidates = @($installed | Where-Object { $_.Name -eq $Name })
         if ($candidates.Count -eq 0) {
@@ -1378,9 +1380,17 @@ function Install-PSResourceWithRetry {
             $candidates = @(Get-InstalledPSResource @getParams)
         }
         if (-not $Prerelease) {
-            $candidates = @($candidates | Where-Object { -not $_.IsPrerelease })
+            $candidates = @($candidates | Where-Object { [string]::IsNullOrWhiteSpace($_.Prerelease) })
         }
         $resolved = $candidates | Sort-Object -Property $sortOrder | Select-Object -First 1
+
+        # A version constraint was requested but no satisfying installed version could be resolved. Fail fast
+        # before mutating session state; importing unconstrained would silently load an arbitrary copy from
+        # PSModulePath (for example the runner's preinstalled module), defeating the deterministic,
+        # constraint-driven selection this function exists to guarantee.
+        if (-not $resolved -and -not [string]::IsNullOrWhiteSpace($Version)) {
+            throw "No installed '$Name' version satisfies constraint '$Version'; refusing to import an unconstrained version."
+        }
 
         # Remove every already-loaded instance (all versions, including nested) from the session so the
         # chosen version is the only one loaded, then import into the global session state so the resolved
@@ -1390,12 +1400,6 @@ function Install-PSResourceWithRetry {
         if ($resolved) {
             Write-Output "Importing module: $Name $($resolved.Version)"
             $imported = Import-Module -Name $Name -RequiredVersion $resolved.Version -Force -Global -PassThru -ErrorAction Stop
-        } elseif (-not [string]::IsNullOrWhiteSpace($Version)) {
-            # A version constraint was requested but no satisfying installed version could be resolved. Importing the
-            # module unconstrained here would silently load an arbitrary copy from PSModulePath (for example the
-            # runner's preinstalled module), defeating the deterministic, constraint-driven selection this function
-            # exists to guarantee. Fail fast instead.
-            throw "No installed '$Name' version satisfies constraint '$Version'; refusing to import an unconstrained version."
         } else {
             $imported = Import-Module -Name $Name -Force -Global -PassThru -ErrorAction Stop
         }
