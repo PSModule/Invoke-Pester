@@ -1283,14 +1283,14 @@ function Invoke-ProcessTestDirectory {
 function Install-PSResourceWithRetry {
     <#
         .SYNOPSIS
-        Installs a PowerShell module with a retry mechanism, then imports the installed version.
+        Installs a PowerShell module with a retry mechanism, then imports the installed version as the only loaded version.
 
         .DESCRIPTION
         Attempts to install a PowerShell module multiple times in case of failure. When a version
-        constraint is supplied, the newest version satisfying it is installed; that exact version is
-        then imported so the loaded module is deterministic even when other versions (for example the
-        runner's preinstalled copy) are present on the machine. When no version is supplied, the latest
-        available version is installed.
+        constraint is supplied, the newest version satisfying it is installed. Any other versions already
+        loaded in the session are then removed and that exact version is imported, so the loaded module is
+        deterministic even when other versions (for example the runner's preinstalled copy) are present on
+        the machine. When no version is supplied, the latest available version is installed.
     #>
     [CmdletBinding()]
     param (
@@ -1363,28 +1363,43 @@ function Install-PSResourceWithRetry {
 
         # Resolve the exact version to import. Prefer what was just installed; if the resource was
         # already present, Install-PSResource returns nothing, so fall back to the newest installed
-        # version that satisfies the requested constraint.
-        $resolved = $installed | Where-Object { $_.Name -eq $Name } | Sort-Object Version -Descending | Select-Object -First 1
-        if (-not $resolved) {
+        # version that satisfies the requested constraint. When prerelease versions are not requested,
+        # never resolve to one; when a stable and a prerelease share a base version, the stable one wins.
+        # PSResourceGet exposes prerelease state as the 'Prerelease' string (empty for stable), present on
+        # both Install-PSResource and Get-InstalledPSResource output.
+        $sortOrder = @(
+            @{ Expression = 'Version'; Descending = $true }
+            @{ Expression = { -not [string]::IsNullOrWhiteSpace($_.Prerelease) }; Descending = $false }
+        )
+        $candidates = @($installed | Where-Object { $_.Name -eq $Name })
+        if ($candidates.Count -eq 0) {
             $getParams = @{ Name = $Name; Verbose = $false; ErrorAction = 'SilentlyContinue' }
             if (-not [string]::IsNullOrWhiteSpace($Version)) {
                 $getParams['Version'] = $Version
             }
-            $resolved = Get-InstalledPSResource @getParams | Sort-Object Version -Descending | Select-Object -First 1
+            $candidates = @(Get-InstalledPSResource @getParams)
+        }
+        if (-not $Prerelease) {
+            $candidates = @($candidates | Where-Object { [string]::IsNullOrWhiteSpace($_.Prerelease) })
+        }
+        $resolved = $candidates | Sort-Object -Property $sortOrder | Select-Object -First 1
+
+        # A version constraint was requested but no satisfying installed version could be resolved. Fail fast
+        # before mutating session state; importing unconstrained would silently load an arbitrary copy from
+        # PSModulePath (for example the runner's preinstalled module), defeating the deterministic,
+        # constraint-driven selection this function exists to guarantee.
+        if (-not $resolved -and -not [string]::IsNullOrWhiteSpace($Version)) {
+            throw "No installed '$Name' version satisfies constraint '$Version'; refusing to import an unconstrained version."
         }
 
-        # Import into the global session state so the resolved version is the one every subsequent
-        # command (for example Invoke-Pester in exec.ps1) uses, instead of PowerShell auto-loading the
-        # highest version available on PSModulePath.
+        # Remove every already-loaded instance (all versions, including nested) from the session so the
+        # chosen version is the only one loaded, then import into the global session state so the resolved
+        # version is the one every subsequent command (for example Invoke-Pester in exec.ps1) uses, instead
+        # of PowerShell auto-loading the highest version available on PSModulePath.
+        Get-Module -Name $Name -All | Remove-Module -Force -ErrorAction SilentlyContinue
         if ($resolved) {
             Write-Output "Importing module: $Name $($resolved.Version)"
             $imported = Import-Module -Name $Name -RequiredVersion $resolved.Version -Force -Global -PassThru -ErrorAction Stop
-        } elseif (-not [string]::IsNullOrWhiteSpace($Version)) {
-            # A version constraint was requested but no satisfying installed version could be resolved. Importing the
-            # module unconstrained here would silently load an arbitrary copy from PSModulePath (for example the
-            # runner's preinstalled module), defeating the deterministic, constraint-driven selection this function
-            # exists to guarantee. Fail fast instead.
-            throw "No installed '$Name' version satisfies constraint '$Version'; refusing to import an unconstrained version."
         } else {
             $imported = Import-Module -Name $Name -Force -Global -PassThru -ErrorAction Stop
         }
