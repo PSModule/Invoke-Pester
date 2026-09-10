@@ -185,10 +185,8 @@ LogGroup 'Init - Export containers' {
     Write-Output "Containers from configuration: [$($containers.Count)]"
 
     # Keep transient configuration and container files outside the workspace.
-    if ([string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
-        throw 'RUNNER_TEMP is required to create temporary Pester files.'
-    }
-    $path = New-Item -Path $env:RUNNER_TEMP -ItemType Directory -Name 'Invoke-Pester' -Force
+    $temporaryRoot = [System.IO.Path]::GetTempPath()
+    $path = New-Item -Path $temporaryRoot -ItemType Directory -Name 'Invoke-Pester' -Force
 
     # Process each input path
     foreach ($testDir in $inputs.Path) {

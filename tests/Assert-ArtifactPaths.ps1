@@ -48,7 +48,7 @@ function Get-ReportPath {
     [System.IO.Path]::ChangeExtension($reportPath, '.json')
 }
 
-$temporaryDirectory = Join-Path -Path $env:RUNNER_TEMP -ChildPath 'Invoke-Pester'
+$temporaryDirectory = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath 'Invoke-Pester'
 $expectedPaths = @{
     'temporary configuration' = Join-Path -Path $temporaryDirectory -ChildPath 'Invoke-Pester.Configuration.ps1'
 }
