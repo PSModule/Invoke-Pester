@@ -10,6 +10,12 @@ inputs:
     description: |
       Path to where tests are located or a configuration file.
     required: false
+  OutputDirectory:
+    description: |
+      Optional repository-relative directory for action-generated TestResult, CodeCoverage, and .temp files.
+      When empty, files are generated in the working directory for backward compatibility.
+    required: false
+    default: ''
   Version:
     description: |
       Version of the Pester module to install, using NuGet version-range syntax, e.g. '[6.0.0,7.0.0)' to allow any 6.x.
@@ -306,6 +312,7 @@ runs:
       uses: PSModule/GitHub-Script@8083ec1f733f00357ee4d0db0c6056686e483bc0 # v1.9.0
       env:
         PSMODULE_INVOKE_PESTER_INPUT_Path: ${{ inputs.Path }}
+        PSMODULE_INVOKE_PESTER_INPUT_OutputDirectory: ${{ inputs.OutputDirectory }}
         PSMODULE_INVOKE_PESTER_INPUT_Version: ${{ inputs.Version }}
         PSMODULE_INVOKE_PESTER_INPUT_Prerelease: ${{ inputs.Prerelease }}
         PSMODULE_INVOKE_PESTER_INPUT_Guid: ${{ inputs.Guid }}
