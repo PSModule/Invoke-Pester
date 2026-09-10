@@ -21,11 +21,11 @@ $outputDirectory = switch ($Layout) {
 }
 
 $expectedPaths = @{
-    '.temp configuration' = Join-Path -Path $outputDirectory -ChildPath '.temp/Invoke-Pester.Configuration.ps1'
-    'code coverage report' = Join-Path -Path $outputDirectory -ChildPath 'CodeCoverage/Standard-CodeCoverage-Report.xml'
+    '.temp configuration'       = Join-Path -Path $outputDirectory -ChildPath '.temp/Invoke-Pester.Configuration.ps1'
+    'code coverage report'      = Join-Path -Path $outputDirectory -ChildPath 'CodeCoverage/Standard-CodeCoverage-Report.xml'
     'code coverage JSON report' = Join-Path -Path $outputDirectory -ChildPath 'CodeCoverage/Standard-CodeCoverage-Report.json'
-    'test result report' = Join-Path -Path $outputDirectory -ChildPath 'TestResult/Standard-TestResult-Report.xml'
-    'test result JSON report' = Join-Path -Path $outputDirectory -ChildPath 'TestResult/Standard-TestResult-Report.json'
+    'test result report'        = Join-Path -Path $outputDirectory -ChildPath 'TestResult/Standard-TestResult-Report.xml'
+    'test result JSON report'   = Join-Path -Path $outputDirectory -ChildPath 'TestResult/Standard-TestResult-Report.json'
 }
 
 $expectedTestResultOutputPath = Join-Path -Path $outputDirectory -ChildPath 'TestResult'
