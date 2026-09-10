@@ -14,8 +14,10 @@ $outputDirectory = switch ($Layout) {
     }
 }
 
+$temporaryDirectory = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath 'tests/2-Standard'
+
 $expectedPaths = @{
-    '.temp configuration'       = Join-Path -Path $outputDirectory -ChildPath '.temp/Invoke-Pester.Configuration.ps1'
+    '.temp configuration'       = Join-Path -Path $temporaryDirectory -ChildPath '.temp/Invoke-Pester.Configuration.ps1'
     'code coverage report'      = Join-Path -Path $outputDirectory -ChildPath 'CodeCoverage/Standard-CodeCoverage-Report.xml'
     'code coverage JSON report' = Join-Path -Path $outputDirectory -ChildPath 'CodeCoverage/Standard-CodeCoverage-Report.json'
     'test result report'        = Join-Path -Path $outputDirectory -ChildPath 'TestResult/Standard-TestResult-Report.xml'
