@@ -264,7 +264,6 @@ jobs:
 | **Input**                            | **Description**                                                                                                                                                                       | **Default** |
 |--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
 | `Path`                               | Path to where tests are located or a configuration file.                                                                                                                              | *(none)*    |
-| `OutputDirectory`                    | Repository-relative directory for action-generated `TestResult`, `CodeCoverage`, and `.temp` files.                                                                                   | `''`        |
 | `Version`                            | Version of Pester to install (NuGet range, e.g. `[6.0.0,7.0.0)` for any 6.x). Empty installs the latest version.                                                                      | *(none)*    |
 | `Prerelease`                         | Allow installing prerelease versions of Pester.                                                                                                                                       | `false`     |
 | `Guid`                               | Optional module identity (GUID) the installed Pester must match; fails fast if a different module named Pester is loaded. Mirrors the GUID key of a `#Requires -Modules` pin.         | *(none)*    |
@@ -411,10 +410,10 @@ jobs:
           CodeCoverage_OutputFormat: 'JaCoCo'
 ```
 
-### Store Action-Generated Files in a Custom Directory
+### Store Reports in a Custom Directory
 
-Set `OutputDirectory` to place the action's `TestResult`, `CodeCoverage`, and `.temp` directories under a repository-relative location. An
-empty value, the default, preserves the existing behavior of placing them in `WorkingDirectory`.
+Use Pester's existing output-path inputs to configure the report locations. Direct action inputs take precedence over values from a Pester
+configuration file.
 
 ```yaml
 jobs:
@@ -427,7 +426,8 @@ jobs:
         uses: PSModule/Invoke-Pester@v3
         with:
           Path: './tests'
-          OutputDirectory: '.PSModule'
+          TestResult_OutputPath: '.PSModule/TestResult/results.xml'
+          CodeCoverage_OutputPath: '.PSModule/CodeCoverage/coverage.xml'
 ```
 
 ### Import a module before pester runs

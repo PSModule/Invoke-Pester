@@ -25,7 +25,6 @@ LogGroup 'Init - Load inputs' {
 
     $inputs = @{
         Path                               = $path
-        OutputDirectory                    = $env:PSMODULE_INVOKE_PESTER_INPUT_OutputDirectory
 
         Run_Path                           = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_Path
         Run_ExcludePath                    = $env:PSMODULE_INVOKE_PESTER_INPUT_Run_ExcludePath
@@ -173,39 +172,6 @@ LogGroup 'Init - Load configuration' {
     $configuration | Format-Hashtable | Out-String
 }
 
-LogGroup 'Init - Resolve output directory' {
-    $outputDirectory = $pwd.Path
-    if (-not [string]::IsNullOrWhiteSpace($inputs.OutputDirectory)) {
-        if ([System.IO.Path]::IsPathRooted($inputs.OutputDirectory)) {
-            throw "OutputDirectory must be repository-relative: [$($inputs.OutputDirectory)]"
-        }
-
-        if ([string]::IsNullOrWhiteSpace($env:GITHUB_WORKSPACE)) {
-            throw 'OutputDirectory requires the GITHUB_WORKSPACE environment variable.'
-        }
-
-        $repositoryRoot = [System.IO.Path]::GetFullPath($env:GITHUB_WORKSPACE).TrimEnd(
-            [char[]]@(
-                [System.IO.Path]::DirectorySeparatorChar,
-                [System.IO.Path]::AltDirectorySeparatorChar
-            )
-        )
-        $outputDirectory = [System.IO.Path]::GetFullPath(
-            (Join-Path -Path $repositoryRoot -ChildPath $inputs.OutputDirectory)
-        )
-        $repositoryRootWithSeparator = "$repositoryRoot$([System.IO.Path]::DirectorySeparatorChar)"
-
-        if (
-            $outputDirectory -ne $repositoryRoot -and
-            -not $outputDirectory.StartsWith($repositoryRootWithSeparator, [System.StringComparison]::Ordinal)
-        ) {
-            throw "OutputDirectory must remain within the repository: [$($inputs.OutputDirectory)]"
-        }
-    }
-
-    Write-Output "Output directory: [$outputDirectory]"
-}
-
 LogGroup 'Init - Export containers' {
     $containers = @()
     $existingContainers = $configuration.Run.Container
@@ -218,8 +184,12 @@ LogGroup 'Init - Export containers' {
     }
     Write-Output "Containers from configuration: [$($containers.Count)]"
 
-    # Create temp directory for container output
-    $path = New-Item -Path $outputDirectory -ItemType Directory -Name '.temp' -Force
+    # Keep transient configuration and container files outside the workspace.
+    if ([string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
+        throw 'RUNNER_TEMP is required to create temporary Pester files.'
+    }
+    $temporaryDirectory = Join-Path -Path $env:RUNNER_TEMP -ChildPath 'Invoke-Pester'
+    $path = New-Item -Path $temporaryDirectory -ItemType Directory -Name '.temp' -Force
 
     # Process each input path
     foreach ($testDir in $inputs.Path) {
@@ -277,8 +247,25 @@ LogGroup 'Init - Export containers' {
 
 LogGroup 'Init - Export configuration' {
     $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
-    $configuration.TestResult.OutputPath = Join-Path -Path $outputDirectory -ChildPath "TestResult/$artifactName-TestResult-Report.xml"
-    $configuration.CodeCoverage.OutputPath = Join-Path -Path $outputDirectory -ChildPath "CodeCoverage/$artifactName-CodeCoverage-Report.xml"
+    $testResultPathIsConfigured = -not [string]::IsNullOrWhiteSpace($inputs.TestResult_OutputPath) -or
+    ($customConfig.ContainsKey('TestResult') -and -not [string]::IsNullOrWhiteSpace($customConfig.TestResult.OutputPath))
+    $codeCoveragePathIsConfigured = -not [string]::IsNullOrWhiteSpace($inputs.CodeCoverage_OutputPath) -or
+    ($customConfig.ContainsKey('CodeCoverage') -and -not [string]::IsNullOrWhiteSpace($customConfig.CodeCoverage.OutputPath))
+
+    if (-not $testResultPathIsConfigured) {
+        $configuration.TestResult.OutputPath = Join-Path -Path $pwd.Path -ChildPath "TestResult/$artifactName-TestResult-Report.xml"
+    }
+    if (-not $codeCoveragePathIsConfigured) {
+        $configuration.CodeCoverage.OutputPath = Join-Path -Path $pwd.Path -ChildPath "CodeCoverage/$artifactName-CodeCoverage-Report.xml"
+    }
+
+    foreach ($report in @('TestResult', 'CodeCoverage')) {
+        $outputPath = $configuration[$report].OutputPath
+        if (-not [System.IO.Path]::IsPathRooted($outputPath)) {
+            $outputPath = Join-Path -Path $pwd.Path -ChildPath $outputPath
+        }
+        $configuration[$report].OutputPath = [System.IO.Path]::GetFullPath($outputPath)
+    }
     $configuration.Run.PassThru = $true
 
     Format-Hashtable -Hashtable $configuration
