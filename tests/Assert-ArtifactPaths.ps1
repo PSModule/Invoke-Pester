@@ -14,7 +14,7 @@ $outputDirectory = switch ($Layout) {
     }
 }
 
-$temporaryDirectory = $outputDirectory
+$temporaryDirectory = Join-Path -Path $env:RUNNER_TEMP -ChildPath 'Invoke-Pester'
 
 $expectedPaths = @{
     '.temp configuration'       = Join-Path -Path $temporaryDirectory -ChildPath '.temp/Invoke-Pester.Configuration.ps1'

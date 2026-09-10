@@ -212,8 +212,8 @@ jobs:
           CONCLUSION: ${{ steps.action-test.conclusion }}
         run: tests/Show-Status.ps1
 
-  ActionTestOutputDirectory:
-    name: Action-Test - [Output Directory]
+  ActionTestOutputPathInputs:
+    name: Action-Test - [Output Path Inputs]
     runs-on: ubuntu-latest
 
     steps:
@@ -223,12 +223,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Action-Test [Output Directory]
+      - name: Action-Test [Output Path Inputs]
         uses: ./
         id: action-test
         with:
-          WorkingDirectory: tests/2-Standard
-          OutputDirectory: .PSModule
+          Path: tests/2-Standard/Emoji.Configuration.ps1
+          TestResult_OutputPath: .PSModule/TestResult/Standard-TestResult-Report.xml
+          CodeCoverage_OutputPath: .PSModule/CodeCoverage/Standard-CodeCoverage-Report.xml
 
       - name: Assert .PSModule artifact paths
         shell: pwsh
@@ -496,7 +497,7 @@ jobs:
       - ActionTest1SimpleFailureOnlyFailedSummary
       - ActionTest1SimpleExecutionFailure
       - ActionTest2Standard
-      - ActionTestOutputDirectory
+      - ActionTestOutputPathInputs
       - ActionTest2StandardPrescriptFile
       - ActionTest2StandardNoSummary
       - ActionTest3Advanced
