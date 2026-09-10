@@ -377,6 +377,7 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
+        PSMODULE_INVOKE_PESTER_INPUT_OutputDirectory: ${{ inputs.OutputDirectory }}
         PSMODULE_INVOKE_PESTER_INPUT_Version: ${{ inputs.Version }}
         PSMODULE_INVOKE_PESTER_INPUT_Prerelease: ${{ inputs.Prerelease }}
         PSMODULE_INVOKE_PESTER_INPUT_Guid: ${{ inputs.Guid }}
