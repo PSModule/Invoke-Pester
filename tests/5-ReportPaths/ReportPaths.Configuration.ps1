@@ -10,7 +10,7 @@
     }
     CodeCoverage = @{
         Enabled    = $true
-        Path       = "$PSScriptRoot/Emoji.psm1"
+        Path       = "$PSScriptRoot/../2-Standard/Emoji.psm1"
         OutputPath = '.PSModule/Configuration/CodeCoverage/Configured-CodeCoverage-Report.xml'
     }
     Output       = @{
