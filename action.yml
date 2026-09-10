@@ -12,8 +12,8 @@ inputs:
     required: false
   OutputDirectory:
     description: |
-      Optional repository-relative directory for generated TestResult and CodeCoverage files.
-      When empty, reports are generated in the working directory for backward compatibility.
+      Optional repository-relative directory for action-generated TestResult, CodeCoverage, and .temp files.
+      When empty, files are generated in the working directory for backward compatibility.
     required: false
     default: ''
   Version:
@@ -377,6 +377,7 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
+        PSMODULE_INVOKE_PESTER_INPUT_OutputDirectory: ${{ inputs.OutputDirectory }}
         PSMODULE_INVOKE_PESTER_INPUT_Version: ${{ inputs.Version }}
         PSMODULE_INVOKE_PESTER_INPUT_Prerelease: ${{ inputs.Prerelease }}
         PSMODULE_INVOKE_PESTER_INPUT_Guid: ${{ inputs.Guid }}

@@ -24,7 +24,11 @@ $pesterModule = Get-Module -Name Pester | Sort-Object Version -Descending | Sele
 '::endgroup::'
 
 '::group::Exec - Info about environment'
-$path = Join-Path -Path $pwd.Path -ChildPath '.temp'
+$outputDirectory = $pwd.Path
+if (-not [string]::IsNullOrWhiteSpace($env:PSMODULE_INVOKE_PESTER_INPUT_OutputDirectory)) {
+    $outputDirectory = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:PSMODULE_INVOKE_PESTER_INPUT_OutputDirectory
+}
+$path = Join-Path -Path $outputDirectory -ChildPath '.temp'
 Test-Path -Path $path
 Get-ChildItem -Path $path -Recurse | Sort-Object FullName | Format-Table -AutoSize | Out-String
 
