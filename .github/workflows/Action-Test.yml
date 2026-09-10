@@ -203,11 +203,13 @@ jobs:
 
       - name: Assert default artifact paths
         shell: pwsh
+        env:
+          TEMP_PATH: ${{ steps.action-test.outputs.TempPath }}
         run: |
           tests/Assert-ArtifactPaths.ps1 `
             -TestResultPath 'tests/2-Standard/TestResult/Standard-TestResult-Report.xml' `
             -CodeCoveragePath 'tests/2-Standard/CodeCoverage/Standard-CodeCoverage-Report.xml' `
-            -TempPath '${{ steps.action-test.outputs.TempPath }}'
+            -TempPath $env:TEMP_PATH
 
       - name: Status
         shell: pwsh
@@ -289,11 +291,13 @@ jobs:
 
       - name: Assert artifact paths
         shell: pwsh
+        env:
+          TEMP_PATH: ${{ steps.action-test.outputs.TempPath }}
         run: |
           tests/Assert-ArtifactPaths.ps1 `
             -TestResultPath '${{ matrix.expected_test_result }}' `
             -CodeCoveragePath '${{ matrix.expected_code_coverage }}' `
-            -TempPath '${{ steps.action-test.outputs.TempPath }}' `
+            -TempPath $env:TEMP_PATH `
             -UnexpectedTestResultPath '${{ matrix.unexpected_test_result }}' `
             -UnexpectedCodeCoveragePath '${{ matrix.unexpected_code_coverage }}'
 
