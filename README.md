@@ -339,6 +339,7 @@ The action provides the following outputs:
 | `InconclusiveCount`     | Number of inconclusive tests                      |
 | `NotRunCount`           | Number of tests not run                           |
 | `TotalCount`            | Total count of tests                              |
+| `TempPath`              | Invocation-specific action temporary directory    |
 
 ## Examples
 
@@ -408,6 +409,26 @@ jobs:
           CodeCoverage_Path: './src'
           CodeCoverage_OutputPath: './coverage.xml'
           CodeCoverage_OutputFormat: 'JaCoCo'
+```
+
+### Store Reports in a Custom Directory
+
+Use Pester's existing output-path inputs to configure the report locations. Direct action inputs take precedence over values from a Pester
+configuration file.
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Pester tests
+        uses: PSModule/Invoke-Pester@v3
+        with:
+          Path: './tests'
+          TestResult_OutputPath: '.PSModule/TestResult/results.xml'
+          CodeCoverage_OutputPath: '.PSModule/CodeCoverage/coverage.xml'
 ```
 
 ### Import a module before pester runs

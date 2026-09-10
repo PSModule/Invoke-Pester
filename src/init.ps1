@@ -184,8 +184,12 @@ LogGroup 'Init - Export containers' {
     }
     Write-Output "Containers from configuration: [$($containers.Count)]"
 
-    # Create temp directory for container output
-    $path = New-Item -Path . -ItemType Directory -Name '.temp' -Force
+    # Keep transient configuration and container files outside the workspace.
+    $tempPath = $env:PSMODULE_INVOKE_PESTER_INTERNAL_TempPath
+    if ([string]::IsNullOrWhiteSpace($tempPath)) {
+        throw 'A temporary path is required to create Pester handoff files.'
+    }
+    $path = New-Item -Path $tempPath -ItemType Directory -Force
 
     # Process each input path
     foreach ($testDir in $inputs.Path) {
@@ -243,8 +247,25 @@ LogGroup 'Init - Export containers' {
 
 LogGroup 'Init - Export configuration' {
     $artifactName = $configuration.TestResult.TestSuiteName ?? 'Pester'
-    $configuration.TestResult.OutputPath = "$pwd/TestResult/$artifactName-TestResult-Report.xml"
-    $configuration.CodeCoverage.OutputPath = "$pwd/CodeCoverage/$artifactName-CodeCoverage-Report.xml"
+    $testResultPathIsConfigured = -not [string]::IsNullOrWhiteSpace($inputs.TestResult_OutputPath) -or
+    ($customConfig.ContainsKey('TestResult') -and -not [string]::IsNullOrWhiteSpace($customConfig.TestResult.OutputPath))
+    $codeCoveragePathIsConfigured = -not [string]::IsNullOrWhiteSpace($inputs.CodeCoverage_OutputPath) -or
+    ($customConfig.ContainsKey('CodeCoverage') -and -not [string]::IsNullOrWhiteSpace($customConfig.CodeCoverage.OutputPath))
+
+    if (-not $testResultPathIsConfigured) {
+        $configuration.TestResult.OutputPath = Join-Path -Path $pwd.Path -ChildPath "TestResult/$artifactName-TestResult-Report.xml"
+    }
+    if (-not $codeCoveragePathIsConfigured) {
+        $configuration.CodeCoverage.OutputPath = Join-Path -Path $pwd.Path -ChildPath "CodeCoverage/$artifactName-CodeCoverage-Report.xml"
+    }
+
+    foreach ($report in @('TestResult', 'CodeCoverage')) {
+        $outputPath = $configuration[$report].OutputPath
+        if (-not [System.IO.Path]::IsPathRooted($outputPath)) {
+            $outputPath = Join-Path -Path $pwd.Path -ChildPath $outputPath
+        }
+        $configuration[$report].OutputPath = [System.IO.Path]::GetFullPath($outputPath)
+    }
     $configuration.Run.PassThru = $true
 
     Format-Hashtable -Hashtable $configuration
