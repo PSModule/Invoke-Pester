@@ -27,7 +27,7 @@ $pesterModule = Get-Module -Name Pester | Sort-Object Version -Descending | Sele
 if ([string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
     throw 'RUNNER_TEMP is required to read temporary Pester files.'
 }
-$path = Join-Path -Path $env:RUNNER_TEMP -ChildPath 'Invoke-Pester/.temp'
+$path = Join-Path -Path $env:RUNNER_TEMP -ChildPath 'Invoke-Pester'
 Test-Path -Path $path
 Get-ChildItem -Path $path -Recurse | Sort-Object FullName | Format-Table -AutoSize | Out-String
 

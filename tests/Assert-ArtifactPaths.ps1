@@ -50,7 +50,7 @@ function Get-ReportPath {
 
 $temporaryDirectory = Join-Path -Path $env:RUNNER_TEMP -ChildPath 'Invoke-Pester'
 $expectedPaths = @{
-    '.temp configuration' = Join-Path -Path $temporaryDirectory -ChildPath '.temp/Invoke-Pester.Configuration.ps1'
+    'temporary configuration' = Join-Path -Path $temporaryDirectory -ChildPath 'Invoke-Pester.Configuration.ps1'
 }
 
 foreach ($path in (Get-ReportPath -Path $TestResultPath)) {

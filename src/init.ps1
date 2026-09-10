@@ -188,8 +188,7 @@ LogGroup 'Init - Export containers' {
     if ([string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
         throw 'RUNNER_TEMP is required to create temporary Pester files.'
     }
-    $temporaryDirectory = Join-Path -Path $env:RUNNER_TEMP -ChildPath 'Invoke-Pester'
-    $path = New-Item -Path $temporaryDirectory -ItemType Directory -Name '.temp' -Force
+    $path = New-Item -Path $env:RUNNER_TEMP -ItemType Directory -Name 'Invoke-Pester' -Force
 
     # Process each input path
     foreach ($testDir in $inputs.Path) {
