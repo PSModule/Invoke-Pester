@@ -203,14 +203,7 @@ jobs:
 
       - name: Assert default artifact paths
         shell: pwsh
-        env:
-          TEST_RESULT_OUTPUT_PATH: ${{ steps.action-test.outputs.TestResultOutputPath }}
-          CODE_COVERAGE_OUTPUT_PATH: ${{ steps.action-test.outputs.CodeCoverageOutputPath }}
-        run: |
-          tests/Assert-ArtifactPaths.ps1 `
-            -Layout Default `
-            -TestResultOutputPath $env:TEST_RESULT_OUTPUT_PATH `
-            -CodeCoverageOutputPath $env:CODE_COVERAGE_OUTPUT_PATH
+        run: tests/Assert-ArtifactPaths.ps1 -Layout Default
 
       - name: Status
         shell: pwsh
@@ -239,14 +232,7 @@ jobs:
 
       - name: Assert .PSModule artifact paths
         shell: pwsh
-        env:
-          TEST_RESULT_OUTPUT_PATH: ${{ steps.action-test.outputs.TestResultOutputPath }}
-          CODE_COVERAGE_OUTPUT_PATH: ${{ steps.action-test.outputs.CodeCoverageOutputPath }}
-        run: |
-          tests/Assert-ArtifactPaths.ps1 `
-            -Layout PSModule `
-            -TestResultOutputPath $env:TEST_RESULT_OUTPUT_PATH `
-            -CodeCoverageOutputPath $env:CODE_COVERAGE_OUTPUT_PATH
+        run: tests/Assert-ArtifactPaths.ps1 -Layout PSModule
 
   ActionTest2StandardPrescriptFile:
     name: Action-Test - [2-Standard-PrescriptFile]
