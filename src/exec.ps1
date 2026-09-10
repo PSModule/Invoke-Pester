@@ -121,20 +121,73 @@ if ($generateSummary) {
 '::endgroup::'
 
 '::group::Eval - Set outputs'
-$testResultOutputFolderPath = $testResults.Configuration.TestResult.OutputPath.Value | Split-Path -Parent
-$codeCoverageOutputFolderPath = $testResults.Configuration.CodeCoverage.OutputPath.Value | Split-Path -Parent
+$testResultOutputPath = $testResults.Configuration.TestResult.OutputPath.Value
+$codeCoverageOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value
+$reservedOutputPaths = [System.Collections.Generic.HashSet[string]]::new(
+    [System.StringComparer]::OrdinalIgnoreCase
+)
+$null = $reservedOutputPaths.Add($testResultOutputPath)
+$null = $reservedOutputPaths.Add($codeCoverageOutputPath)
+
+function Get-JsonOutputPath {
+    <#
+        .SYNOPSIS
+        Selects a JSON companion path that cannot overwrite another configured report.
+    #>
+    [OutputType([string])]
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string] $ReportPath,
+
+        [Parameter(Mandatory)]
+        [System.Collections.Generic.HashSet[string]] $ReservedPaths
+    )
+
+    $jsonOutputPath = [System.IO.Path]::ChangeExtension($ReportPath, '.json')
+    $suffix = '.json'
+    while (-not $ReservedPaths.Add($jsonOutputPath)) {
+        $jsonOutputPath = "$ReportPath$suffix"
+        $suffix += '.json'
+    }
+    return $jsonOutputPath
+}
+
+$testResultJsonOutputPath = $null
+$codeCoverageJsonOutputPath = $null
+if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
+    $testResultJsonOutputPath = Get-JsonOutputPath -ReportPath $testResultOutputPath -ReservedPaths $reservedOutputPaths
+    Write-Output "Exporting test results to [$testResultJsonOutputPath]"
+    $testResults | Get-PesterTestTree | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $testResultJsonOutputPath
+}
+
+if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.CodeCoverage.Enabled.Value) {
+    $codeCoverageJsonOutputPath = Get-JsonOutputPath -ReportPath $codeCoverageOutputPath -ReservedPaths $reservedOutputPaths
+    Write-Output "Exporting code coverage results to [$codeCoverageJsonOutputPath]"
+    $testResults.CodeCoverage | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $codeCoverageJsonOutputPath
+}
+
+$testResultArtifactPaths = @($testResultOutputPath) + @($testResultJsonOutputPath) | Where-Object { $_ }
+$codeCoverageArtifactPaths = @($codeCoverageOutputPath) + @($codeCoverageJsonOutputPath) | Where-Object { $_ }
 [pscustomobject]@{
     TestSuiteName          = $testResults.Configuration.TestResult.TestSuiteName.Value
     TestResultEnabled      = $testResults.Configuration.TestResult.Enabled.Value
-    TestResultOutputPath   = $testResultOutputFolderPath
+    TestResultOutputPath   = $testResultArtifactPaths
     CodeCoverageEnabled    = $testResults.Configuration.CodeCoverage.Enabled.Value
-    CodeCoverageOutputPath = $codeCoverageOutputFolderPath
+    CodeCoverageOutputPath = $codeCoverageArtifactPaths
 } | Format-List | Out-String
 "TestSuiteName=$($testResults.Configuration.TestResult.TestSuiteName.Value)" >> $env:GITHUB_OUTPUT
 "TestResultEnabled=$($testResults.Configuration.TestResult.Enabled.Value)" >> $env:GITHUB_OUTPUT
-"TestResultOutputPath=$($testResultOutputFolderPath)" >> $env:GITHUB_OUTPUT
 "CodeCoverageEnabled=$($testResults.Configuration.CodeCoverage.Enabled.Value)" >> $env:GITHUB_OUTPUT
-"CodeCoverageOutputPath=$($codeCoverageOutputFolderPath)" >> $env:GITHUB_OUTPUT
+foreach ($output in @{
+        TestResultOutputPath   = $testResultArtifactPaths
+        CodeCoverageOutputPath = $codeCoverageArtifactPaths
+    }.GetEnumerator()) {
+    $delimiter = "InvokePester_$([System.Guid]::NewGuid().ToString('N'))"
+    "$($output.Key)<<$delimiter" >> $env:GITHUB_OUTPUT
+    $output.Value >> $env:GITHUB_OUTPUT
+    $delimiter >> $env:GITHUB_OUTPUT
+}
 "Executed=$($testResults.Executed)" >> $env:GITHUB_OUTPUT
 "Result=$($testResults.Result)" >> $env:GITHUB_OUTPUT
 "FailedCount=$($testResults.FailedCount)" >> $env:GITHUB_OUTPUT
@@ -145,18 +198,6 @@ $codeCoverageOutputFolderPath = $testResults.Configuration.CodeCoverage.OutputPa
 "InconclusiveCount=$($testResults.InconclusiveCount)" >> $env:GITHUB_OUTPUT
 "NotRunCount=$($testResults.NotRunCount)" >> $env:GITHUB_OUTPUT
 "TotalCount=$($testResults.TotalCount)" >> $env:GITHUB_OUTPUT
-
-if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
-    $jsonOutputPath = [System.IO.Path]::ChangeExtension($testResults.Configuration.TestResult.OutputPath.Value, '.json')
-    Write-Output "Exporting test results to [$jsonOutputPath]"
-    $testResults | Get-PesterTestTree | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
-}
-
-if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.CodeCoverage.Enabled.Value) {
-    $jsonOutputPath = [System.IO.Path]::ChangeExtension($testResults.Configuration.CodeCoverage.OutputPath.Value, '.json')
-    Write-Output "Exporting code coverage results to [$jsonOutputPath]"
-    $testResults.CodeCoverage | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
-}
 '::endgroup::'
 
 '::group::Exit'
