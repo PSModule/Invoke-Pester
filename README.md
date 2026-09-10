@@ -411,7 +411,7 @@ jobs:
           CodeCoverage_OutputFormat: 'JaCoCo'
 ```
 
-### Store Action-Generated Files Under `.PSModule`
+### Store Action-Generated Files in a Custom Directory
 
 Set `OutputDirectory` to place the action's `TestResult`, `CodeCoverage`, and `.temp` directories under a repository-relative location. An
 empty value, the default, preserves the existing behavior of placing them in `WorkingDirectory`.
@@ -427,7 +427,7 @@ jobs:
         uses: PSModule/Invoke-Pester@v3
         with:
           Path: './tests'
-          OutputDirectory: '.PSModule'
+          OutputDirectory: 'outputs'
 ```
 
 ### Import a module before pester runs
