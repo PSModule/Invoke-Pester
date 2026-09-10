@@ -12,6 +12,11 @@ param(
 )
 
 function Resolve-ArtifactPath {
+    <#
+        .SYNOPSIS
+        Resolves an artifact path against the GitHub workspace.
+    #>
+    [OutputType([string])]
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -27,6 +32,11 @@ function Resolve-ArtifactPath {
 }
 
 function Get-ReportPath {
+    <#
+        .SYNOPSIS
+        Gets the configured report path and its JSON companion path.
+    #>
+    [OutputType([string])]
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -34,10 +44,8 @@ function Get-ReportPath {
     )
 
     $reportPath = Resolve-ArtifactPath -Path $Path
-    return @(
-        $reportPath
-        [System.IO.Path]::ChangeExtension($reportPath, '.json')
-    )
+    $reportPath
+    [System.IO.Path]::ChangeExtension($reportPath, '.json')
 }
 
 $temporaryDirectory = Join-Path -Path $env:RUNNER_TEMP -ChildPath 'Invoke-Pester'

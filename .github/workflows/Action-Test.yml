@@ -231,7 +231,7 @@ jobs:
             unexpected_test_result: ''
             unexpected_code_coverage: ''
           - name: Configuration file
-            path: tests/ReportPaths.Configuration.ps1
+            path: tests/2-Standard/ReportPaths.Configuration.ps1
             test_result_input: ''
             code_coverage_input: ''
             expected_test_result: .PSModule/Configuration/TestResult/Configured-TestResult-Report.xml
@@ -239,7 +239,7 @@ jobs:
             unexpected_test_result: ''
             unexpected_code_coverage: ''
           - name: Action input precedence
-            path: tests/ReportPaths.Configuration.ps1
+            path: tests/2-Standard/ReportPaths.Configuration.ps1
             test_result_input: .PSModule/Inputs/TestResult/Input-TestResult-Report.xml
             code_coverage_input: .PSModule/Inputs/CodeCoverage/Input-CodeCoverage-Report.xml
             expected_test_result: .PSModule/Inputs/TestResult/Input-TestResult-Report.xml
