@@ -227,12 +227,12 @@ jobs:
         include:
           - name: Action inputs
             path: tests/2-Standard/Emoji.Configuration.ps1
-            test_result_input: .PSModule/Inputs/TestResult/Input-TestResult-Report.xml
-            code_coverage_input: .PSModule/Inputs/CodeCoverage/Input-CodeCoverage-Report.xml
-            expected_test_result: .PSModule/Inputs/TestResult/Input-TestResult-Report.xml
-            expected_code_coverage: .PSModule/Inputs/CodeCoverage/Input-CodeCoverage-Report.xml
-            unexpected_test_result: ''
-            unexpected_code_coverage: ''
+            test_result_input: artifacts/TestResult/results.xml
+            code_coverage_input: artifacts/CodeCoverage/coverage.xml
+            expected_test_result: artifacts/TestResult/results.xml
+            expected_code_coverage: artifacts/CodeCoverage/coverage.xml
+            unexpected_test_result: TestResult/Standard-TestResult-Report.xml
+            unexpected_code_coverage: CodeCoverage/Standard-CodeCoverage-Report.xml
           - name: Configuration file
             path: tests/5-ReportPaths/ReportPaths.Configuration.ps1
             test_result_input: ''
