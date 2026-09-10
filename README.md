@@ -427,8 +427,8 @@ jobs:
         uses: PSModule/Invoke-Pester@v3
         with:
           Path: './tests'
-          TestResult_OutputPath: '.PSModule/TestResult/results.xml'
-          CodeCoverage_OutputPath: '.PSModule/CodeCoverage/coverage.xml'
+          TestResult_OutputPath: 'artifacts/TestResult/results.xml'
+          CodeCoverage_OutputPath: 'artifacts/CodeCoverage/coverage.xml'
 ```
 
 ### Import a module before pester runs
