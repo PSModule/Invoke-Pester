@@ -10,11 +10,11 @@ $outputDirectory = switch ($Layout) {
         Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath 'tests/2-Standard'
     }
     'PSModule' {
-        Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath '.PSModule/outputs'
+        Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath '.PSModule'
     }
 }
 
-$temporaryDirectory = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath 'tests/2-Standard'
+$temporaryDirectory = $outputDirectory
 
 $expectedPaths = @{
     '.temp configuration'       = Join-Path -Path $temporaryDirectory -ChildPath '.temp/Invoke-Pester.Configuration.ps1'
@@ -33,6 +33,7 @@ foreach ($artifact in $expectedPaths.GetEnumerator()) {
 if ($Layout -eq 'PSModule') {
     $workingDirectory = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath 'tests/2-Standard'
     $legacyPaths = @(
+        (Join-Path -Path $workingDirectory -ChildPath '.temp'),
         (Join-Path -Path $workingDirectory -ChildPath 'TestResult'),
         (Join-Path -Path $workingDirectory -ChildPath 'CodeCoverage')
     )
