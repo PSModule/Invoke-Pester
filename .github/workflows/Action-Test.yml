@@ -228,7 +228,7 @@ jobs:
         id: action-test
         with:
           WorkingDirectory: tests/2-Standard
-          OutputDirectory: .PSModule
+          OutputDirectory: .PSModule/outputs
 
       - name: Assert .PSModule artifact paths
         shell: pwsh
