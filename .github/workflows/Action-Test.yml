@@ -206,7 +206,8 @@ jobs:
         run: |
           tests/Assert-ArtifactPaths.ps1 `
             -TestResultPath 'tests/2-Standard/TestResult/Standard-TestResult-Report.xml' `
-            -CodeCoveragePath 'tests/2-Standard/CodeCoverage/Standard-CodeCoverage-Report.xml'
+            -CodeCoveragePath 'tests/2-Standard/CodeCoverage/Standard-CodeCoverage-Report.xml' `
+            -TempPath '${{ steps.action-test.outputs.TempPath }}'
 
       - name: Status
         shell: pwsh
@@ -262,6 +263,14 @@ jobs:
             expected_code_coverage: .PSModule/Inputs/CodeCoverage/Input-CodeCoverage-Report.xml
             unexpected_test_result: ''
             unexpected_code_coverage: ''
+          - name: Non-XML extensions
+            path: tests/2-Standard/Emoji.Configuration.ps1
+            test_result_input: .PSModule/Extensions/TestResult/results.junit
+            code_coverage_input: .PSModule/Extensions/CodeCoverage/coverage.cobertura
+            expected_test_result: .PSModule/Extensions/TestResult/results.junit
+            expected_code_coverage: .PSModule/Extensions/CodeCoverage/coverage.cobertura
+            unexpected_test_result: ''
+            unexpected_code_coverage: ''
 
     steps:
       # Need to check out as part of the test, as it's a local action
@@ -284,6 +293,7 @@ jobs:
           tests/Assert-ArtifactPaths.ps1 `
             -TestResultPath '${{ matrix.expected_test_result }}' `
             -CodeCoveragePath '${{ matrix.expected_code_coverage }}' `
+            -TempPath '${{ steps.action-test.outputs.TempPath }}' `
             -UnexpectedTestResultPath '${{ matrix.unexpected_test_result }}' `
             -UnexpectedCodeCoveragePath '${{ matrix.unexpected_code_coverage }}'
 
@@ -318,6 +328,46 @@ jobs:
           OUTCOME: ${{ steps.action-test.outcome }}
           CONCLUSION: ${{ steps.action-test.conclusion }}
         run: tests/Show-Status.ps1
+
+  ActionTestTempPathIsolation:
+    name: Action-Test - [Temporary Path Isolation]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: First Invoke-Pester invocation
+        uses: ./
+        id: first
+        with:
+          WorkingDirectory: tests/1-Simple
+          Path: Emoji.Tests.ps1
+
+      - name: Second Invoke-Pester invocation
+        uses: ./
+        id: second
+        with:
+          WorkingDirectory: tests/1-Simple
+          Path: Cars.Tests.ps1
+
+      - name: Assert temporary path isolation
+        shell: pwsh
+        env:
+          FIRST_TEMP_PATH: ${{ steps.first.outputs.TempPath }}
+          SECOND_TEMP_PATH: ${{ steps.second.outputs.TempPath }}
+        run: |
+          if ($env:FIRST_TEMP_PATH -eq $env:SECOND_TEMP_PATH) {
+            throw "Expected invocation-specific temporary paths, but both used [$env:FIRST_TEMP_PATH]."
+          }
+          foreach ($tempPath in @($env:FIRST_TEMP_PATH, $env:SECOND_TEMP_PATH)) {
+            $configurationPath = Join-Path -Path $tempPath -ChildPath 'Invoke-Pester.Configuration.ps1'
+            if (-not (Test-Path -Path $configurationPath -PathType Leaf)) {
+              throw "Expected an invocation configuration at [$configurationPath]."
+            }
+          }
 
   ActionTest2StandardNoSummary:
     name: Action-Test - [2-Standard-NoSummary]
@@ -550,6 +600,7 @@ jobs:
       - ActionTest1SimpleExecutionFailure
       - ActionTest2Standard
       - ActionTestOutputPathInputs
+      - ActionTestTempPathIsolation
       - ActionTest2StandardPrescriptFile
       - ActionTest2StandardNoSummary
       - ActionTest3Advanced

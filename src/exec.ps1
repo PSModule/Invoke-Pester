@@ -24,7 +24,10 @@ $pesterModule = Get-Module -Name Pester | Sort-Object Version -Descending | Sele
 '::endgroup::'
 
 '::group::Exec - Info about environment'
-$path = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath 'Invoke-Pester'
+$path = $env:PSMODULE_INVOKE_PESTER_INTERNAL_TempPath
+if ([string]::IsNullOrWhiteSpace($path)) {
+    throw 'A temporary path is required to read Pester handoff files.'
+}
 Test-Path -Path $path
 Get-ChildItem -Path $path -Recurse | Sort-Object FullName | Format-Table -AutoSize | Out-String
 
@@ -144,13 +147,13 @@ $codeCoverageOutputFolderPath = $testResults.Configuration.CodeCoverage.OutputPa
 "TotalCount=$($testResults.TotalCount)" >> $env:GITHUB_OUTPUT
 
 if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.TestResult.Enabled.Value) {
-    $jsonOutputPath = $testResults.Configuration.TestResult.OutputPath.Value -replace '\.xml$', '.json'
+    $jsonOutputPath = [System.IO.Path]::ChangeExtension($testResults.Configuration.TestResult.OutputPath.Value, '.json')
     Write-Output "Exporting test results to [$jsonOutputPath]"
     $testResults | Get-PesterTestTree | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
 }
 
 if ($env:PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson -eq 'true' -and $testResults.Configuration.CodeCoverage.Enabled.Value) {
-    $jsonOutputPath = $testResults.Configuration.CodeCoverage.OutputPath.Value -replace '\.xml$', '.json'
+    $jsonOutputPath = [System.IO.Path]::ChangeExtension($testResults.Configuration.CodeCoverage.OutputPath.Value, '.json')
     Write-Output "Exporting code coverage results to [$jsonOutputPath]"
     $testResults.CodeCoverage | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath $jsonOutputPath
 }

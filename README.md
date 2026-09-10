@@ -339,6 +339,7 @@ The action provides the following outputs:
 | `InconclusiveCount`     | Number of inconclusive tests                      |
 | `NotRunCount`           | Number of tests not run                           |
 | `TotalCount`            | Total count of tests                              |
+| `TempPath`              | Invocation-specific action temporary directory   |
 
 ## Examples
 

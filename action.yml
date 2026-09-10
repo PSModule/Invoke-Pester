@@ -298,13 +298,26 @@ outputs:
     description: |
       Total count of tests.
     value: ${{ steps.test.outputs.TotalCount }}
+  TempPath:
+    description: |
+      Path containing action-private temporary files for this invocation.
+    value: ${{ steps.temp.outputs.Path }}
 
 runs:
   using: composite
   steps:
+    - name: Initialize temporary path
+      id: temp
+      shell: pwsh
+      run: |
+        $tempPath = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "Invoke-Pester/$([System.IO.Path]::GetRandomFileName())"
+        Write-Output "Temporary path: [$tempPath]"
+        "Path=$tempPath" >> $env:GITHUB_OUTPUT
+
     - name: Invoke-Pester (init)
       uses: PSModule/GitHub-Script@8083ec1f733f00357ee4d0db0c6056686e483bc0 # v1.9.0
       env:
+        PSMODULE_INVOKE_PESTER_INTERNAL_TempPath: ${{ steps.temp.outputs.Path }}
         PSMODULE_INVOKE_PESTER_INPUT_Path: ${{ inputs.Path }}
         PSMODULE_INVOKE_PESTER_INPUT_Version: ${{ inputs.Version }}
         PSMODULE_INVOKE_PESTER_INPUT_Prerelease: ${{ inputs.Prerelease }}
@@ -369,6 +382,7 @@ runs:
       continue-on-error: true
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
+        PSMODULE_INVOKE_PESTER_INTERNAL_TempPath: ${{ steps.temp.outputs.Path }}
         PSMODULE_INVOKE_PESTER_INPUT_ReportAsJson: ${{ inputs.ReportAsJson }}
         PSMODULE_INVOKE_PESTER_INPUT_Version: ${{ inputs.Version }}
         PSMODULE_INVOKE_PESTER_INPUT_Prerelease: ${{ inputs.Prerelease }}

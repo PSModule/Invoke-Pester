@@ -6,6 +6,9 @@ param(
     [Parameter(Mandatory)]
     [string] $CodeCoveragePath,
 
+    [Parameter(Mandatory)]
+    [string] $TempPath,
+
     [string] $UnexpectedTestResultPath,
 
     [string] $UnexpectedCodeCoveragePath
@@ -48,21 +51,41 @@ function Get-ReportPath {
     [System.IO.Path]::ChangeExtension($reportPath, '.json')
 }
 
-$temporaryDirectory = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath 'Invoke-Pester'
-$expectedPaths = @{
-    'temporary configuration' = Join-Path -Path $temporaryDirectory -ChildPath 'Invoke-Pester.Configuration.ps1'
+$tempRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath 'Invoke-Pester'
+$resolvedTempRoot = [System.IO.Path]::GetFullPath($tempRoot).TrimEnd(
+    [System.IO.Path]::DirectorySeparatorChar,
+    [System.IO.Path]::AltDirectorySeparatorChar
+) + [System.IO.Path]::DirectorySeparatorChar
+$resolvedTempPath = [System.IO.Path]::GetFullPath($TempPath)
+if (-not $resolvedTempPath.StartsWith($resolvedTempRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+    throw "Expected invocation temporary path beneath [$resolvedTempRoot], but found [$resolvedTempPath]."
 }
 
-foreach ($path in (Get-ReportPath -Path $TestResultPath)) {
+$expectedPaths = @{
+    'temporary configuration' = Join-Path -Path $resolvedTempPath -ChildPath 'Invoke-Pester.Configuration.ps1'
+}
+
+$testResultPaths = @(Get-ReportPath -Path $TestResultPath)
+$codeCoveragePaths = @(Get-ReportPath -Path $CodeCoveragePath)
+
+foreach ($path in $testResultPaths) {
     $expectedPaths["test result report [$([System.IO.Path]::GetExtension($path))]"] = $path
 }
-foreach ($path in (Get-ReportPath -Path $CodeCoveragePath)) {
+foreach ($path in $codeCoveragePaths) {
     $expectedPaths["code coverage report [$([System.IO.Path]::GetExtension($path))]"] = $path
 }
 
 foreach ($artifact in $expectedPaths.GetEnumerator()) {
     if (-not (Test-Path -Path $artifact.Value -PathType Leaf)) {
         throw "Expected $($artifact.Key) at [$($artifact.Value)]."
+    }
+}
+
+foreach ($xmlReportPath in @($testResultPaths[0], $codeCoveragePaths[0])) {
+    try {
+        $null = [xml](Get-Content -Path $xmlReportPath -Raw)
+    } catch {
+        throw "Expected an XML report at [$xmlReportPath], but it did not contain valid XML."
     }
 }
 

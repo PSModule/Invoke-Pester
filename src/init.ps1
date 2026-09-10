@@ -185,8 +185,11 @@ LogGroup 'Init - Export containers' {
     Write-Output "Containers from configuration: [$($containers.Count)]"
 
     # Keep transient configuration and container files outside the workspace.
-    $temporaryRoot = [System.IO.Path]::GetTempPath()
-    $path = New-Item -Path $temporaryRoot -ItemType Directory -Name 'Invoke-Pester' -Force
+    $tempPath = $env:PSMODULE_INVOKE_PESTER_INTERNAL_TempPath
+    if ([string]::IsNullOrWhiteSpace($tempPath)) {
+        throw 'A temporary path is required to create Pester handoff files.'
+    }
+    $path = New-Item -Path $tempPath -ItemType Directory -Force
 
     # Process each input path
     foreach ($testDir in $inputs.Path) {
