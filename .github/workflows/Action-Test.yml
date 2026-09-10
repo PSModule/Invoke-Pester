@@ -203,7 +203,10 @@ jobs:
 
       - name: Assert default artifact paths
         shell: pwsh
-        run: tests/Assert-ArtifactPaths.ps1 -Layout Default
+        run: |
+          tests/Assert-ArtifactPaths.ps1 `
+            -TestResultPath 'tests/2-Standard/TestResult/Standard-TestResult-Report.xml' `
+            -CodeCoveragePath 'tests/2-Standard/CodeCoverage/Standard-CodeCoverage-Report.xml'
 
       - name: Status
         shell: pwsh
@@ -213,8 +216,52 @@ jobs:
         run: tests/Show-Status.ps1
 
   ActionTestOutputPathInputs:
-    name: Action-Test - [Output Path Inputs]
+    name: Action-Test - [Output Paths - ${{ matrix.name }}]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Action inputs
+            path: tests/2-Standard/Emoji.Configuration.ps1
+            test_result_input: .PSModule/Inputs/TestResult/Input-TestResult-Report.xml
+            code_coverage_input: .PSModule/Inputs/CodeCoverage/Input-CodeCoverage-Report.xml
+            expected_test_result: .PSModule/Inputs/TestResult/Input-TestResult-Report.xml
+            expected_code_coverage: .PSModule/Inputs/CodeCoverage/Input-CodeCoverage-Report.xml
+            unexpected_test_result: ''
+            unexpected_code_coverage: ''
+          - name: Configuration file
+            path: tests/ReportPaths.Configuration.ps1
+            test_result_input: ''
+            code_coverage_input: ''
+            expected_test_result: .PSModule/Configuration/TestResult/Configured-TestResult-Report.xml
+            expected_code_coverage: .PSModule/Configuration/CodeCoverage/Configured-CodeCoverage-Report.xml
+            unexpected_test_result: ''
+            unexpected_code_coverage: ''
+          - name: Action input precedence
+            path: tests/ReportPaths.Configuration.ps1
+            test_result_input: .PSModule/Inputs/TestResult/Input-TestResult-Report.xml
+            code_coverage_input: .PSModule/Inputs/CodeCoverage/Input-CodeCoverage-Report.xml
+            expected_test_result: .PSModule/Inputs/TestResult/Input-TestResult-Report.xml
+            expected_code_coverage: .PSModule/Inputs/CodeCoverage/Input-CodeCoverage-Report.xml
+            unexpected_test_result: .PSModule/Configuration/TestResult/Configured-TestResult-Report.xml
+            unexpected_code_coverage: .PSModule/Configuration/CodeCoverage/Configured-CodeCoverage-Report.xml
+          - name: Test result input only
+            path: tests/2-Standard/Emoji.Configuration.ps1
+            test_result_input: .PSModule/Inputs/TestResult/Input-TestResult-Report.xml
+            code_coverage_input: ''
+            expected_test_result: .PSModule/Inputs/TestResult/Input-TestResult-Report.xml
+            expected_code_coverage: CodeCoverage/Standard-CodeCoverage-Report.xml
+            unexpected_test_result: ''
+            unexpected_code_coverage: ''
+          - name: Code coverage input only
+            path: tests/2-Standard/Emoji.Configuration.ps1
+            test_result_input: ''
+            code_coverage_input: .PSModule/Inputs/CodeCoverage/Input-CodeCoverage-Report.xml
+            expected_test_result: TestResult/Standard-TestResult-Report.xml
+            expected_code_coverage: .PSModule/Inputs/CodeCoverage/Input-CodeCoverage-Report.xml
+            unexpected_test_result: ''
+            unexpected_code_coverage: ''
 
     steps:
       # Need to check out as part of the test, as it's a local action
@@ -223,17 +270,22 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Action-Test [Output Path Inputs]
+      - name: Action-Test [Output Paths - ${{ matrix.name }}]
         uses: ./
         id: action-test
         with:
-          Path: tests/2-Standard/Emoji.Configuration.ps1
-          TestResult_OutputPath: .PSModule/TestResult/Standard-TestResult-Report.xml
-          CodeCoverage_OutputPath: .PSModule/CodeCoverage/Standard-CodeCoverage-Report.xml
+          Path: ${{ matrix.path }}
+          TestResult_OutputPath: ${{ matrix.test_result_input }}
+          CodeCoverage_OutputPath: ${{ matrix.code_coverage_input }}
 
-      - name: Assert .PSModule artifact paths
+      - name: Assert artifact paths
         shell: pwsh
-        run: tests/Assert-ArtifactPaths.ps1 -Layout PSModule
+        run: |
+          tests/Assert-ArtifactPaths.ps1 `
+            -TestResultPath '${{ matrix.expected_test_result }}' `
+            -CodeCoveragePath '${{ matrix.expected_code_coverage }}' `
+            -UnexpectedTestResultPath '${{ matrix.unexpected_test_result }}' `
+            -UnexpectedCodeCoveragePath '${{ matrix.unexpected_code_coverage }}'
 
   ActionTest2StandardPrescriptFile:
     name: Action-Test - [2-Standard-PrescriptFile]

@@ -1,27 +1,55 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet('Default', 'PSModule')]
-    [string] $Layout
+    [string] $TestResultPath,
+
+    [Parameter(Mandatory)]
+    [string] $CodeCoveragePath,
+
+    [string] $UnexpectedTestResultPath,
+
+    [string] $UnexpectedCodeCoveragePath
 )
 
-$outputDirectory = switch ($Layout) {
-    'Default' {
-        Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath 'tests/2-Standard'
+function Resolve-ArtifactPath {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string] $Path
+    )
+
+    if ([System.IO.Path]::IsPathRooted($Path)) {
+        return [System.IO.Path]::GetFullPath($Path)
     }
-    'PSModule' {
-        Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath '.PSModule'
-    }
+
+    $workspacePath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $Path
+    return [System.IO.Path]::GetFullPath($workspacePath)
+}
+
+function Get-ReportPath {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string] $Path
+    )
+
+    $reportPath = Resolve-ArtifactPath -Path $Path
+    return @(
+        $reportPath
+        [System.IO.Path]::ChangeExtension($reportPath, '.json')
+    )
 }
 
 $temporaryDirectory = Join-Path -Path $env:RUNNER_TEMP -ChildPath 'Invoke-Pester'
-
 $expectedPaths = @{
-    '.temp configuration'       = Join-Path -Path $temporaryDirectory -ChildPath '.temp/Invoke-Pester.Configuration.ps1'
-    'code coverage report'      = Join-Path -Path $outputDirectory -ChildPath 'CodeCoverage/Standard-CodeCoverage-Report.xml'
-    'code coverage JSON report' = Join-Path -Path $outputDirectory -ChildPath 'CodeCoverage/Standard-CodeCoverage-Report.json'
-    'test result report'        = Join-Path -Path $outputDirectory -ChildPath 'TestResult/Standard-TestResult-Report.xml'
-    'test result JSON report'   = Join-Path -Path $outputDirectory -ChildPath 'TestResult/Standard-TestResult-Report.json'
+    '.temp configuration' = Join-Path -Path $temporaryDirectory -ChildPath '.temp/Invoke-Pester.Configuration.ps1'
+}
+
+foreach ($path in (Get-ReportPath -Path $TestResultPath)) {
+    $expectedPaths["test result report [$([System.IO.Path]::GetExtension($path))]"] = $path
+}
+foreach ($path in (Get-ReportPath -Path $CodeCoveragePath)) {
+    $expectedPaths["code coverage report [$([System.IO.Path]::GetExtension($path))]"] = $path
 }
 
 foreach ($artifact in $expectedPaths.GetEnumerator()) {
@@ -30,17 +58,15 @@ foreach ($artifact in $expectedPaths.GetEnumerator()) {
     }
 }
 
-if ($Layout -eq 'PSModule') {
-    $workingDirectory = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath 'tests/2-Standard'
-    $legacyPaths = @(
-        (Join-Path -Path $workingDirectory -ChildPath '.temp'),
-        (Join-Path -Path $workingDirectory -ChildPath 'TestResult'),
-        (Join-Path -Path $workingDirectory -ChildPath 'CodeCoverage')
-    )
+$unexpectedPaths = @(
+    $UnexpectedTestResultPath
+    $UnexpectedCodeCoveragePath
+) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
-    foreach ($legacyPath in $legacyPaths) {
-        if (Test-Path -Path $legacyPath) {
-            throw "Did not expect an action-generated path at [$legacyPath]."
+foreach ($unexpectedPath in $unexpectedPaths) {
+    foreach ($path in (Get-ReportPath -Path $unexpectedPath)) {
+        if (Test-Path -Path $path) {
+            throw "Did not expect a report at [$path]."
         }
     }
 }
