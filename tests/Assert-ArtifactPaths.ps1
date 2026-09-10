@@ -9,6 +9,10 @@ param(
     [Parameter(Mandatory)]
     [string] $TempPath,
 
+    [string] $TestResultJsonPath,
+
+    [string] $CodeCoverageJsonPath,
+
     [string] $UnexpectedTestResultPath,
 
     [string] $UnexpectedCodeCoveragePath
@@ -43,12 +47,18 @@ function Get-ReportPath {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [string] $Path
+        [string] $Path,
+
+        [string] $JsonPath
     )
 
     $reportPath = Resolve-ArtifactPath -Path $Path
     $reportPath
-    [System.IO.Path]::ChangeExtension($reportPath, '.json')
+    if ([string]::IsNullOrWhiteSpace($JsonPath)) {
+        [System.IO.Path]::ChangeExtension($reportPath, '.json')
+    } else {
+        Resolve-ArtifactPath -Path $JsonPath
+    }
 }
 
 $tempRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath 'Invoke-Pester'
@@ -65,8 +75,8 @@ $expectedPaths = @{
     'temporary configuration' = Join-Path -Path $resolvedTempPath -ChildPath 'Invoke-Pester.Configuration.ps1'
 }
 
-$testResultPaths = @(Get-ReportPath -Path $TestResultPath)
-$codeCoveragePaths = @(Get-ReportPath -Path $CodeCoveragePath)
+$testResultPaths = @(Get-ReportPath -Path $TestResultPath -JsonPath $TestResultJsonPath)
+$codeCoveragePaths = @(Get-ReportPath -Path $CodeCoveragePath -JsonPath $CodeCoverageJsonPath)
 
 foreach ($path in $testResultPaths) {
     $expectedPaths["test result report [$([System.IO.Path]::GetExtension($path))]"] = $path

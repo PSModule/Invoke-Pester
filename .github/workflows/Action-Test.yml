@@ -271,6 +271,28 @@ jobs:
             code_coverage_input: .PSModule/Extensions/CodeCoverage/coverage.cobertura
             expected_test_result: .PSModule/Extensions/TestResult/results.junit
             expected_code_coverage: .PSModule/Extensions/CodeCoverage/coverage.cobertura
+            expected_test_result_json: ''
+            expected_code_coverage_json: ''
+            unexpected_test_result: ''
+            unexpected_code_coverage: ''
+          - name: JSON extensions
+            path: tests/2-Standard/Emoji.Configuration.ps1
+            test_result_input: .PSModule/Collisions/TestResult/results.json
+            code_coverage_input: .PSModule/Collisions/CodeCoverage/coverage.json
+            expected_test_result: .PSModule/Collisions/TestResult/results.json
+            expected_code_coverage: .PSModule/Collisions/CodeCoverage/coverage.json
+            expected_test_result_json: .PSModule/Collisions/TestResult/results.json.json
+            expected_code_coverage_json: .PSModule/Collisions/CodeCoverage/coverage.json.json
+            unexpected_test_result: ''
+            unexpected_code_coverage: ''
+          - name: Shared stem
+            path: tests/2-Standard/Emoji.Configuration.ps1
+            test_result_input: .PSModule/Collisions/Shared/report.xml
+            code_coverage_input: .PSModule/Collisions/Shared/report.cobertura
+            expected_test_result: .PSModule/Collisions/Shared/report.xml
+            expected_code_coverage: .PSModule/Collisions/Shared/report.cobertura
+            expected_test_result_json: .PSModule/Collisions/Shared/report.json
+            expected_code_coverage_json: .PSModule/Collisions/Shared/report.cobertura.json
             unexpected_test_result: ''
             unexpected_code_coverage: ''
 
@@ -298,6 +320,8 @@ jobs:
             -TestResultPath '${{ matrix.expected_test_result }}' `
             -CodeCoveragePath '${{ matrix.expected_code_coverage }}' `
             -TempPath $env:TEMP_PATH `
+            -TestResultJsonPath '${{ matrix.expected_test_result_json }}' `
+            -CodeCoverageJsonPath '${{ matrix.expected_code_coverage_json }}' `
             -UnexpectedTestResultPath '${{ matrix.unexpected_test_result }}' `
             -UnexpectedCodeCoveragePath '${{ matrix.unexpected_code_coverage }}'
 
