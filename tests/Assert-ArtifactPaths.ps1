@@ -14,7 +14,7 @@ $outputDirectory = switch ($Layout) {
     }
 }
 
-$temporaryDirectory = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath 'tests/2-Standard'
+$temporaryDirectory = $outputDirectory
 
 $expectedPaths = @{
     '.temp configuration'       = Join-Path -Path $temporaryDirectory -ChildPath '.temp/Invoke-Pester.Configuration.ps1'
@@ -27,5 +27,20 @@ $expectedPaths = @{
 foreach ($artifact in $expectedPaths.GetEnumerator()) {
     if (-not (Test-Path -Path $artifact.Value -PathType Leaf)) {
         throw "Expected $($artifact.Key) at [$($artifact.Value)]."
+    }
+}
+
+if ($Layout -eq 'PSModule') {
+    $workingDirectory = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath 'tests/2-Standard'
+    $legacyPaths = @(
+        (Join-Path -Path $workingDirectory -ChildPath '.temp'),
+        (Join-Path -Path $workingDirectory -ChildPath 'TestResult'),
+        (Join-Path -Path $workingDirectory -ChildPath 'CodeCoverage')
+    )
+
+    foreach ($legacyPath in $legacyPaths) {
+        if (Test-Path -Path $legacyPath) {
+            throw "Did not expect an action-generated path at [$legacyPath]."
+        }
     }
 }
